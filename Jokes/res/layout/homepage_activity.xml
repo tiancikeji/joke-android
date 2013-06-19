@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg" >
+    
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="45dp"
+        android:orientation="horizontal"
+        android:background="@drawable/homepage_activity_title_bg">
+        
+        <Button 
+            android:id="@+id/homepage_button_setting"
+            android:layout_width="50dp"
+            android:layout_height="fill_parent"
+            android:background="@drawable/btn_homepage_setting"
+            android:layout_gravity="left"/>
+        
+        <LinearLayout 
+            android:layout_width="0px"
+        	android:layout_height="0px"
+        	android:layout_weight="1"></LinearLayout>
+        
+        <Button 
+            android:id="@+id/homepage_button_record"
+            android:layout_width="50dp"
+            android:layout_height="fill_parent"
+            android:background="@drawable/btn_homepage_record"
+            android:layout_gravity="right"/>
+        
+    </LinearLayout>
+    
+    <FrameLayout 
+        android:id="@+id/homepage_linearlayout_date"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="7dp"
+        android:gravity="center">
+        
+        <ImageView 
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/homepage_activity_date_line"/>
+        
+        <TextView 
+            android:id="@+id/homepage_textview_date"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:text="lijizhe"
+            android:textColor="#999999"
+            android:textSize="12sp"/>
+        
+    </FrameLayout>
+    
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="7dp"
+        android:layout_weight="7"
+        android:orientation="vertical"
+        android:background="@drawable/homepage_activity_centerbg">
+        
+        <FrameLayout 
+	        android:layout_width="fill_parent"
+	        android:layout_height="0px"
+	        android:layout_weight="5">
+        	
+            <ImageView
+                android:id="@+id/homepage_imageview_pic"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="#cccccc"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"/>
+            
+            <Button 
+                android:id="@+id/homepage_button_favorite_big"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:background="@drawable/btn_favorite_big"/>
+                
+    	</FrameLayout>
+    	
+        <LinearLayout 
+            android:layout_width="fill_parent"
+            android:layout_height="0px"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center">
+            
+            <Button
+                android:id="@+id/homepage_button_favorite_small"
+                android:layout_width="13dp"
+                android:layout_height="10dp"
+                android:background="@drawable/btn_homepage_favorite_small"></Button>
+            
+            <TextView 
+                android:id="@+id/homepage_textview_favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:textColor="#000000"
+                android:textSize="9sp"
+                android:text="1234"/>
+            
+            <FrameLayout 
+                android:id="@+id/homepage_framelayout_play"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:orientation="horizontal"
+                android:clickable="true"
+                android:background="@drawable/playback_play">
+                
+                <TextView 
+                    android:id="@+id/homepage_textview_duration"
+                    android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                	android:layout_marginLeft="20dp"
+                	android:layout_gravity="left|center_vertical"
+                	android:textColor="#333333"
+                	android:textSize="15sp"
+                	android:text="1234"/>
+                
+                <TextView 
+                    android:id="@+id/homepage_textview_playcount"
+                    android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                	android:layout_gravity="right|center_vertical"
+                	android:layout_marginRight="20dp"
+                	android:textColor="#333333"
+                	android:textSize="15sp"
+                	android:text="1234"/>
+                
+            </FrameLayout>
+            
+            <Button 
+                    android:id="@+id/homepage_button_share"
+                    android:layout_width="33dp"
+                    android:layout_height="13dp"
+                    android:background="@drawable/btn_homepage_share"/>
+        </LinearLayout>
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_weight="0.8"
+        android:orientation="horizontal">
+        
+        <ImageView 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="#000000"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"/>
+    </LinearLayout>
+    
+</LinearLayout>
