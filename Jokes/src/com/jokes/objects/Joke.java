@@ -14,18 +14,18 @@ public class Joke {
 	private boolean approved;
 	private String createdAt;
 	private String updatedAt;
-	private int userId;
+	private String uid;
 	private int id;
 	private String name;
 	
 	public Joke(JSONObject json){
 		try{
-			this.pictureUrl = json.getJSONObject("picture_url").getString("url");
+			this.pictureUrl = json.getString("picture_url");
 			this.approved 	= json.getInt("approved") == APPROVED;
-			this.audioUrl 	= json.getJSONObject("audio_url").getString("url");
+			this.audioUrl 	= json.getString("audio_url");
 			this.createdAt 	= json.getString("created_at");
 			this.updatedAt 	= json.getString("updated_at");
-			this.userId 	= json.getInt("user_id");
+			this.uid 		= json.getString("uid");
 			this.id			= json.getInt("id");
 			this.name		= json.getString("name");
 		} catch(JSONException e){
@@ -34,6 +34,10 @@ public class Joke {
 		
 	}
 	
+	public Joke() {
+
+	}
+
 	public String getPictureUrl() {
 		return pictureUrl;
 	}
@@ -64,11 +68,11 @@ public class Joke {
 	public void setUpdatedAt(String updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	public int getUserId() {
-		return userId;
+	public String getUserId() {
+		return uid;
 	}
-	public void setUserId(int userId) {
-		this.userId = userId;
+	public void setUserId(String userId) {
+		this.uid = userId;
 	}
 	public int getId() {
 		return id;
@@ -107,7 +111,7 @@ public class Joke {
 	public String toString() {
 		return "Joke [pictureUrl=" + pictureUrl + ", audioUrl=" + audioUrl
 				+ ", approved=" + approved + ", createdAt=" + createdAt
-				+ ", updatedAt=" + updatedAt + ", userId=" + userId + ", id="
+				+ ", updatedAt=" + updatedAt + ", userId=" + uid + ", id="
 				+ id + ", name=" + name + "]";
 	}
 	

@@ -14,6 +14,7 @@ public class JokeHandler extends AbsHandler {
 	@Override
 	public Object parseResponse(String responseStr) throws JSONException {
 		List<Joke> jokes = new ArrayList<Joke>();
+		
 		JSONObject object = new JSONObject(responseStr);
 		JSONArray array = object.getJSONArray("myjokes");
 

@@ -10,7 +10,7 @@ public class Like {
 	private int id;
 	private int jokeId;
 	private String updatedAt;
-	private int userId;
+	private String uid;
 	
 	public Like(){
 		
@@ -30,7 +30,7 @@ public class Like {
 			id 			= json.getInt("id");
 			jokeId 		= json.getInt("myjoke_id");
 			updatedAt 	= json.getString("updated_at");
-			userId 		= json.getInt("user_id");
+			uid 		= json.getString("uid");
 			
 		} catch (JSONException e) {
 			Log.e("JOKE", "JSON parsing exception in Like Constructor " + e);
@@ -42,7 +42,7 @@ public class Like {
 		id 			= like.getId();
 		jokeId		= like.getJokeId();
 		updatedAt	= like.getUpdatedAt();
-		userId		= like.getUserId();
+		uid		= like.getUserId();
 	}
 	
 	public String getCreatedAt() {
@@ -69,11 +69,11 @@ public class Like {
 	public void setUpdatedAt(String updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	public int getUserId() {
-		return userId;
+	public String getUserId() {
+		return uid;
 	}
-	public void setUserId(int userId) {
-		this.userId = userId;
+	public void setUserId(String userId) {
+		this.uid = userId;
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class Like {
 	public String toString() {
 		return String
 				.format("Like [createdAt=%s, id=%s, jokeId=%s, updatedAt=%s, userId=%s]",
-						createdAt, id, jokeId, updatedAt, userId);
+						createdAt, id, jokeId, updatedAt, uid);
 	}
 
 }
