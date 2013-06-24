@@ -1,9 +1,14 @@
 package com.jokes.core;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -12,18 +17,61 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jokes.objects.Joke;
+import com.jokes.objects.Like;
+import com.jokes.utils.ApiRequests;
+import com.jokes.utils.HandlerCodes;
+
 public class HomepageActivity extends Activity implements OnClickListener{
 
-	Button button_setting;//设置按钮
-	Button button_record;//录音按钮
-	Button button_favorite_big;//图片中间收藏按钮
-	Button button_favorite_small;//收藏按钮
-	FrameLayout framelayout_play;//播放按钮
-	Button button_share;//分享按钮
-	TextView textview_date;//日期
-	ImageView imageview_pic;//笑话图片
-	TextView textview_duration;//时长
-	TextView textview_playCount;//播放次数
+	Button button_setting;//璁剧疆鎸夐挳
+	Button button_record;//褰曢煶鎸夐挳
+	Button button_favorite_big;//鍥剧墖涓棿鏀惰棌鎸夐挳
+	Button button_favorite_small;//鏀惰棌鎸夐挳
+	FrameLayout framelayout_play;//鎾斁鎸夐挳
+	Button button_share;//鍒嗕韩鎸夐挳
+	TextView textview_date;//鏃ユ湡
+	ImageView imageview_pic;//绗戣瘽鍥剧墖
+	TextView textview_duration;//鏃堕暱
+	TextView textview_playCount;//鎾斁娆℃暟
+	
+	private static final String DEBUG_TAG = "JOKE";
+	
+	private List<Joke> jokeList;
+	private Like like;
+	private Joke joke;
+	
+	private Handler mainHandler = new Handler(){
+		@Override
+		public void handleMessage(Message msg) {
+		
+			switch(msg.what){
+			case HandlerCodes.GET_JOKES_SUCCESS:
+				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = "+jokeList.size());
+				if(jokeList.size() > 0){
+					joke = jokeList.get(0);
+					ApiRequests.unlikeJoke(mainHandler, joke.getId(), joke.getUserId());
+				}
+				break;
+			case HandlerCodes.GET_JOKES_FAILURE:
+				break;
+			case HandlerCodes.LIKE_SUCCESS:
+				Log.d(DEBUG_TAG, "Like Succes " + like);
+				break;
+			case HandlerCodes.LIKE_FAILURE:
+				Log.d(DEBUG_TAG, "Like Failure " + like);
+				break;
+			case HandlerCodes.UNLIKE_SUCCESS:
+				ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
+				ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
+				Log.d(DEBUG_TAG, "Unlike Succes " + like);
+				break;
+			case HandlerCodes.UNLIKE_FAILURE:
+				Log.d(DEBUG_TAG, "UnLike Failure " + like);
+				break;
+			}
+		}
+	};
 	
 	
 	@Override
@@ -32,6 +80,28 @@ public class HomepageActivity extends Activity implements OnClickListener{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.homepage_activity);
+		/*
+		final String uid = Installation.id(this);
+		jokeList = new ArrayList<Joke>();
+		like = new Like();
+		joke = new Joke(); 
+		joke.setName("Test Name");
+		ApiRequests.getJokes(mainHandler, jokeList, uid);
+		
+		File imageFile = new File(getFilesDir().getAbsolutePath() + "image.png");
+		FileOutputStream out;
+		try {
+			out = new FileOutputStream(imageFile);
+			Bitmap bmp =  BitmapFactory.decodeResource(getResources(), R.drawable.btn_back);
+			bmp.compress(Bitmap.CompressFormat.JPEG, 30, out);
+			ApiRequests.addJoke(mainHandler, joke, imageFile, new File("/data/data/com.jokes.core/files/sample.mp4"), uid);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		
+		
+		
 		
 		init();
 	}
@@ -102,3 +172,11 @@ public class HomepageActivity extends Activity implements OnClickListener{
 	}
 
 }
+
+
+
+
+
+
+
+	

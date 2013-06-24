@@ -4,48 +4,56 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.PixelFormat;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.MediaRecorder;
+import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-public class RecordActivity extends Activity implements OnClickListener{
-	final int RESULT_LOAD_IMAGE = 0;//±íÊ¾´ò¿ªÏµÍ³Í¼¿â
-	final int TAKE_PICTURE = 1;//ÎªÁË±íÊ¾·µ»Ø·½·¨ÖĞ±æÊ¶ÄãµÄ³ÌĞò´ò¿ªµÄÏà»ú
-	final int CUT_PHOTO_REQUEST_CODE = 2;//²Ã¼ôÍ¼Æ¬
+import com.jokes.utils.AudioUtils;
+
+public class RecordActivity extends Activity implements OnClickListener, OnInfoListener{
+	private final static String DEBUG_TAG = "JOKE";
+	final int RESULT_LOAD_IMAGE = 0;//è¡¨ç¤ºæ‰“å¼€ç³»ç»Ÿå›¾åº“
+	final int TAKE_PICTURE = 1;//ä¸ºäº†è¡¨ç¤ºè¿”å›æ–¹æ³•ä¸­è¾¨è¯†ä½ çš„ç¨‹åºæ‰“å¼€çš„ç›¸æœº
+	final int CUT_PHOTO_REQUEST_CODE = 2;//è£å‰ªå›¾ç‰‡
 	final String BUGTAG = "RecordActivity";
-	CharSequence[] items = {"Ïà²á","Ïà»ú"};
+	CharSequence[] items = {"ç›¸å†Œ","ç›¸æœº"};
 	String path = getSDPath() +"/jokes/";
 	
-	Button button_back;//·µ»Ø°´Å¥
-	Button button_send;//·¢²¼°´Å¥
+	Button button_back;//è¿”å›æŒ‰é’®
+	Button button_send;//å‘å¸ƒæŒ‰é’®
 	LinearLayout linearlayout_record;
-	Button button_record;//Â¼Òô°´Å¥
+	Button button_record;//å½•éŸ³æŒ‰é’®
 	LinearLayout linearlayout_addpic;
-	ImageView imageview_pic;//Ìí¼ÓÍ¼Æ¬°´Å¥
-	Button button_play;//²¥·Å°´Å¥
+	ImageView imageview_pic;//æ·»åŠ å›¾ç‰‡æŒ‰é’®
+	Button button_play;//æ’­æ”¾æŒ‰é’®
 	LinearLayout linearlayout_bar;
-	ImageView imageview_bar;//¼ÓÔØÖĞ¶¯»­
+	ImageView imageview_bar;//åŠ è½½ä¸­åŠ¨ç”»
 	
-	Bitmap bipmpTemp ;//ÓÃ»§Ñ¡ÔñÍ¼Æ¬
+	Bitmap bipmpTemp ;//ç”¨æˆ·é€‰æ‹©å›¾ç‰‡
 	File imageFile;
+	
+	private String audioFilename;
+	private MediaRecorder recorder;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,17 +92,23 @@ public class RecordActivity extends Activity implements OnClickListener{
 		case R.id.record_button_send:
 			break;
 		case R.id.record_button_record:
-			//µã»÷¿ªÊ¼Â¼Òô£¬ÔÙ´Îµã»÷Í£Ö¹ÁËÂ¼Òô
+			//ç‚¹å‡»å¼€å§‹å½•éŸ³ï¼Œå†æ¬¡ç‚¹å‡»åœæ­¢äº†å½•éŸ³
 			if((Boolean)button_record.getTag()){
 				button_record.setTag(false);
 				button_record.setBackgroundResource(R.drawable.btn_record_activity_record);
-				//ÅĞ¶ÏÂ¼ÒôÊ±¼ä£¬Ìø×ªµ½Ìí¼ÓÍ¼Æ¬Ò³Ãæ
+				//åˆ¤æ–­å½•éŸ³æ—¶é—´ï¼Œè·³è½¬åˆ°æ·»åŠ å›¾ç‰‡é¡µé¢
 				linearlayout_record.setVisibility(View.GONE);
 				linearlayout_addpic.setVisibility(View.VISIBLE);
 				button_send.setVisibility(View.VISIBLE);
 				AnimationDrawable animationDrawable = (AnimationDrawable) imageview_bar.getDrawable();
 				animationDrawable.stop();
+				
+				AudioUtils.stopRecordingAudio(recorder, audioFilename);
+			
 			}else{
+				recorder = new MediaRecorder();
+				audioFilename = AudioUtils.startRecordingAudio(recorder, "sample.3gp", this, this);
+				
 				button_record.setTag(true);
 				linearlayout_bar.setVisibility(View.VISIBLE);
 				AnimationDrawable animationDrawable = (AnimationDrawable) imageview_bar.getDrawable();
@@ -104,16 +118,16 @@ public class RecordActivity extends Activity implements OnClickListener{
 			break;
 		case R.id.record_imageview_pic:
 			new AlertDialog.Builder(RecordActivity.this)
-				.setTitle("Ñ¡ÔñÍ¼Æ¬À´Ô´")
+				.setTitle("é€‰æ‹©å›¾ç‰‡æ¥æº")
 				.setItems(items, new DialogInterface.OnClickListener(){
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						//´ò¿ªÏà²á
+						//æ‰“å¼€ç›¸å†Œ
 						if(which == RESULT_LOAD_IMAGE){
 							Intent intent = new Intent(Intent.ACTION_GET_CONTENT);   
 							intent.setType("image/*");
-							startActivityForResult(Intent.createChooser(intent, "Ñ¡ÔñÍ¼Æ¬"),RESULT_LOAD_IMAGE);
+							startActivityForResult(Intent.createChooser(intent, "é€‰æ‹©å›¾ç‰‡"),RESULT_LOAD_IMAGE);
 						}else{
 							Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 							startActivityForResult(intent,TAKE_PICTURE);
@@ -132,14 +146,14 @@ public class RecordActivity extends Activity implements OnClickListener{
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		
-		//´¦Àí·µ»ØÍ¼Æ¬
+		//å¤„ç†è¿”å›å›¾ç‰‡
 		if(data != null){
 			Uri uri = data.getData();
 
 			if(requestCode == TAKE_PICTURE){
-				Log.e("Ïà»ú", "Ïà»ú");
+				Log.e("ç›¸æœº", "ç›¸æœº");
 				if(data.getExtras().get("data") != null){
-					Log.e("--²Ã¼ôÖĞ--", "=");
+					Log.e("--è£å‰ªä¸­--", "=");
 					bipmpTemp = (Bitmap) data.getExtras().get("data");
 					try {
 						File tempImageFile = saveFile(bipmpTemp,"lijizhe"+".jpg");
@@ -160,9 +174,9 @@ public class RecordActivity extends Activity implements OnClickListener{
 					   
 				}
 			}else if(requestCode == RESULT_LOAD_IMAGE){
-				Log.e("Ïà²á", "Ïà²á");
+				Log.e("ç›¸å†Œ", "ç›¸å†Œ");
 				if (uri != null) {
-					Log.e("--²Ã¼ôÖĞ--", "=");
+					Log.e("--è£å‰ªä¸­--", "=");
 				    final Intent intent1 = new Intent("com.android.camera.action.CROP"); 
 				       intent1.setDataAndType(uri, "image/*");
 				       intent1.putExtra("crop", "true");
@@ -177,11 +191,11 @@ public class RecordActivity extends Activity implements OnClickListener{
 			}
 			
 			if(requestCode == CUT_PHOTO_REQUEST_CODE){
-				Log.e("--²Ã¼ôºó--", "=");
+				Log.e("--è£å‰ªå--", "=");
 				
 				bipmpTemp = (Bitmap) data.getExtras().get("data");
 				Log.e("--bipmpTemp--", bipmpTemp.getHeight()+":"+bipmpTemp.getWidth());
-				//±£´æÎÄ¼ş
+				//ä¿å­˜æ–‡ä»¶
 				if(bipmpTemp != null){
 					FileOutputStream output;
 					try {
@@ -189,7 +203,7 @@ public class RecordActivity extends Activity implements OnClickListener{
 						bipmpTemp.compress(CompressFormat.JPEG, 50, output);
 						output.flush();
 						output.close();
-						//½«Í¼Æ¬ÏÔÊ¾µ½¿Ø¼ş
+						//å°†å›¾ç‰‡æ˜¾ç¤ºåˆ°æ§ä»¶
 						imageview_pic.setBackgroundColor(00000000);
 						imageview_pic.setImageBitmap(bipmpTemp);
 					} catch(IOException e) {
@@ -208,7 +222,7 @@ public class RecordActivity extends Activity implements OnClickListener{
 		button_send.setVisibility(View.GONE);
 		linearlayout_record = (LinearLayout)findViewById(R.id.record_linearlayout_record);
 		button_record = (Button)findViewById(R.id.record_button_record);
-		button_record.setTag(false);//ÉèÖÃÂ¼Òô×´Ì¬
+		button_record.setTag(false);//è®¾ç½®å½•éŸ³çŠ¶æ€
 		linearlayout_addpic = (LinearLayout)findViewById(R.id.record_linearlayout_addpic);
 		linearlayout_addpic.setVisibility(View.GONE);
 		imageview_pic = (ImageView)findViewById(R.id.record_imageview_pic);
@@ -225,7 +239,7 @@ public class RecordActivity extends Activity implements OnClickListener{
 	}
 	
 	/**
-	 * ±£´æÍ¼Æ¬µ½sd¿¨
+	 * ä¿å­˜å›¾ç‰‡åˆ°sdå¡
 	 * @param bm
 	 * @param fileName
 	 * @return
@@ -245,17 +259,23 @@ public class RecordActivity extends Activity implements OnClickListener{
 	 } 
 	
 	/**
-	 * »ñÈ¡Â·¾¶
+	 * è·å–è·¯å¾„
 	 * @return
 	 */
 	public static String getSDPath(){
 		File sdDir = null;
 		boolean sdCardExist = Environment.getExternalStorageState().equals(
-				android.os.Environment.MEDIA_MOUNTED); // ÅĞ¶Ïsd¿¨ÊÇ·ñ´æÔÚ
+				android.os.Environment.MEDIA_MOUNTED); // åˆ¤æ–­sdå¡æ˜¯å¦å­˜åœ¨
 		if (sdCardExist) {
-			sdDir = Environment.getExternalStorageDirectory();// »ñÈ¡¸úÄ¿Â¼
+			sdDir = Environment.getExternalStorageDirectory();// è·å–è·Ÿç›®å½•
 		}
 		return sdDir.toString();
+	}
+
+	@Override
+	public void onInfo(MediaRecorder mr, int what, int extra) {
+		Log.d("JOKE", "oninfo mediarecorder: " + what + ", " + extra);
+		
 	}
 
 }

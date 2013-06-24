@@ -1,23 +1,21 @@
 package com.jokes.utils;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.graphics.Bitmap;
 import android.os.Handler;
-import android.util.Base64;
 import android.util.Log;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 import com.jokes.handlers.JokeHandler;
 import com.jokes.handlers.LikeHandler;
+import com.jokes.objects.GeneralResponse;
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
-import com.jokes.objects.UploadResponse;
 
 @SuppressWarnings("unchecked")
 public class ApiRequests {
@@ -26,8 +24,8 @@ public class ApiRequests {
 	private static final String BASE_URL = "http://42.96.164.29:8888/api";
 	private static final String JOKE_URL = BASE_URL + "/myjokes";
 	private static final String LIKE_URL = BASE_URL + "/likes";
-	private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
-	private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
+	//private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
+	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
 	
 	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid){
 		new Thread(new Runnable() {	
@@ -51,40 +49,23 @@ public class ApiRequests {
 		}).start();
 	}
 	
-	public static void addJoke(final Handler responseHandler, final Joke joke, final Bitmap image, final String uid){
+	
+	public static void addJoke(final Handler responseHandler, final Joke joke, final File image,
+			final File audio, final String uid){
 		new Thread(new Runnable() {	
 			@Override
 			public void run() {
-				byte[] imgArray = convertBitmapToByteArray(image);
-				HttpRequest response = HttpRequest.post(IMG_UPLOAD_URL, true, "uid", uid, "type", "jpeg").send(imgArray);
-				final String responseStr = response.body();
-				try {
-					UploadResponse resp = new UploadResponse(new JSONObject(responseStr));
-					if(resp.isSuccess()){
-						joke.setPictureUrl(resp.getUrl());
-					} else {
-						Log.e(DEBUG_TAG, "GetJokes Upload Image Success = false");
-						responseHandler.sendEmptyMessage(HandlerCodes.IMG_UPLOAD_FAILURE);
-						return;
-					}
-				} catch (JSONException e1) {
-					Log.e(DEBUG_TAG, "GetJokes Img Upload " + e1.toString() + "| " + responseStr);
-					responseHandler.sendEmptyMessage(HandlerCodes.IMG_UPLOAD_FAILURE);
-					return;
-				}
 				
+				HttpRequest request = HttpRequest.post(JOKE_URL);
+				request.part("myjoke[name]", joke.getName());
+				request.part("imageFileData", image);
+				request.part("audioFileData", audio);
+				request.part("myjoke[uid]", uid);
+		
 				
-				HttpRequest createResp = HttpRequest.post(JOKE_URL, true, "myjoke[name]", joke.getName(),
-						"myjoke[audio_url]", joke.getAudioUrl(), "myjoke[picture_url]", joke.getPictureUrl(),
-						"myjoke[uid]", uid);
-				
-				Log.d(DEBUG_TAG, createResp.body());
-				try {
-					responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_SUCCESS);
-				} catch (HttpRequestException e) {
-					responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_FAILURE);
-					Log.e(DEBUG_TAG, "Create Joke " + e.toString());
-				}
+				responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_SUCCESS);
+					/*responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_FAILURE);
+					Log.e(DEBUG_TAG, "Create Joke " + e.toString());*/
 			}
 		}).start();
 	}
@@ -127,9 +108,8 @@ public class ApiRequests {
 				HttpRequest response = HttpRequest.post(LIKE_URL, true, "uid", userId, "myjoke_id", jokeId, "isLike", 0);
 				final String responseString = response.body();
 				try {
-					JSONObject object = new JSONObject(responseString);
-					final boolean success = object.getBoolean("success");
-					if(success){
+					GeneralResponse generalResponse = new GeneralResponse(new JSONObject(responseString));
+					if(generalResponse.isSuccess()){
 						responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_SUCCESS);
 					} else {
 						Log.d(DEBUG_TAG, "Unlike "  + responseString);
@@ -149,11 +129,11 @@ public class ApiRequests {
 		
 	}
 	
-	private static byte[] convertBitmapToByteArray(Bitmap image){
+	/*private static byte[] convertBitmapToByteArray(Bitmap image){
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		image.compress(Bitmap.CompressFormat.JPEG, 10, stream);
 		return Base64.encode(stream.toByteArray(),Base64.DEFAULT);
-	}
+	}*/
 	
 
 }

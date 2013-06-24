@@ -14,16 +14,16 @@ import android.widget.TextView;
 
 public class SettingActivity extends Activity implements OnClickListener{
 
-	Button button_back;//·µ»Ø°´Å¥
+	Button button_back;//è¿”å›æŒ‰é’®
 	LinearLayout linearlayot_cache;
-	TextView textview_cache;//»º´æ
-	FrameLayout framelayout_offlinedownload;//ÀëÏßÏÂÔØ²¼¾Ö
+	TextView textview_cache;//ç¼“å­˜
+	FrameLayout framelayout_offlinedownload;//ç¦»çº¿ä¸‹è½½å¸ƒå±€
 	TextView textview_offlinedownload;
-	TextView textview_downloadpercent;//ÏÂÔØ°Ù·Ö±È
-	FrameLayout framelayout_feedback;//ÓÃ»§·´À¡
-	FrameLayout framelayout_update;//¸üĞÂ
-	TextView textview_updatepercent;//¸üĞÂ°üÏÂÔØ½ø¶È
-	FrameLayout framelayout_contactus;//ÁªÏµÎÒÃÇ
+	TextView textview_downloadpercent;//ä¸‹è½½ç™¾åˆ†æ¯”
+	FrameLayout framelayout_feedback;//ç”¨æˆ·åé¦ˆ
+	FrameLayout framelayout_update;//æ›´æ–°
+	TextView textview_updatepercent;//æ›´æ–°åŒ…ä¸‹è½½è¿›åº¦
+	FrameLayout framelayout_contactus;//è”ç³»æˆ‘ä»¬
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

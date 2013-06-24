@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
-		ApiRequests.getJokes(mainHandler, jokeList);
+		//ApiRequests.getJokes(mainHandler, jokeList);
 		
 	}
 

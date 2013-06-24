@@ -35,7 +35,7 @@ public class FeedbackActivity extends Activity implements OnClickListener{
 			break;
 		case R.id.feedback_button_record:
 			
-			//µã»÷¿ªÊ¼Â¼Òô£¬ÔÙ´Îµã»÷Í£Ö¹ÁËÂ¼Òô
+			//ç‚¹å‡»å¼€å§‹å½•éŸ³ï¼Œå†æ¬¡ç‚¹å‡»åœæ­¢äº†å½•éŸ³
 			if((Boolean)button_record.getTag()){
 				button_record.setTag(false);
 				button_record.setBackgroundResource(R.drawable.btn_record_activity_record);
@@ -56,7 +56,7 @@ public class FeedbackActivity extends Activity implements OnClickListener{
 		button_send = (Button)findViewById(R.id.feedback_button_send);
 		button_send.setVisibility(View.GONE);
 		button_record = (Button)findViewById(R.id.feedback_button_record);
-		button_record.setTag(false);//ÉèÖÃÂ¼Òô×´Ì¬
+		button_record.setTag(false);//è®¾ç½®å½•éŸ³çŠ¶æ€
 		button_play = (Button)findViewById(R.id.feedback_button_play);
 		button_back.setOnClickListener(this);
 		button_send.setOnClickListener(this);

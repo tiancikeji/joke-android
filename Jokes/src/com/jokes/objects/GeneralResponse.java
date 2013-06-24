@@ -5,15 +5,15 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-public class UploadResponse {
+public class GeneralResponse {
 	
 	private boolean success;
-	private String url;
+	private String reason;
 	
 	
-	public UploadResponse(JSONObject json){
+	public GeneralResponse(JSONObject json){
 		try {
-			this.url = json.getString("url");
+			this.reason = json.getString("reason");
 			this.success = json.getBoolean("success");
 		} catch (JSONException e) {
 			Log.e("JOKE", "Failure to parse Upload Response");
@@ -26,16 +26,16 @@ public class UploadResponse {
 	public void setSuccess(boolean success) {
 		this.success = success;
 	}
-	public String getUrl() {
-		return url;
+	public String getReason() {
+		return reason;
 	}
-	public void setUrl(String url) {
-		this.url = url;
+	public void setReason(String reason) {
+		this.reason = reason;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("UploadResponse [success=%s, url=%s]", success,
-				url);
+		return String.format("UploadResponse [success=%s, reason=%s]", success,
+				reason);
 	}
 }
