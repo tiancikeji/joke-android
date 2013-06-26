@@ -38,7 +38,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
@@ -369,7 +368,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	
 	private void loadJoke(){
 		//下载图图片
-		new ImageDownLoadTask(jokeList.get(index_joke).getId(),jokeList.get(index_joke).getPictureUrl(),HomepageActivity.this).execute(imageview_pic);
+		new ImageDownLoadTask(jokeList.get(index_joke).getId(),ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getPictureUrl()),HomepageActivity.this).execute(imageview_pic);
 		if(isLike(jokeList.get(index_joke))){
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
 			jokeList.get(index_joke).setIsLike(true);
@@ -391,8 +390,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			if(isPlay){
 				mediaPlayer.start();
 			}else{
-				AudioUtils.prepareStreamAudio(mediaPlayer, jokeList.get(index_joke).getAudioUrl(), listener1);
-				
+				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getAudioUrl()), listener1);
+//				mediaPlayer.prepare();
 			}
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block

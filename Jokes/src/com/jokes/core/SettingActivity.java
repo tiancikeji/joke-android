@@ -34,7 +34,6 @@ public class SettingActivity extends Activity implements OnClickListener{
 	FrameLayout framelayout_contactus;//联系我们
 	
 	Context context;
-	DataManagerApp dataManagerApp;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,7 +42,6 @@ public class SettingActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.setting_activity);
 		
 		context = getApplicationContext();
-		dataManagerApp = ((DataManagerApp)context);
 		init();
 		setView();
 	}
@@ -77,8 +75,8 @@ public class SettingActivity extends Activity implements OnClickListener{
 				context.deleteFile(a[i]);
 			}
 			textview_cache.setText("清除缓存（已用0M）");
-			MyToast toast = new MyToast(context,"缓存已清除");
-			toast.startMyToast();
+//			MyToast toast = new MyToast(SettingActivity.this,"缓存已清除");
+//			toast.startMyToast();
 			break;
 		case R.id.setting_framelayout_offlinedownload:
 			break;
@@ -100,6 +98,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 		framelayout_offlinedownload = (FrameLayout)findViewById(R.id.setting_framelayout_offlinedownload);
 		textview_offlinedownload = (TextView)findViewById(R.id.setting_textview_offlinedownload);
 		textview_downloadpercent = (TextView)findViewById(R.id.setting_textview_downloadpercent);
+		textview_downloadpercent.setVisibility(View.GONE);
 		framelayout_feedback = (FrameLayout)findViewById(R.id.setting_framelayout_feedback);
 		framelayout_update = (FrameLayout)findViewById(R.id.setting_framelayout_update);
 		textview_updatepercent = (TextView)findViewById(R.id.setting_textview_updatepercent);

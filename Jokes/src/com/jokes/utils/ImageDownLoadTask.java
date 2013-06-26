@@ -24,6 +24,7 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 	
 	public ImageDownLoadTask(int jokeId,String url, Context context) {
 		this.iconurl = url;
+//		this.iconurl = "http://image.baidu.com/i?ct=503316480&z=&tn=baiduimagedetail&ipn=d&word=%E9%87%91%E5%B8%8C%E6%BE%88&ie=utf-8&in=5261&cl=&lm=&st=&pn=31&rn=1&di=163468126150&ln=1998&fr=&&fmq=1372239520062_R&ic=&s=&se=&sme=0&tab=&width=&height=&face=&is=&istype=&ist=&jit=&objurl=http%3A%2F%2Fpic.baike.soso.com%2Fp%2F20120910%2F20120910130935-730414026.jpg#pn31&-1&di163468126150&objURLhttp%3A%2F%2Fpic.baike.soso.com%2Fp%2F20120910%2F20120910130935-730414026.jpg&fromURLippr_z2C%24qAzdH3FAzdH3Fkwthj_z%26e3Bf5f5_z%26e3Bv54AzdH3Filc0l9_z%26e3Bip4&W500&H379&T7712&S26&TPjpg";
 		this.context = context;
 		this.jokeId = jokeId;
 	}

@@ -26,6 +26,7 @@ public class ApiRequests {
 	private static final String BASE_URL = "http://42.96.164.29:8888/api";
 	private static final String JOKE_URL = BASE_URL + "/myjokes";
 	private static final String LIKE_URL = BASE_URL + "/likes";
+
 	//private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
 	
@@ -189,7 +190,7 @@ public class ApiRequests {
 	 * @return Absolute Url
 	 */
 	public static String buildAbsoluteUrl(final String relativeUrl){
-		return BASE_URL + relativeUrl;
+		return "http://42.96.164.29:8888" + relativeUrl;
 	}
 
 }
