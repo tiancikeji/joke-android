@@ -85,7 +85,9 @@ public class ApiRequests {
 				request.part("audioFileData", audio);
 				request.part("myjoke[uid]", uid);
 				request.part("myjoke[description]", joke.getDescription());
-				request.part("myjoke[length]", getAudioFileLength(audio));
+				if(0 == joke.getLength()){
+					request.part("myjoke[length]", getAudioFileLength(audio));
+				}
 				
 				final String responseStr = request.body();
 				try {
@@ -110,6 +112,9 @@ public class ApiRequests {
 						jokeId, "uid", userId, "isLike", 1);
 				LikeHandler handler = new LikeHandler();
 				final String responseStr = response.body();
+				//TODO look at response
+				
+				
 				try {
 					//like.setFromLike((Like)handler.parseResponse(responseStr));
 					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_SUCCESS);
@@ -150,7 +155,8 @@ public class ApiRequests {
 		}).start();
 		
 	}
-	private static int getAudioFileLength(File audio){
+	
+	public static int getAudioFileLength(File audio){
 		MediaPlayer mp = new MediaPlayer();
 		try {
 			mp.setDataSource(audio.getAbsolutePath());
@@ -163,7 +169,7 @@ public class ApiRequests {
 			return 0;
 		} catch (IllegalStateException e) {
 			Log.e(DEBUG_TAG, "Error determining audio length " + e);
-			return 0;
+			return 0; 
 		} catch (IOException e) {
 			Log.e(DEBUG_TAG, "Error determining audio length " + e);
 			return 0;

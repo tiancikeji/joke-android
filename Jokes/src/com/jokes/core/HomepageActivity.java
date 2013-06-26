@@ -379,7 +379,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			linearlayout_volume.setVisibility(View.VISIBLE);
 			startPlayAnim();
 			jokeCurrent = jokeList.get(index_joke);
-			AudioUtils.streamAudio(mediaPlayer, jokeList.get(index_joke).getAudioUrl(), listener1);
+			AudioUtils.prepareStreamAudio(mediaPlayer, jokeList.get(index_joke).getAudioUrl(), listener1);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -429,7 +429,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 		@Override
 		public void onPrepared(MediaPlayer mp) {
-			
+			mp.start();
 		}
 	};
 

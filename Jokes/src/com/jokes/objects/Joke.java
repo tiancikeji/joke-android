@@ -19,7 +19,8 @@ public class Joke {
 	private String name;
 	private String description;
 	private boolean isLike = false;
-	
+	private int length;
+
 	public Joke(JSONObject json){
 		try{
 			this.pictureUrl = json.getString("picture_url");
@@ -31,6 +32,7 @@ public class Joke {
 			this.id			= json.getInt("id");
 			this.name		= json.getString("name");
 			this.description = json.getString("description");
+			this.length = json.getInt("length");
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
 		}
@@ -40,8 +42,17 @@ public class Joke {
 	public Joke() {
 		this.description = "";
 		this.name = "";
+		this.length = 0;
 	}
 
+	
+	public int getLength() {
+		return length;
+	}
+	
+	public void setLength(int length) {
+		this.length = length;
+	}
 	public String getPictureUrl() {
 		return pictureUrl;
 	}
