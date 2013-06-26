@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ImageView;
 
 public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
@@ -46,7 +47,7 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 	}
 	
 	public Bitmap downImage(String ImageUrl, Context context){
-
+		Log.e("图片地址", ImageUrl);
 		InputStream ism = null;
 		URLConnection conn = null;
 		FileOutputStream output = null;

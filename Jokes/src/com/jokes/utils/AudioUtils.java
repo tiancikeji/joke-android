@@ -21,7 +21,7 @@ public class AudioUtils {
 	 * 开始播放
 	 */
 	public static void startPlaying(MediaPlayer mPlayer,String fileName){
-		mPlayer = new MediaPlayer();
+//		mPlayer = new MediaPlayer();
 		try {
 			mPlayer.setDataSource(fileName);
 			mPlayer.prepare();

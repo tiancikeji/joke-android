@@ -40,12 +40,14 @@ public class FeedbackActivity extends Activity implements OnClickListener{
 				button_record.setTag(false);
 				button_record.setBackgroundResource(R.drawable.btn_record_activity_record);
 				button_send.setVisibility(View.VISIBLE);
+				button_play.setVisibility(View.VISIBLE);
 			}else{
 				button_record.setTag(true);
 				button_record.setBackgroundResource(R.drawable.btn_record_activity_record_1);
 			}
 			break;
 		case R.id.feedback_button_play:
+			
 			break;
 		}
 		

@@ -149,6 +149,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				startPlayAnim();
 				
 				recorder = new MediaRecorder();
+				//代码变动，有错误，所以注释，你根据你的新代码来写吧
+//				audioFilename = AudioUtils.startRecordingAudio(recorder, "sample.3gp", this, this);
 
 				button_record.setTag(true);
 				linearlayout_bar.setVisibility(View.VISIBLE);
@@ -180,9 +182,11 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			if(mediaPlayer == null){
 				mediaPlayer = new MediaPlayer();
 			}
-			if(isPlay && audioFilename != null){
+			if(!isPlay && audioFilename != null){
+				isPlay = true;
 				AudioUtils.startPlaying(mediaPlayer, audioFilename);
 			}else{
+				isPlay = false;
 				AudioUtils.stopPlaying(mediaPlayer);
 			}
 			
@@ -268,6 +272,7 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	private void init(){
 		button_back = (Button)findViewById(R.id.record_button_back);
 		button_send = (Button)findViewById(R.id.record_button_send);
+		button_send.setBackgroundResource(R.drawable.btn_current);
 		button_send.setVisibility(View.GONE);
 		linearlayout_record = (LinearLayout)findViewById(R.id.record_linearlayout_record);
 		button_record = (Button)findViewById(R.id.record_button_record);

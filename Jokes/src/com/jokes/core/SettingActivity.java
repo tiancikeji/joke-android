@@ -1,6 +1,14 @@
 package com.jokes.core;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import com.jokes.mywidget.MyToast;
+import com.jokes.utils.DataManagerApp;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
@@ -25,13 +33,19 @@ public class SettingActivity extends Activity implements OnClickListener{
 	TextView textview_updatepercent;//更新包下载进度
 	FrameLayout framelayout_contactus;//联系我们
 	
+	Context context;
+	DataManagerApp dataManagerApp;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.setting_activity);
+		
+		context = getApplicationContext();
+		dataManagerApp = ((DataManagerApp)context);
 		init();
+		setView();
 	}
 
 	@Override
@@ -56,6 +70,15 @@ public class SettingActivity extends Activity implements OnClickListener{
 			finish();
 			break;
 		case R.id.setting_linearlayout_cache:
+			String a[] = null;
+			//清除数据
+			a = context.fileList();
+			for(int i = 0; i < a.length;i++){
+				context.deleteFile(a[i]);
+			}
+			textview_cache.setText("清除缓存（已用0M）");
+			MyToast toast = new MyToast(context,"缓存已清除");
+			toast.startMyToast();
 			break;
 		case R.id.setting_framelayout_offlinedownload:
 			break;
@@ -80,6 +103,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 		framelayout_feedback = (FrameLayout)findViewById(R.id.setting_framelayout_feedback);
 		framelayout_update = (FrameLayout)findViewById(R.id.setting_framelayout_update);
 		textview_updatepercent = (TextView)findViewById(R.id.setting_textview_updatepercent);
+		textview_updatepercent.setVisibility(View.GONE);
 		framelayout_contactus = (FrameLayout)findViewById(R.id.setting_framelayout_contactus);
 	
 		button_back.setOnClickListener(this);
@@ -88,6 +112,37 @@ public class SettingActivity extends Activity implements OnClickListener{
 		framelayout_feedback.setOnClickListener(this);
 		framelayout_update.setOnClickListener(this);
 		framelayout_contactus.setOnClickListener(this);
+	}
+	
+	private void setView(){
+		int cache = getCache();
+		textview_cache.setText("清除缓存（已用"+cache+"）");
+	}
+	
+	/**
+	 * 获取缓存大小
+	 */
+	private int getCache(){
+		//清空上次的缓冲数据
+		int cache = 0;
+		String b[] = null;
+		FileInputStream fin;
+		b = this.fileList();
+		for(int i = 0; i < b.length;i++){
+			try {
+				fin = openFileInput(b[i]);
+				try {
+					cache += fin.available();
+					fin.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+
+		}
+		return cache;
 	}
 
 }
