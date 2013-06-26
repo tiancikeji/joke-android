@@ -1,27 +1,14 @@
 package com.jokes.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.jokes.objects.Joke;
-import com.jokes.objects.Like;
-import com.jokes.utils.ApiRequests;
-import com.jokes.utils.AudioUtils;
-import com.jokes.utils.Constant;
-import com.jokes.utils.HandlerCodes;
-import com.jokes.utils.ImageDownLoadTask;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
@@ -34,9 +21,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -49,8 +34,10 @@ import android.widget.TextView;
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
+import com.jokes.utils.AudioUtils;
+import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
-import com.jokes.utils.Installation;
+import com.jokes.utils.ImageDownLoadTask;
 
 public class HomepageActivity extends Activity implements OnClickListener,AnimationListener{
 
@@ -135,17 +122,14 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			case HandlerCodes.LIKE_FAILURE:
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
-				ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
+				//ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
 				Log.d(DEBUG_TAG, "Unlike Succes " + like);
 				break;
 			case HandlerCodes.UNLIKE_FAILURE:
-				ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
+				//ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
 				Log.d(DEBUG_TAG, "UnLike Failure " + like);
 				jokeCurrent.setIsLike(false);
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
-				break;
-			case HandlerCodes.UNLIKE_FAILURE:
-				
 				break;
 			case HandlerCodes.GET_LIKEJOKES_SUCCESS:
 				
@@ -184,7 +168,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.homepage_activity);
-		
+		/*
 		final String uid = Installation.id(this);
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
@@ -203,7 +187,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 		initView();
 		initAnim();

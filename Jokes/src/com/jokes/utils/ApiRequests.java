@@ -1,15 +1,12 @@
 package com.jokes.utils;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
@@ -181,5 +178,12 @@ public class ApiRequests {
 		return Base64.encode(stream.toByteArray(),Base64.DEFAULT);
 	}*/
 	
+	/**
+	 * @param relativeUrl
+	 * @return Absolute Url
+	 */
+	public static String buildAbsoluteUrl(final String relativeUrl){
+		return BASE_URL + relativeUrl;
+	}
 
 }

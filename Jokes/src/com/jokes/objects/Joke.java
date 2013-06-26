@@ -102,7 +102,7 @@ public class Joke {
 		return isLike;
 	}
 	public void setIsLike(boolean islike){
-		this.isLike=islike;
+		this.isLike = islike;
 	}
 	
 	@Override

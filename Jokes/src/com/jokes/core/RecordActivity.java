@@ -136,7 +136,6 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				linearlayout_record.setVisibility(View.GONE);
 				linearlayout_addpic.setVisibility(View.VISIBLE);
 				button_send.setVisibility(View.VISIBLE);
-<<<<<<< HEAD
 				AnimationDrawable animationDrawable = (AnimationDrawable) imageview_bar.getDrawable();
 				animationDrawable.stop();
 				
@@ -146,17 +145,11 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			}else{
 				audioRecorder = new AudioRecorder();
 				audioRecorder.startRecordingAudio(this);
-				
-=======
-				AudioUtils.stopRecordingAudio(recorder, audioFilename);
-			}else{
 				isStartAnim = true;
 				startPlayAnim();
 				
 				recorder = new MediaRecorder();
-				audioFilename = AudioUtils.startRecordingAudio(recorder, "sample.3gp", this, this);
 
->>>>>>> 5e90f778762335c4445cedc2984d8bc40c38077e
 				button_record.setTag(true);
 				linearlayout_bar.setVisibility(View.VISIBLE);
 				
