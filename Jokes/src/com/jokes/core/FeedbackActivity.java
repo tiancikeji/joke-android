@@ -56,7 +56,7 @@ public class FeedbackActivity extends Activity implements OnClickListener{
 		button_send = (Button)findViewById(R.id.feedback_button_send);
 		button_send.setVisibility(View.GONE);
 		button_record = (Button)findViewById(R.id.feedback_button_record);
-		button_record.setTag(false);//设置录音状态
+		button_record.setTag(false);//设置按钮是否在录音状态
 		button_play = (Button)findViewById(R.id.feedback_button_play);
 		button_back.setOnClickListener(this);
 		button_send.setOnClickListener(this);

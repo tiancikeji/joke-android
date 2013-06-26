@@ -18,6 +18,7 @@ public class Joke {
 	private int id;
 	private String name;
 	private String description;
+	private boolean isLike = false;
 	
 	public Joke(JSONObject json){
 		try{
@@ -97,6 +98,13 @@ public class Joke {
 	public void setName(String name) {
 		this.name = name;
 	}
+	public boolean getIsLike(){
+		return isLike;
+	}
+	public void setIsLike(boolean islike){
+		this.isLike=islike;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
