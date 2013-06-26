@@ -1,9 +1,15 @@
 package com.jokes.core;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,6 +27,7 @@ import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.HandlerCodes;
+import com.jokes.utils.Installation;
 
 public class HomepageActivity extends Activity implements OnClickListener{
 
@@ -63,11 +70,17 @@ public class HomepageActivity extends Activity implements OnClickListener{
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
 				ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
-				ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
 				Log.d(DEBUG_TAG, "Unlike Succes " + like);
 				break;
 			case HandlerCodes.UNLIKE_FAILURE:
+				ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
 				Log.d(DEBUG_TAG, "UnLike Failure " + like);
+				break;
+			case HandlerCodes.CREATE_JOKE_SUCCESS:
+				Log.d(DEBUG_TAG, "Create joke success");
+				break;
+			case HandlerCodes.CREATE_JOKE_FAILURE:
+				Log.d(DEBUG_TAG, "Create joke failure");
 				break;
 			}
 		}
@@ -80,12 +93,13 @@ public class HomepageActivity extends Activity implements OnClickListener{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.homepage_activity);
-		/*
+		
 		final String uid = Installation.id(this);
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
 		joke = new Joke(); 
 		joke.setName("Test Name");
+		joke.setDescription("Testing Joke");
 		ApiRequests.getJokes(mainHandler, jokeList, uid);
 		
 		File imageFile = new File(getFilesDir().getAbsolutePath() + "image.png");
@@ -94,11 +108,11 @@ public class HomepageActivity extends Activity implements OnClickListener{
 			out = new FileOutputStream(imageFile);
 			Bitmap bmp =  BitmapFactory.decodeResource(getResources(), R.drawable.btn_back);
 			bmp.compress(Bitmap.CompressFormat.JPEG, 30, out);
-			ApiRequests.addJoke(mainHandler, joke, imageFile, new File("/data/data/com.jokes.core/files/sample.mp4"), uid);
+			ApiRequests.addJoke(mainHandler, joke, imageFile, new File("/storage/emulated/0/sample.mp3"), uid);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 		
 		
 		

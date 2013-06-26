@@ -28,6 +28,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.jokes.utils.AudioRecorder;
 import com.jokes.utils.AudioUtils;
 
 public class RecordActivity extends Activity implements OnClickListener, OnInfoListener{
@@ -51,9 +52,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	
 	Bitmap bipmpTemp ;//用户选择图片
 	File imageFile;
-	
-	private String audioFilename;
-	private MediaRecorder recorder;
+
+	private AudioRecorder audioRecorder;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,11 +103,12 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				AnimationDrawable animationDrawable = (AnimationDrawable) imageview_bar.getDrawable();
 				animationDrawable.stop();
 				
-				AudioUtils.stopRecordingAudio(recorder, audioFilename);
+				File mp3Out = audioRecorder.stopRecordingAudio(this);
+				Log.d(DEBUG_TAG, "Mp3 out file " + mp3Out.getAbsolutePath());
 			
 			}else{
-				recorder = new MediaRecorder();
-				audioFilename = AudioUtils.startRecordingAudio(recorder, "sample.3gp", this, this);
+				audioRecorder = new AudioRecorder();
+				audioRecorder.startRecordingAudio(this);
 				
 				button_record.setTag(true);
 				linearlayout_bar.setVisibility(View.VISIBLE);

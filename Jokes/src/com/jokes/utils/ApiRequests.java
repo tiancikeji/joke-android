@@ -1,11 +1,16 @@
 package com.jokes.utils;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
 
@@ -61,11 +66,20 @@ public class ApiRequests {
 				request.part("imageFileData", image);
 				request.part("audioFileData", audio);
 				request.part("myjoke[uid]", uid);
-		
+				request.part("myjoke[description]", joke.getDescription());
+				request.part("myjoke[length]", getAudioFileLength(audio));
 				
-				responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_SUCCESS);
-					/*responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_FAILURE);
-					Log.e(DEBUG_TAG, "Create Joke " + e.toString());*/
+				final String responseStr = request.body();
+				try {
+					if(new JSONObject(responseStr).getBoolean("success")){
+						responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_SUCCESS);
+					} else {
+						
+					}
+				} catch (JSONException e) {
+					Log.e(DEBUG_TAG, "Error parsing response = " + e + " | " + responseStr);
+					responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_FAILURE);
+				}
 			}
 		}).start();
 	}
@@ -79,21 +93,11 @@ public class ApiRequests {
 				LikeHandler handler = new LikeHandler();
 				final String responseStr = response.body();
 				try {
-					like.setFromLike((Like)handler.parseResponse(responseStr));
+					//like.setFromLike((Like)handler.parseResponse(responseStr));
 					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_SUCCESS);
 				} catch (HttpRequestException e) {
 					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_FAILURE);
 					Log.e(DEBUG_TAG, "Like " + e.toString());
-				} catch (JSONException e) {
-					try {
-						JSONObject respJsonObject = new JSONObject(responseStr);
-						if(respJsonObject.getBoolean("success")){
-							//TODO
-						}
-					} catch (JSONException e1) {
-						Log.e(DEBUG_TAG, "Like " + e.toString());
-					}
-					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_FAILURE);
 				}
 			}
 		}).start();
@@ -128,7 +132,28 @@ public class ApiRequests {
 		}).start();
 		
 	}
-	
+	private static int getAudioFileLength(File audio){
+		MediaPlayer mp = new MediaPlayer();
+		try {
+			mp.setDataSource(audio.getAbsolutePath());
+			mp.prepare(); // might be optional
+		} catch (IllegalArgumentException e) {
+			Log.e(DEBUG_TAG, "Error determining audio length " + e);
+			return 0;
+		} catch (SecurityException e) {
+			Log.e(DEBUG_TAG, "Error determining audio length " + e);
+			return 0;
+		} catch (IllegalStateException e) {
+			Log.e(DEBUG_TAG, "Error determining audio length " + e);
+			return 0;
+		} catch (IOException e) {
+			Log.e(DEBUG_TAG, "Error determining audio length " + e);
+			return 0;
+		}
+		int length = (int) Math.round(((float)mp.getDuration() / 1000.0)); 
+		mp.release();
+		return length;
+	}
 	/*private static byte[] convertBitmapToByteArray(Bitmap image){
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		image.compress(Bitmap.CompressFormat.JPEG, 10, stream);
