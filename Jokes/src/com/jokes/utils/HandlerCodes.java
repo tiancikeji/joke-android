@@ -23,6 +23,7 @@ public class HandlerCodes {
 	
 	public static final int GET_LIKEJOKES_SUCCESS = 12;
 	public static final int GET_LIKEJOKES_FAILURE = 13;
+	public static final int CLOSE = 99;
 
 
 }

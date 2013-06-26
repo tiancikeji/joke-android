@@ -180,7 +180,6 @@
             android:background="@drawable/record_activity_play"
             android:gravity="left|center_vertical"
             android:paddingLeft="20dp"
-            android:text="1234"
             android:textColor="#333333"
             android:textSize="18sp" />
     </LinearLayout>

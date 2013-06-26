@@ -23,9 +23,10 @@ import com.jokes.objects.Like;
 public class ApiRequests {
 	private static final String DEBUG_TAG = "JOKE";
 	
-	private static final String BASE_URL = "http://42.96.164.29:8888/api";
-	private static final String JOKE_URL = BASE_URL + "/myjokes";
-	private static final String LIKE_URL = BASE_URL + "/likes";
+	private static final String BASE_URL = "http://42.96.164.29:8888";
+	private static final String API_URL = "/api";
+	private static final String JOKE_URL = BASE_URL + API_URL + "/myjokes";
+	private static final String LIKE_URL = BASE_URL + API_URL + "/likes";
 	//private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
 	
@@ -81,12 +82,14 @@ public class ApiRequests {
 				
 				HttpRequest request = HttpRequest.post(JOKE_URL);
 				request.part("myjoke[name]", joke.getName());
-				request.part("imageFileData", image);
+				if(null != image){
+					request.part("imageFileData", image);
+				}
 				request.part("audioFileData", audio);
 				request.part("myjoke[uid]", uid);
 				request.part("myjoke[description]", joke.getDescription());
 				if(0 == joke.getLength()){
-					request.part("myjoke[length]", getAudioFileLength(audio));
+					request.part("myjoke[length]", AudioUtils.getAudioFileLength(audio));
 				}
 				
 				final String responseStr = request.body();
@@ -94,7 +97,7 @@ public class ApiRequests {
 					if(new JSONObject(responseStr).getBoolean("success")){
 						responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_SUCCESS);
 					} else {
-						
+						//TODO
 					}
 				} catch (JSONException e) {
 					Log.e(DEBUG_TAG, "Error parsing response = " + e + " | " + responseStr);
@@ -156,28 +159,7 @@ public class ApiRequests {
 		
 	}
 	
-	public static int getAudioFileLength(File audio){
-		MediaPlayer mp = new MediaPlayer();
-		try {
-			mp.setDataSource(audio.getAbsolutePath());
-			mp.prepare(); // might be optional
-		} catch (IllegalArgumentException e) {
-			Log.e(DEBUG_TAG, "Error determining audio length " + e);
-			return 0;
-		} catch (SecurityException e) {
-			Log.e(DEBUG_TAG, "Error determining audio length " + e);
-			return 0;
-		} catch (IllegalStateException e) {
-			Log.e(DEBUG_TAG, "Error determining audio length " + e);
-			return 0; 
-		} catch (IOException e) {
-			Log.e(DEBUG_TAG, "Error determining audio length " + e);
-			return 0;
-		}
-		int length = (int) Math.round(((float)mp.getDuration() / 1000.0)); 
-		mp.release();
-		return length;
-	}
+
 	/*private static byte[] convertBitmapToByteArray(Bitmap image){
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		image.compress(Bitmap.CompressFormat.JPEG, 10, stream);

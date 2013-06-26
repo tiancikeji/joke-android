@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.BreakIterator;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,6 +20,7 @@ import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -30,9 +32,14 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import com.jokes.objects.Joke;
+import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
 import com.jokes.utils.AudioUtils;
+import com.jokes.utils.HandlerCodes;
+import com.jokes.utils.Installation;
 
 public class RecordActivity extends Activity implements OnClickListener, OnInfoListener{
 	private final static String DEBUG_TAG = "RecordActivity";
@@ -68,8 +75,7 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	File imageFile;
 
 	private AudioRecorder audioRecorder;
-	private String audioFilename;
-	private MediaRecorder recorder;
+	private File mp3RecordedFile;
 	private MediaPlayer mediaPlayer;
 	//用来控制录音动画效果
 	int count = 0;
@@ -82,8 +88,30 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.what){
+			case HandlerCodes.CLOSE:
+				RecordActivity.this.finish();
+				break;
 			case CHANGEVOLUME:
 				changePointView(count);
+				break;
+			case HandlerCodes.CREATE_JOKE_SUCCESS:
+				Toast.makeText(RecordActivity.this, "已经上传，请等待审核", Toast.LENGTH_LONG).show();
+				button_send.setEnabled(false);
+				CountDownTimer timer = new CountDownTimer(3000, 3000) {
+					@Override
+					public void onTick(long arg0) {
+					}
+					
+					@Override
+					public void onFinish() {
+						mainHandler.sendEmptyMessage(HandlerCodes.CLOSE);
+					}
+				}; 
+				timer.start();
+				break;
+			case HandlerCodes.CREATE_JOKE_FAILURE:
+				Toast.makeText(RecordActivity.this, "上传失败了", Toast.LENGTH_LONG).show();
+				button_send.setEnabled(false);
 				break;
 			}
 		}
@@ -125,6 +153,12 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			finish();
 			break;
 		case R.id.record_button_send:
+			Joke joke = new Joke();
+			joke.setName("笑话");
+			joke.setDescription("笑话");
+			ApiRequests.addJoke(mainHandler, joke, imageFile, mp3RecordedFile, Installation.id(this));
+			Toast.makeText(this, "正在发布...", Toast.LENGTH_SHORT).show();
+			button_send.setEnabled(false);
 			break;
 		case R.id.record_button_record:
 			//点击开始录音，再次点击停止了录音
@@ -139,17 +173,14 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				AnimationDrawable animationDrawable = (AnimationDrawable) imageview_bar.getDrawable();
 				animationDrawable.stop();
 				
-				File mp3Out = audioRecorder.stopRecordingAudio(this);
-				Log.d(DEBUG_TAG, "Mp3 out file " + mp3Out.getAbsolutePath());
+				mp3RecordedFile = audioRecorder.stopRecordingAudio(this);
+				displayLengthOfAudioFile();
 			
 			}else{
 				audioRecorder = new AudioRecorder();
 				audioRecorder.startRecordingAudio(this);
 				isStartAnim = true;
 				startPlayAnim();
-				
-				recorder = new MediaRecorder();
-
 				button_record.setTag(true);
 				linearlayout_bar.setVisibility(View.VISIBLE);
 				
@@ -180,12 +211,14 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			if(mediaPlayer == null){
 				mediaPlayer = new MediaPlayer();
 			}
-			if(isPlay && audioFilename != null){
-				AudioUtils.startPlaying(mediaPlayer, audioFilename);
+			if(!isPlay && mp3RecordedFile != null){
+				isPlay = true;
+				AudioUtils.startPlaying(mediaPlayer, mp3RecordedFile.getAbsolutePath());
 			}else{
+				isPlay = false;
 				AudioUtils.stopPlaying(mediaPlayer);
+				mediaPlayer = null;
 			}
-			
 			break;
 		}
 		
@@ -200,7 +233,6 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			Uri uri = data.getData();
 
 			if(requestCode == TAKE_PICTURE){
-				Log.e("相机", "相机");
 				if(data.getExtras().get("data") != null){
 					Log.e("--裁剪中--", "=");
 					bipmpTemp = (Bitmap) data.getExtras().get("data");
@@ -223,7 +255,6 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 
 				}
 			}else if(requestCode == RESULT_LOAD_IMAGE){
-				Log.e("相册", "相册");
 				if (uri != null) {
 					Log.e("--裁剪中--", "=");
 					final Intent intent1 = new Intent("com.android.camera.action.CROP"); 
@@ -248,7 +279,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				if(bipmpTemp != null){
 					FileOutputStream output;
 					try {
-						output = this.openFileOutput("pic", Context.MODE_PRIVATE);
+						imageFile = new File(getFilesDir().getAbsolutePath() + "/image.jpg");
+						output = new FileOutputStream(imageFile);
 						bipmpTemp.compress(CompressFormat.JPEG, 50, output);
 						output.flush();
 						output.close();
@@ -294,6 +326,10 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		button_record.setOnClickListener(this);
 		button_play.setOnClickListener(this);
 		imageview_pic.setOnClickListener(this);
+	}
+	
+	private void displayLengthOfAudioFile(){
+		button_play.setText(AudioUtils.getAudioFileLength(mp3RecordedFile) + "\"");
 	}
 
 	/**
