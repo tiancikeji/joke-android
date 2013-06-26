@@ -27,11 +27,11 @@ public class ApiRequests {
 	//private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
 	
-	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid){
+	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid,final int page){
 		new Thread(new Runnable() {	
 			@Override
 			public void run() {
-				HttpRequest response = HttpRequest.get(JOKE_URL, true, "page", 1, "uid", uid);
+				HttpRequest response = HttpRequest.get(JOKE_URL, true, "page", page, "uid", uid);
 				JokeHandler handler = new JokeHandler();
 				final String responseStr = response.body();
 				try {
@@ -49,6 +49,27 @@ public class ApiRequests {
 		}).start();
 	}
 	
+	public static void getLikeJokes(final Handler responseHandler, final List<Joke> jokes, final String uid){
+		new Thread(new Runnable() {	
+			@Override
+			public void run() {
+				HttpRequest response = HttpRequest.get(LIKE_URL, true, "uid", uid);
+				JokeHandler handler = new JokeHandler();
+				final String responseStr = response.body();
+				try {
+					jokes.clear(); 
+					jokes.addAll((List<Joke>)handler.parseResponse(responseStr));
+					responseHandler.sendEmptyMessage(HandlerCodes.GET_LIKEJOKES_SUCCESS);
+				} catch (HttpRequestException e) {
+					responseHandler.sendEmptyMessage(HandlerCodes.GET_LIKEJOKES_FAILURE);
+					Log.e(DEBUG_TAG, "GetJokes " + e.toString() + " " + responseStr);
+				} catch (JSONException e) {
+					responseHandler.sendEmptyMessage(HandlerCodes.GET_LIKEJOKES_FAILURE);
+					Log.e(DEBUG_TAG, "GetJokes " + e.toString() + " " + responseStr);
+				}
+			}
+		}).start();
+	}
 	
 	public static void addJoke(final Handler responseHandler, final Joke joke, final File image,
 			final File audio, final String uid){

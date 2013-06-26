@@ -57,13 +57,79 @@
                 android:textSize="18dp" >
             </TextView>
 
+            <LinearLayout
+                android:id="@+id/record_linearlayout_point"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"
+                android:background="#00000000" >
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_1"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_2"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_3"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_4"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_5"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_6"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_7"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/record_imageview_point_8"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:background="@drawable/point2" />
+            </LinearLayout>
+
             <ImageView
                 android:id="@+id/record_imageview_bar"
                 android:layout_width="40dp"
                 android:layout_height="4dp"
                 android:layout_marginBottom="20dp"
                 android:layout_marginTop="10dp"
-                android:src="@drawable/animation1" />
+                android:src="@drawable/animation1"
+                android:visibility="gone" />
         </LinearLayout>
 
         <Button

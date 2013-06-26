@@ -17,6 +17,7 @@ public class Joke {
 	private String uid;
 	private int id;
 	private String name;
+	private boolean isLike = false;
 	
 	public Joke(JSONObject json){
 		try{
@@ -28,6 +29,7 @@ public class Joke {
 			this.uid 		= json.getString("uid");
 			this.id			= json.getInt("id");
 			this.name		= json.getString("name");
+			Log.e("JOKE", pictureUrl+"[]"+audioUrl);
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
 		}
@@ -86,6 +88,13 @@ public class Joke {
 	public void setName(String name) {
 		this.name = name;
 	}
+	public boolean getIsLike(){
+		return isLike;
+	}
+	public void setIsLike(boolean islike){
+		this.isLike=islike;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -85,5 +85,37 @@ public class AudioUtils {
 		*/
 	}
 
+	/**
+	 * 开始播放
+	 */
+	public static void startPlaying(MediaPlayer mPlayer,String fileName){
+		mPlayer = new MediaPlayer();
+		try {
+			mPlayer.setDataSource(fileName);
+			mPlayer.prepare();
+			mPlayer.start();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
+	 * 停止播放
+	 */
+	public static void stopPlaying(MediaPlayer mPlayer){
+		mPlayer.release();
+//		mPlayer = null;
+	}
 
 }
