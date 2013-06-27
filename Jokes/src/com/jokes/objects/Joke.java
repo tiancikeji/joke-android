@@ -21,6 +21,9 @@ public class Joke {
 	private boolean isLike = false;
 	private int length;
 
+//	{"id":104,"name":"iOSTest","picture_url":null,"audio_url":"audio-3f144c40c9132f9ad715b7203e80f0fa789a349e-1372306598.mp3",
+//		"approved":1,"created_at":null,"updated_at":null,"uid":null,"description":"123","length":0,
+//		"num_plays":0,"myjoke_id":null,"num_likes":0}
 	public Joke(JSONObject json){
 		try{
 			this.pictureUrl = json.getString("picture_url");

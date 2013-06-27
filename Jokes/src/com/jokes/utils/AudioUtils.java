@@ -44,6 +44,8 @@ public class AudioUtils {
 		
 	}
 	
+	
+	
 	/**
 	 * 停止播放
 	 */
@@ -51,6 +53,15 @@ public class AudioUtils {
 		mPlayer.stop();
 		mPlayer.reset();
 		//mPlayer.release();
+	}
+	
+	/**
+	 * 暂停播放
+	 */
+	public static void pausePlaying(MediaPlayer mPlayer){
+		if(mPlayer != null){
+			mPlayer.pause();
+		}
 	}
 	
 	private static int getAudioFileLength(File audio, MediaPlayer mp){
@@ -79,5 +90,8 @@ public class AudioUtils {
 	public static int getAudioFileLength(File audio){
 		return getAudioFileLength(audio, new MediaPlayer());
 	}
+	
+	
+
 
 }
