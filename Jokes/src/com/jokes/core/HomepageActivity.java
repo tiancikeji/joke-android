@@ -1,17 +1,11 @@
-package com.jokes.core;
+ package com.jokes.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import com.jokes.objects.Joke;
-import com.jokes.objects.Like;
-import com.jokes.utils.ApiRequests;
-import com.jokes.utils.AudioUtils;
-import com.jokes.utils.DataManagerApp;
-import com.jokes.utils.HandlerCodes;
-import com.jokes.utils.ImageDownLoadTask;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,9 +22,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -38,17 +31,19 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
+import com.jokes.utils.AudioEncoder;
 import com.jokes.utils.AudioUtils;
-import com.jokes.utils.Constant;
+import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.ImageDownLoadTask;
 
-public class HomepageActivity extends Activity implements OnClickListener,AnimationListener{
+public class HomepageActivity extends Activity implements OnClickListener,AnimationListener, OnPreparedListener, OnCompletionListener{
 
-	private static final String DEBUG_TAG = "HomepageActivity";
+	private static final String DEBUG_TAG = "JOKE";
 	private static final int PLAY_NEXT = 100001;
 	private static final int CHANGEVOLUME = 100002;
 	
@@ -110,11 +105,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				if(!isPlay){
 					loadJoke();
 				}
-				
-//				if(jokeList.size() > 0){
-//					Joke joke = jokeList.get(0);
-//					ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
-//				}
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
 				break;
@@ -199,23 +189,13 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		initAnim();
 		initValues();
 		
-		mediaPlayer = new MediaPlayer();
-		mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){  //为什么没有触发这个函数呢？
-             @Override  
-            public void onCompletion(MediaPlayer arg0) {  
-//                 mediaPlayer.release();
-            	   arg0.release();
-                   index_joke++;
-                   //播放下一条
-                   mainHandler.sendEmptyMessage(PLAY_NEXT);
-                }  
-         });     
+		initMediaPlayer();
 
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
 		jokeLikeList = new ArrayList<Joke>();
-		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
-		ApiRequests.getLikeJokes(mainHandler, jokeLikeList, DataManagerApp.uid);
+		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, page);
+		//ApiRequests.getLikeJokes(mainHandler, jokeLikeList, DataManagerApp.uid);
 		
 		if(loadSettingTime().equals(getTodayToString())){
 			//不是今天第一次进入
@@ -306,6 +286,11 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);
 	}
 	
+	private void initMediaPlayer(){
+		mediaPlayer = new MediaPlayer();
+		mediaPlayer.setOnCompletionListener(this);
+	}
+	
 	private void initAnim(){
 		myAnimation_Alpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha_heart);	
 	}
@@ -346,14 +331,9 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		case R.id.homepage_framelayout_play:
 			if(isPlay){
 				isPlay = false;
-				//暂停
-//				mediaPlayer.stop();
-//				mediaPlayer.release();
-//				mediaPlayer.pause();
 				stopJoke();
 			}else{
-				isPlay = true;
-				if(jokeList.size()>0){
+				if(jokeList.size() > 0){
 					loadJoke();
 					playJoke();
 				}else{
@@ -366,15 +346,20 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		
 	}
 	
+	
 	private void loadJoke(){
 		//下载图图片
-		new ImageDownLoadTask(jokeList.get(index_joke).getId(),ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getPictureUrl()),HomepageActivity.this).execute(imageview_pic);
+		new ImageDownLoadTask(jokeList.get(index_joke).getId(),
+				ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getPictureUrl()),HomepageActivity.this).execute(imageview_pic);
 		if(isLike(jokeList.get(index_joke))){
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
 			jokeList.get(index_joke).setIsLike(true);
 		}else{
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
-			jokeList.get(index_joke).setIsLike(false);
+			Joke joke = jokeList.get(index_joke);
+			joke.setIsLike(false); // FIXME why are we doing this?
+			textview_duration.setText(joke.getLength() + "\"");
+			
 		}
 	}
 	
@@ -387,27 +372,21 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			linearlayout_volume.setVisibility(View.VISIBLE);
 			startPlayAnim();
 			jokeCurrent = jokeList.get(index_joke);
-			if(isPlay){
-				mediaPlayer.start();
-			}else{
-				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getAudioUrl()), listener1);
-//				mediaPlayer.prepare();
+			textview_duration.setText(jokeCurrent.getLength()+"\"");
+			Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
+			if(!isPlay){
+				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getAudioUrl()), this);
 			}
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
 		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
 		}
 		framelayout_play.setBackgroundResource(R.drawable.btn);
-		textview_duration.setText("150"+"\"");
 		textview_playCount.setVisibility(View.GONE);
 	}
 	
@@ -417,6 +396,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private void stopJoke(){
 		//暂停笑话
 		isStartAnim = false;
+		AudioUtils.stopPlaying(mediaPlayer);
+		
 //		linearlayout_volume.setVisibility(View.GONE);
 //		framelayout_play.setBackgroundResource(R.drawable.playback_play);
 //		textview_duration.setText("无数据");
@@ -434,19 +415,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		textview_playCount.setVisibility(View.VISIBLE);
 		textview_playCount.setText("3456");
 	}
-	
-	/**
-	 * 监听
-	 */
-	OnPreparedListener listener1 = new MediaPlayer.OnPreparedListener(){
 
-		@Override
-		public void onPrepared(MediaPlayer mp) {
-			mp.start();
-		}
-	};
-
-	
 	
 	/**
 	 * 播放中动画效果
@@ -680,6 +649,25 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			break;
 		}
 		
+	}
+
+	@Override
+	public void onPrepared(MediaPlayer arg0) {
+		isPlay = true;
+		arg0.start();
+	}
+
+	@Override
+	public void onCompletion(MediaPlayer mp) {
+		Log.d(DEBUG_TAG, "onCompletion");
+		mp.reset();
+		//mp.release();
+		index_joke++;
+		isPlay = false;
+		// 播放下一条
+		mainHandler.sendEmptyMessage(PLAY_NEXT);
+		// TODO 停止动画
+		// isStartAnim = false;
 	}
 }
 

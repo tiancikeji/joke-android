@@ -48,7 +48,7 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 	}
 	
 	public Bitmap downImage(String ImageUrl, Context context){
-		Log.e("图片地址", ImageUrl);
+		Log.d("JOKE", "图片地址: " + ImageUrl);
 		InputStream ism = null;
 		URLConnection conn = null;
 		FileOutputStream output = null;

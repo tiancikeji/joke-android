@@ -217,6 +217,7 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			}else{
 				isPlay = false;
 				AudioUtils.stopPlaying(mediaPlayer);
+				mediaPlayer.release();
 				mediaPlayer = null;
 			}
 			break;
