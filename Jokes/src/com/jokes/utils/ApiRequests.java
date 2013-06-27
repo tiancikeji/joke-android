@@ -171,7 +171,7 @@ public class ApiRequests {
 	 * @return Absolute Url
 	 */
 	public static String buildAbsoluteUrl(final String relativeUrl){
-		return BASE_URL + relativeUrl;
+		return "http://42.96.164.29:8888" + relativeUrl;
 	}
 
 }

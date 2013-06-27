@@ -234,7 +234,6 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 
 			if(requestCode == TAKE_PICTURE){
 				if(data.getExtras().get("data") != null){
-					Log.e("--裁剪中--", "=");
 					bipmpTemp = (Bitmap) data.getExtras().get("data");
 					try {
 						File tempImageFile = saveFile(bipmpTemp,"lijizhe"+".jpg");
@@ -256,7 +255,6 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				}
 			}else if(requestCode == RESULT_LOAD_IMAGE){
 				if (uri != null) {
-					Log.e("--裁剪中--", "=");
 					final Intent intent1 = new Intent("com.android.camera.action.CROP"); 
 					intent1.setDataAndType(uri, "image/*");
 					intent1.putExtra("crop", "true");
@@ -271,10 +269,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			}
 
 			if(requestCode == CUT_PHOTO_REQUEST_CODE){
-				Log.e("--裁剪后--", "=");
 
 				bipmpTemp = (Bitmap) data.getExtras().get("data");
-				Log.e("--bipmpTemp--", bipmpTemp.getHeight()+":"+bipmpTemp.getWidth());
 				//保存文件
 				if(bipmpTemp != null){
 					FileOutputStream output;
@@ -300,6 +296,7 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	private void init(){
 		button_back = (Button)findViewById(R.id.record_button_back);
 		button_send = (Button)findViewById(R.id.record_button_send);
+		button_send.setBackgroundResource(R.drawable.btn_current);
 		button_send.setVisibility(View.GONE);
 		linearlayout_record = (LinearLayout)findViewById(R.id.record_linearlayout_record);
 		button_record = (Button)findViewById(R.id.record_button_record);

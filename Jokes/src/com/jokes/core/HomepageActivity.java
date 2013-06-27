@@ -5,7 +5,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
+import com.jokes.objects.Joke;
+import com.jokes.objects.Like;
+import com.jokes.utils.ApiRequests;
+import com.jokes.utils.AudioUtils;
+import com.jokes.utils.DataManagerApp;
+import com.jokes.utils.HandlerCodes;
+import com.jokes.utils.ImageDownLoadTask;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +27,9 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -30,7 +38,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
@@ -85,6 +92,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	boolean isStartAnim = false;
 	
 	MediaPlayer mediaPlayer;
+	Context context;
 	
 	//用来控制音频动画效果
 	int count = 0;
@@ -122,14 +130,11 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			case HandlerCodes.LIKE_FAILURE:
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
-				//ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
-				Log.d(DEBUG_TAG, "Unlike Succes " + like);
-				break;
-			case HandlerCodes.UNLIKE_FAILURE:
-				//ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
-				Log.d(DEBUG_TAG, "UnLike Failure " + like);
 				jokeCurrent.setIsLike(false);
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+				break;
+			case HandlerCodes.UNLIKE_FAILURE:
+				
 				break;
 			case HandlerCodes.GET_LIKEJOKES_SUCCESS:
 				
@@ -145,7 +150,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				//当未播放笑话剩下一条时，加载新笑话
 				if(jokeList.size() - (index_joke+1) == 0){
 					page++;
-					ApiRequests.getJokes(mainHandler, jokeList,Constant.uid,page);
+					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
 				}
 				break;
 			case CHANGEVOLUME:
@@ -168,6 +173,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.homepage_activity);
+		context = getApplicationContext();
 		/*
 		final String uid = Installation.id(this);
 		jokeList = new ArrayList<Joke>();
@@ -208,8 +214,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
 		jokeLikeList = new ArrayList<Joke>();
-		ApiRequests.getJokes(mainHandler, jokeList,Constant.uid,page);
-		ApiRequests.getLikeJokes(mainHandler, jokeLikeList, Constant.uid);
+		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
+		ApiRequests.getLikeJokes(mainHandler, jokeLikeList, DataManagerApp.uid);
 		
 		if(loadSettingTime().equals(getTodayToString())){
 			//不是今天第一次进入
@@ -306,7 +312,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	
 	private void initValues(){
 		TelephonyManager tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-		Constant.uid = tm.getDeviceId();
+		DataManagerApp.uid = tm.getDeviceId();
 	}
 
 	@Override
@@ -342,6 +348,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				isPlay = false;
 				//暂停
 //				mediaPlayer.stop();
+//				mediaPlayer.release();
+//				mediaPlayer.pause();
 				stopJoke();
 			}else{
 				isPlay = true;
@@ -360,7 +368,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	
 	private void loadJoke(){
 		//下载图图片
-		new ImageDownLoadTask(jokeList.get(index_joke).getId(),jokeList.get(index_joke).getPictureUrl(),HomepageActivity.this).execute(imageview_pic);
+		new ImageDownLoadTask(jokeList.get(index_joke).getId(),ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getPictureUrl()),HomepageActivity.this).execute(imageview_pic);
 		if(isLike(jokeList.get(index_joke))){
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
 			jokeList.get(index_joke).setIsLike(true);
@@ -379,7 +387,12 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			linearlayout_volume.setVisibility(View.VISIBLE);
 			startPlayAnim();
 			jokeCurrent = jokeList.get(index_joke);
-			AudioUtils.prepareStreamAudio(mediaPlayer, jokeList.get(index_joke).getAudioUrl(), listener1);
+			if(isPlay){
+				mediaPlayer.start();
+			}else{
+				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getAudioUrl()), listener1);
+//				mediaPlayer.prepare();
+			}
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
