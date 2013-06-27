@@ -373,7 +373,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			startPlayAnim();
 			jokeCurrent = jokeList.get(index_joke);
 			textview_duration.setText(jokeCurrent.getLength()+"\"");
-			Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
+			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
 			if(!isPlay){
 				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getAudioUrl()), this);
 			}
@@ -659,7 +659,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
-		Log.d(DEBUG_TAG, "onCompletion");
 		mp.reset();
 		//mp.release();
 		index_joke++;
