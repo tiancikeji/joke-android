@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
@@ -30,8 +33,10 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.jokes.mywidget.MyToast;
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
@@ -41,7 +46,7 @@ import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.ImageDownLoadTask;
 
-public class HomepageActivity extends Activity implements OnClickListener,AnimationListener, OnPreparedListener, OnCompletionListener{
+public class HomepageActivity extends Activity implements OnClickListener,AnimationListener, OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener{
 
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int PLAY_NEXT = 100001;
@@ -59,6 +64,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	TextView textview_date;//日期
 	ImageView imageview_pic;//笑话图片
 	ImageView imageview_progress;//播放进度
+	SeekBar seekbar;//播放进度条
 	TextView textview_duration;//时长
 	TextView textview_playCount;//播放次数
 	
@@ -85,9 +91,11 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private boolean isPlay = false;
 	Animation myAnimation_Alpha;
 	boolean isStartAnim = false;
+	int isFristAnim = 0;//判断动画 线程启动次数
 	
 	MediaPlayer mediaPlayer;
 	Context context;
+	private Timer mTimer;
 	
 	//用来控制音频动画效果
 	int count = 0;
@@ -107,6 +115,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				}
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
+//				MyToast toast = new MyToast(HomepageActivity.this,"笑话列表获取失败");
+//				toast.startMyToast();
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Log.d(DEBUG_TAG, "Like Succes " + like);
@@ -195,6 +205,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		like = new Like();
 		jokeLikeList = new ArrayList<Joke>();
 		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, page);
+		
 		//ApiRequests.getLikeJokes(mainHandler, jokeLikeList, DataManagerApp.uid);
 		
 		if(loadSettingTime().equals(getTodayToString())){
@@ -262,6 +273,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		textview_date = (TextView)findViewById(R.id.homepage_textview_date);
 		imageview_pic = (ImageView)findViewById(R.id.homepage_imageview_pic);
 		imageview_progress = (ImageView)findViewById(R.id.homepage_imageview_progress);
+		seekbar = (SeekBar)findViewById(R.id.homepage_seekbar_progress);
+		
 		textview_duration = (TextView)findViewById(R.id.homepage_textview_duration);
 		textview_playCount = (TextView)findViewById(R.id.homepage_textview_playcount);
 		
@@ -289,6 +302,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private void initMediaPlayer(){
 		mediaPlayer = new MediaPlayer();
 		mediaPlayer.setOnCompletionListener(this);
+		mediaPlayer.setOnBufferingUpdateListener(this);  
 	}
 	
 	private void initAnim(){
@@ -331,7 +345,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		case R.id.homepage_framelayout_play:
 			if(isPlay){
 				isPlay = false;
-				stopJoke();
+//				stopJoke();
+				pauseJoke();
 			}else{
 				if(jokeList.size() > 0){
 					loadJoke();
@@ -376,6 +391,10 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
 			if(!isPlay){
 				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getAudioUrl()), this);
+				mTimer = new Timer();
+				mTimer.schedule(mTimerTask, 0, 1000);
+			}else{
+				mediaPlayer.start();
 			}
 		} catch (IllegalArgumentException e) {
 			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
@@ -392,6 +411,21 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	
 	/**
 	 * 暂停
+	 */
+	private void pauseJoke(){
+		//暂停笑话
+		isStartAnim = false;
+		AudioUtils.pausePlaying(mediaPlayer);
+//		linearlayout_volume.setVisibility(View.GONE);
+//		framelayout_play.setBackgroundResource(R.drawable.playback_play);
+//		textview_duration.setText("无数据");
+//		textview_playCount.setVisibility(View.VISIBLE);
+//		textview_playCount.setText("无数据");
+	}
+
+	
+	/**
+	 * 停止
 	 */
 	private void stopJoke(){
 		//暂停笑话
@@ -416,49 +450,49 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		textview_playCount.setText("3456");
 	}
 
-	
 	/**
 	 * 播放中动画效果
 	 */
 	private void startPlayAnim(){
-		
-		new Thread(new Runnable(){
+		if(isFristAnim == 0){
+			isFristAnim++;
+			new Thread(new Runnable(){
 
-			@Override
-			public void run() {
-				
-				while(isStartAnim){
-					if(add){
-						if(count > 7){
-							add = false;
-							count--;
-						}else{
-//							changeView(count);
-							mainHandler.sendEmptyMessage(CHANGEVOLUME);
-							count++;
+				@Override
+				public void run() {
+					
+					while(isStartAnim){
+						if(add){
+							if(count > 7){
+								add = false;
+								count--;
+							}else{
+								mainHandler.sendEmptyMessage(CHANGEVOLUME);
+								count++;
+							}
+							
+						}else if(!add){
+							if(count < 0){
+								add = true;
+								count++;
+							}else{
+								mainHandler.sendEmptyMessage(CHANGEVOLUME);
+								count--;
+							}
 						}
-						
-					}else if(!add){
-						if(count < 0){
-							add = true;
-							count++;
-						}else{
-//							changeView(count);
-							mainHandler.sendEmptyMessage(CHANGEVOLUME);
-							count--;
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					
 				}
 				
-			}
-			
-		}).start();
+			}).start();	
+		}
+		
 	}
 
 	/**
@@ -668,6 +702,38 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		// TODO 停止动画
 		// isStartAnim = false;
 	}
+
+	@Override
+	public void onBufferingUpdate(MediaPlayer arg0, int bufferingProgress) {
+		seekbar.setSecondaryProgress(bufferingProgress);  
+        int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
+        Log.e(currentProgress+"% play", bufferingProgress + "% buffer");
+		
+	}
+	
+	TimerTask mTimerTask = new TimerTask() {  
+        @Override  
+        public void run() {  
+            if(mediaPlayer==null)  
+                return;  
+            if (mediaPlayer.isPlaying() && seekbar.isPressed() == false) {  
+                handleProgress.sendEmptyMessage(0);  
+            }  
+        }  
+    };  
+      
+    Handler handleProgress = new Handler() {  
+        public void handleMessage(Message msg) {  
+  
+            int position = mediaPlayer.getCurrentPosition();  
+            int duration = mediaPlayer.getDuration();  
+              
+            if (duration > 0) {  
+                long pos = seekbar.getMax() * position / duration;  
+                seekbar.setProgress((int) pos);  
+            }  
+        };  
+    }; 
 }
 
 

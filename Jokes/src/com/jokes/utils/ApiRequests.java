@@ -1,16 +1,12 @@
 package com.jokes.utils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
-
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 import com.jokes.handlers.JokeHandler;
@@ -117,7 +113,6 @@ public class ApiRequests {
 				final String responseStr = response.body();
 				//TODO look at response
 				
-				
 				try {
 					//like.setFromLike((Like)handler.parseResponse(responseStr));
 					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_SUCCESS);
@@ -173,5 +168,4 @@ public class ApiRequests {
 	public static String buildAbsoluteUrl(final String relativeUrl){
 		return "http://42.96.164.29:8888" + relativeUrl;
 	}
-
 }
