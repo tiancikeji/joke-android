@@ -108,7 +108,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			switch(msg.what){
 			case HandlerCodes.GET_JOKES_SUCCESS:
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = "+jokeList.size());
-				
 				index_joke = 0;
 				if(!isPlay){
 					loadJoke();
