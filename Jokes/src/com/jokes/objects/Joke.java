@@ -20,6 +20,8 @@ public class Joke {
 	private String description;
 	private boolean isLike = false;
 	private int length;
+	private String fullAudioUrl;
+	private String fullPictureUrl;
 
 //	{"id":104,"name":"iOSTest","picture_url":null,"audio_url":"audio-3f144c40c9132f9ad715b7203e80f0fa789a349e-1372306598.mp3",
 //		"approved":1,"created_at":null,"updated_at":null,"uid":null,"description":"123","length":0,
@@ -36,6 +38,11 @@ public class Joke {
 			this.name		= json.getString("name");
 			this.description = json.getString("description");
 			this.length = json.getInt("length");
+			this.fullAudioUrl = json.getString("full_audio_url");
+			this.fullPictureUrl = json.getString("full_picture_url");
+			
+			Log.e("JOKE", fullPictureUrl);
+			Log.e("JOKE", fullAudioUrl);
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
 		}
@@ -62,11 +69,23 @@ public class Joke {
 	public void setPictureUrl(String pictureUrl) {
 		this.pictureUrl = pictureUrl;
 	}
+	public String getFullPictureUrl() {
+		return fullPictureUrl;
+	}
+	public void setFullPictureUrl(String fullPictureUrl) {
+		this.fullPictureUrl = fullPictureUrl;
+	}
 	public String getAudioUrl() {
 		return audioUrl;
 	}
 	public void setAudioUrl(String audioUrl) {
 		this.audioUrl = audioUrl;
+	}
+	public String getFullAudioUrl() {
+		return fullAudioUrl;
+	}
+	public void setFullAudioUrl(String fullAudioUrl) {
+		this.fullAudioUrl = fullAudioUrl;
 	}
 	public boolean isApproved() {
 		return approved;
