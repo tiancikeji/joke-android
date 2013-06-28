@@ -14,10 +14,9 @@ public class AudioUtils {
 	
 	public static void prepareStreamAudio(MediaPlayer mp, final String url, OnPreparedListener listener) 
 			throws IllegalArgumentException, SecurityException, IllegalStateException, IOException{
-		
 		mp.setDataSource(url);
 		mp.prepareAsync();
-		mp.setOnPreparedListener(listener);
+//		mp.setOnPreparedListener(listener);
 	}
 
 

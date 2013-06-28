@@ -1,4 +1,4 @@
- package com.jokes.core;
+package com.jokes.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int PLAY_NEXT = 100001;
 	private static final int CHANGEVOLUME = 100002;
-	
+
 	Button button_setting;//设置按钮
 	Button button_record;//录音按钮
 	Button button_favorite_big;//图片中间收藏按钮
@@ -67,7 +67,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	SeekBar seekbar;//播放进度条
 	TextView textview_duration;//时长
 	TextView textview_playCount;//播放次数
-	
+
 	ImageView imageview_volume_1;
 	ImageView imageview_volume_2;
 	ImageView imageview_volume_3;
@@ -81,41 +81,42 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	ImageView imageview_volume_11;
 	ImageView imageview_volume_12;
 	ImageView imageview_volume_13;
-	
+
 	private List<Joke> jokeList;
 	private Like like;
 	private Joke jokeCurrent;//正在播放的音频 Play the audio
 	private List<Joke> jokeLikeList;
 	private int index_joke = 0;//当前播放索引
 	private int page = 1;
-	private boolean isPlay = false;
+	private boolean isPlay = false;//判断是否正在播放
 	Animation myAnimation_Alpha;
-	boolean isStartAnim = false;
+	boolean isStartAnim = false;//判断动画效果是否在播放
 	int isFristAnim = 0;//判断动画 线程启动次数
-	
+
 	MediaPlayer mediaPlayer;
 	Context context;
 	private Timer mTimer;
-	
+
 	//用来控制音频动画效果
 	int count = 0;
 	boolean add = true;
-	
+
 	private Handler mainHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
-		
+
 			switch(msg.what){
 			case HandlerCodes.GET_JOKES_SUCCESS:
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = "+jokeList.size());
 				index_joke = 0;
 				if(!isPlay){
+//				if(jokeList != null && !mediaPlayer.isPlaying()){
 					loadJoke();
 				}
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
-//				MyToast toast = new MyToast(HomepageActivity.this,"笑话列表获取失败");
-//				toast.startMyToast();
+				//				MyToast toast = new MyToast(HomepageActivity.this,"笑话列表获取失败");
+				//				toast.startMyToast();
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Log.d(DEBUG_TAG, "Like Succes " + like);
@@ -123,7 +124,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				button_favorite_big.setVisibility(View.VISIBLE);
 				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
 				button_favorite_big.startAnimation(myAnimation_Alpha);
-				
+
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
 				break;
 			case HandlerCodes.LIKE_FAILURE:
@@ -133,10 +134,10 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
 				break;
 			case HandlerCodes.UNLIKE_FAILURE:
-				
+
 				break;
 			case HandlerCodes.GET_LIKEJOKES_SUCCESS:
-				
+
 				break;
 			case HandlerCodes.GET_LIKEJOKES_FAILURE:
 				break;
@@ -164,8 +165,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			}
 		}
 	};
-	
-	
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -181,7 +182,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		joke.setName("Test Name");
 		joke.setDescription("Testing Joke");
 		ApiRequests.getJokes(mainHandler, jokeList, uid);
-		
+
 		File imageFile = new File(getFilesDir().getAbsolutePath() + "image.png");
 		FileOutputStream out;
 		try {
@@ -193,19 +194,24 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-		
+
 		initView();
 		initAnim();
 		initValues();
-		
+
 		initMediaPlayer();
 
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
 		jokeLikeList = new ArrayList<Joke>();
+<<<<<<< HEAD
 		ApiRequests.getJokes(mainHandler, jokeList, DataManagerApp.uid, page);
 		//ApiRequests.getLikeJokes(mainHandler, jokeLikeList, DataManagerApp.uid);
 		
+=======
+		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, page);
+
+>>>>>>> f2b77712caab6e376dc4b0fc80daff8cefe507ad
 		if(loadSettingTime().equals(getTodayToString())){
 			//不是今天第一次进入
 			framelayout_date.setVisibility(View.GONE);
@@ -235,29 +241,31 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	protected void onStop() {
 		super.onStop();
+		AudioUtils.stopPlaying(mediaPlayer);
+		mTimer = null;
 	}
-	
+
 	/**
 	 * 监听动画播放完成
 	 */
 	@Override
 	public void onAnimationEnd(Animation arg0) {
 		button_favorite_big.setVisibility(View.GONE);
-		
+
 	}
 
 	@Override
 	public void onAnimationRepeat(Animation arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onAnimationStart(Animation arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	private void initView(){
 		button_setting = (Button)findViewById(R.id.homepage_button_setting);
 		button_record = (Button)findViewById(R.id.homepage_button_record);
@@ -272,16 +280,16 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		imageview_pic = (ImageView)findViewById(R.id.homepage_imageview_pic);
 		imageview_progress = (ImageView)findViewById(R.id.homepage_imageview_progress);
 		seekbar = (SeekBar)findViewById(R.id.homepage_seekbar_progress);
-		
+
 		textview_duration = (TextView)findViewById(R.id.homepage_textview_duration);
 		textview_playCount = (TextView)findViewById(R.id.homepage_textview_playcount);
-		
+
 		button_setting.setOnClickListener(this);
 		button_record.setOnClickListener(this);
 		button_favorite_small.setOnClickListener(this);
 		framelayout_play.setOnClickListener(this);
 		button_share.setOnClickListener(this);
-		
+
 		imageview_volume_1 =  (ImageView)findViewById(R.id.homepage_imageview_volume_1);
 		imageview_volume_2 =  (ImageView)findViewById(R.id.homepage_imageview_volume_2);
 		imageview_volume_3 =  (ImageView)findViewById(R.id.homepage_imageview_volume_3);
@@ -296,17 +304,18 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		imageview_volume_12 =  (ImageView)findViewById(R.id.homepage_imageview_volume_12);
 		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);
 	}
-	
+
 	private void initMediaPlayer(){
 		mediaPlayer = new MediaPlayer();
 		mediaPlayer.setOnCompletionListener(this);
 		mediaPlayer.setOnBufferingUpdateListener(this);  
+		mediaPlayer.setOnPreparedListener(this);
 	}
-	
+
 	private void initAnim(){
 		myAnimation_Alpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha_heart);	
 	}
-	
+
 	private void initValues(){
 		TelephonyManager tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
 		DataManagerApp.uid = tm.getDeviceId();
@@ -326,7 +335,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		case R.id.homepage_button_favorite_small:
 			if(!jokeCurrent.getIsLike()){
 				ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
-				
+
 				//假操作
 				jokeCurrent.setIsLike(true);
 				button_favorite_big.setVisibility(View.VISIBLE);
@@ -336,34 +345,38 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			}else{
 				ApiRequests.unlikeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
 			}
-			
+
 			break;
 		case R.id.homepage_button_share:
 			break;
 		case R.id.homepage_framelayout_play:
-			if(isPlay){
+			if(jokeList.size() > 0){
+				if(isPlay){
 				isPlay = false;
-//				stopJoke();
-				pauseJoke();
-			}else{
-				if(jokeList.size() > 0){
+//					stopJoke();
+					pauseJoke();
+				}else{
 					loadJoke();
 					playJoke();
-				}else{
-					Log.e(DEBUG_TAG, "无笑话列表");
 				}
+			}else{
+				Log.e(DEBUG_TAG, "无笑话列表");
 			}
 			break;
-			
+
 		}
-		
+
 	}
-	
-	
+
+
 	private void loadJoke(){
 		//下载图图片
-		new ImageDownLoadTask(jokeList.get(index_joke).getId(),
-				ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getPictureUrl()),HomepageActivity.this).execute(imageview_pic);
+		
+		if(jokeList.get(index_joke).getFullPictureUrl() != null && !jokeList.get(index_joke).getFullPictureUrl().equals("null")){
+			new ImageDownLoadTask(jokeList.get(index_joke).getId(),
+					ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getFullPictureUrl()),HomepageActivity.this).execute(imageview_pic);
+			
+		}
 		if(isLike(jokeList.get(index_joke))){
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
 			jokeList.get(index_joke).setIsLike(true);
@@ -372,15 +385,16 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			Joke joke = jokeList.get(index_joke);
 			joke.setIsLike(false); // FIXME why are we doing this?
 			textview_duration.setText(joke.getLength() + "\"");
-			
+
 		}
 	}
-	
+
 	/**
 	 * 开始
 	 */
 	private void playJoke(){
 		try {
+			
 			isStartAnim = true;
 			linearlayout_volume.setVisibility(View.VISIBLE);
 			startPlayAnim();
@@ -388,11 +402,13 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			textview_duration.setText(jokeCurrent.getLength()+"\"");
 			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
 			if(!isPlay){
-				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getAudioUrl()), this);
+				isPlay = true;
+				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getFullAudioUrl()), this);	
 				mTimer = new Timer();
 				mTimer.schedule(mTimerTask, 0, 1000);
 			}else{
 				mediaPlayer.start();
+				isPlay = true;
 			}
 		} catch (IllegalArgumentException e) {
 			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
@@ -406,7 +422,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		framelayout_play.setBackgroundResource(R.drawable.btn);
 		textview_playCount.setVisibility(View.GONE);
 	}
-	
+
 	/**
 	 * 暂停
 	 */
@@ -414,29 +430,30 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		//暂停笑话
 		isStartAnim = false;
 		AudioUtils.pausePlaying(mediaPlayer);
-//		linearlayout_volume.setVisibility(View.GONE);
-//		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-//		textview_duration.setText("无数据");
-//		textview_playCount.setVisibility(View.VISIBLE);
-//		textview_playCount.setText("无数据");
+		//		linearlayout_volume.setVisibility(View.GONE);
+		//		framelayout_play.setBackgroundResource(R.drawable.playback_play);
+		//		textview_duration.setText("无数据");
+		//		textview_playCount.setVisibility(View.VISIBLE);
+		//		textview_playCount.setText("无数据");
 	}
 
-	
+
 	/**
 	 * 停止
 	 */
 	private void stopJoke(){
 		//暂停笑话
+		isPlay = false;
 		isStartAnim = false;
 		AudioUtils.stopPlaying(mediaPlayer);
-		
-//		linearlayout_volume.setVisibility(View.GONE);
-//		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-//		textview_duration.setText("无数据");
-//		textview_playCount.setVisibility(View.VISIBLE);
-//		textview_playCount.setText("无数据");
+
+		//		linearlayout_volume.setVisibility(View.GONE);
+		//		framelayout_play.setBackgroundResource(R.drawable.playback_play);
+		//		textview_duration.setText("无数据");
+		//		textview_playCount.setVisibility(View.VISIBLE);
+		//		textview_playCount.setText("无数据");
 	}
-	
+
 	/**
 	 * 未开始
 	 */
@@ -458,7 +475,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 				@Override
 				public void run() {
-					
+
 					while(isStartAnim){
 						if(add){
 							if(count > 7){
@@ -468,7 +485,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 								mainHandler.sendEmptyMessage(CHANGEVOLUME);
 								count++;
 							}
-							
+
 						}else if(!add){
 							if(count < 0){
 								add = true;
@@ -485,12 +502,12 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 							e.printStackTrace();
 						}
 					}
-					
+
 				}
-				
+
 			}).start();	
 		}
-		
+
 	}
 
 	/**
@@ -506,7 +523,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 保存是否是第一次进入程序
 	 */
@@ -518,13 +535,13 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		editor.putString("ISFRIST", isFrist);
 		editor.commit();  
 	}
-	
+
 	public String loadSettingTime(){
 		SharedPreferences mShared = null;
 		mShared = getSharedPreferences("Jokes", Context.MODE_PRIVATE);
 		return mShared.getString("DATE", "");
 	}
-	
+
 	public void deleteSettingTime(){
 		SharedPreferences mShared = null;
 		mShared = getSharedPreferences("Jokes",Context.MODE_PRIVATE);
@@ -533,7 +550,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		editor.remove("ISFRIST");
 		editor.commit();
 	}
-	
+
 	public static String getTodayToString() {
 		// 转换日期，获得今天之后n天的日期
 		Calendar calendar = Calendar.getInstance();
@@ -545,7 +562,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				calendar.get(Calendar.DAY_OF_MONTH));
 
 	}
-	
+
 	/**
 	 * 根据音量改变控件大小
 	 */
@@ -566,7 +583,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_red_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_red_1);
 		}
-			break;
+		break;
 		case 1:{
 			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
 			imageview_volume_2.setBackgroundResource(R.drawable.vertical_red_2);
@@ -582,7 +599,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_red_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
 		}
-			break;
+		break;
 		case 2:{
 			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
 			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
@@ -598,7 +615,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
 		}
-			break;
+		break;
 		case 3:{
 			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
 			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
@@ -614,7 +631,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
 		}
-			break;
+		break;
 		case 4:{
 			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
 			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
@@ -630,7 +647,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
 		}
-			break;
+		break;
 		case 5:{
 			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
 			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
@@ -646,7 +663,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
 		}
-			break;
+		break;
 		case 6:{
 			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
 			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
@@ -662,7 +679,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
 		}
-			break;
+		break;
 		case 7:{
 			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
 			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
@@ -678,9 +695,9 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
 			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
 		}
-			break;
+		break;
 		}
-		
+
 	}
 
 	@Override
@@ -692,46 +709,43 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	public void onCompletion(MediaPlayer mp) {
 		mp.reset();
-		//mp.release();
 		index_joke++;
 		isPlay = false;
 		// 播放下一条
 		mainHandler.sendEmptyMessage(PLAY_NEXT);
-		// TODO 停止动画
-		// isStartAnim = false;
 	}
 
 	@Override
 	public void onBufferingUpdate(MediaPlayer arg0, int bufferingProgress) {
 		seekbar.setSecondaryProgress(bufferingProgress);  
-        int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
-        Log.e(currentProgress+"% play", bufferingProgress + "% buffer");
-		
+		int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
+		Log.e(currentProgress+"% play", bufferingProgress + "% buffer");
+
 	}
-	
+
 	TimerTask mTimerTask = new TimerTask() {  
-        @Override  
-        public void run() {  
-            if(mediaPlayer==null)  
-                return;  
-            if (mediaPlayer.isPlaying() && seekbar.isPressed() == false) {  
-                handleProgress.sendEmptyMessage(0);  
-            }  
-        }  
-    };  
-      
-    Handler handleProgress = new Handler() {  
-        public void handleMessage(Message msg) {  
-  
-            int position = mediaPlayer.getCurrentPosition();  
-            int duration = mediaPlayer.getDuration();  
-              
-            if (duration > 0) {  
-                long pos = seekbar.getMax() * position / duration;  
-                seekbar.setProgress((int) pos);  
-            }  
-        };  
-    }; 
+		@Override  
+		public void run() {  
+			if(mediaPlayer==null)  
+				return;  
+			if (mediaPlayer.isPlaying() && seekbar.isPressed() == false) {  
+				handleProgress.sendEmptyMessage(0);  
+			}  
+		}  
+	};  
+
+	Handler handleProgress = new Handler() {  
+		public void handleMessage(Message msg) {  
+
+			int position = mediaPlayer.getCurrentPosition();  
+			int duration = mediaPlayer.getDuration();  
+
+			if (duration > 0) {  
+				long pos = seekbar.getMax() * position / duration;  
+				seekbar.setProgress((int) pos);  
+			}  
+		};  
+	}; 
 }
 
 
