@@ -35,18 +35,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.jokes.mywidget.MyToast;
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
-import com.jokes.utils.AudioEncoder;
 import com.jokes.utils.AudioUtils;
 import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.ImageDownLoadTask;
 
-public class HomepageActivity extends Activity implements OnClickListener,AnimationListener, OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener{
+public class HomepageActivity extends Activity implements OnClickListener,AnimationListener,
+	OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener{
 
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int PLAY_NEXT = 100001;
@@ -86,12 +86,15 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private Like like;
 	private Joke jokeCurrent;//正在播放的音频 Play the audio
 	private List<Joke> jokeLikeList;
-	private int index_joke = 0;//当前播放索引
+	private int jokeIndex = 0;//当前播放索引
 	private int page = 1;
 	private boolean isPlay = false;//判断是否正在播放
+	private boolean isPaused = false;
 	Animation myAnimation_Alpha;
 	boolean isStartAnim = false;//判断动画效果是否在播放
 	int isFristAnim = 0;//判断动画 线程启动次数
+	
+	private TimerTask mTimerTask;
 
 	MediaPlayer mediaPlayer;
 	Context context;
@@ -104,19 +107,16 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private Handler mainHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
-
 			switch(msg.what){
 			case HandlerCodes.GET_JOKES_SUCCESS:
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = "+jokeList.size());
-				index_joke = 0;
+				jokeIndex = 0;
 				if(!isPlay){
-//				if(jokeList != null && !mediaPlayer.isPlaying()){
 					loadJoke();
 				}
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
-				//				MyToast toast = new MyToast(HomepageActivity.this,"笑话列表获取失败");
-				//				toast.startMyToast();
+				Toast.makeText(HomepageActivity.this, "笑话列表获取失败", Toast.LENGTH_LONG).show();
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Log.d(DEBUG_TAG, "Like Succes " + like);
@@ -143,12 +143,12 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				break;
 			case PLAY_NEXT:
 				//判断笑话是否还有下一条
-				if(jokeList.size()-1 >= index_joke && jokeList.size()>0){
+				if(jokeList.size()-1 >= jokeIndex && jokeList.size()>0){
 					loadJoke();
 					playJoke();
 				}
 				//当未播放笑话剩下一条时，加载新笑话
-				if(jokeList.size() - (index_joke+1) == 0){
+				if(jokeList.size() - (jokeIndex+1) == 0){
 					page++;
 					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
 				}
@@ -235,8 +235,13 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	protected void onStop() {
 		super.onStop();
-		AudioUtils.stopPlaying(mediaPlayer);
-		mTimer = null;
+		if(isPlay){
+			AudioUtils.stopPlaying(mediaPlayer);
+		}
+		if(null != mTimer){
+			mTimer.cancel();
+			mTimer = null;
+		}
 	}
 
 	/**
@@ -345,12 +350,9 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			break;
 		case R.id.homepage_framelayout_play:
 			if(jokeList.size() > 0){
-				if(isPlay){
-				isPlay = false;
-//					stopJoke();
+				if(isPlay && !isPaused){
 					pauseJoke();
 				}else{
-					loadJoke();
 					playJoke();
 				}
 			}else{
@@ -364,22 +366,18 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 
 	private void loadJoke(){
-		//下载图图片
-		
-		if(jokeList.get(index_joke).getFullPictureUrl() != null && !jokeList.get(index_joke).getFullPictureUrl().equals("null")){
-			new ImageDownLoadTask(jokeList.get(index_joke).getId(),
-					ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getFullPictureUrl()),HomepageActivity.this).execute(imageview_pic);
-			
+		if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
+			new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
+					ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
 		}
-		if(isLike(jokeList.get(index_joke))){
+		Joke joke = jokeList.get(jokeIndex);
+		Log.d(DEBUG_TAG, "Load Joke Called " + joke);
+		textview_duration.setText(joke.getLength() + "\"");
+		if(isLike(jokeList.get(jokeIndex))){
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-			jokeList.get(index_joke).setIsLike(true);
+			joke.setIsLike(true);
 		}else{
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
-			Joke joke = jokeList.get(index_joke);
-			joke.setIsLike(false); // FIXME why are we doing this?
-			textview_duration.setText(joke.getLength() + "\"");
-
 		}
 	}
 
@@ -388,21 +386,27 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	 */
 	private void playJoke(){
 		try {
-			
 			isStartAnim = true;
 			linearlayout_volume.setVisibility(View.VISIBLE);
 			startPlayAnim();
-			jokeCurrent = jokeList.get(index_joke);
-			textview_duration.setText(jokeCurrent.getLength()+"\"");
+			jokeCurrent = jokeList.get(jokeIndex);
+			//textview_duration.setText(jokeCurrent.getLength()+"\"");
 			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
-			if(!isPlay){
+			if(!isPlay && !isPaused){
 				isPlay = true;
-				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getFullAudioUrl()), this);	
+				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullAudioUrl()), this);
+				
 				mTimer = new Timer();
+				
+				mTimerTask = getTimerTask();
 				mTimer.schedule(mTimerTask, 0, 1000);
-			}else{
+			}else if(isPaused){
 				mediaPlayer.start();
-				isPlay = true;
+				isPaused = false;
+			} else{
+				
+				//mediaPlayer.start();
+				//isPlay = true;
 			}
 		} catch (IllegalArgumentException e) {
 			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
@@ -422,8 +426,10 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	 */
 	private void pauseJoke(){
 		//暂停笑话
+		Log.d(DEBUG_TAG, "Pause Joke called");
 		isStartAnim = false;
 		AudioUtils.pausePlaying(mediaPlayer);
+		isPaused = true;
 		//		linearlayout_volume.setVisibility(View.GONE);
 		//		framelayout_play.setBackgroundResource(R.drawable.playback_play);
 		//		textview_duration.setText("无数据");
@@ -703,8 +709,11 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	public void onCompletion(MediaPlayer mp) {
 		mp.reset();
-		index_joke++;
+		jokeIndex++;
 		isPlay = false;
+		isPaused = false;
+		mTimer.cancel();
+		mTimerTask.cancel();
 		// 播放下一条
 		mainHandler.sendEmptyMessage(PLAY_NEXT);
 	}
@@ -712,21 +721,22 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	public void onBufferingUpdate(MediaPlayer arg0, int bufferingProgress) {
 		seekbar.setSecondaryProgress(bufferingProgress);  
-		int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
-		Log.e(currentProgress+"% play", bufferingProgress + "% buffer");
-
+		//int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
+		//Log.d(currentProgress+"% play", bufferingProgress + "% buffer");
 	}
-
-	TimerTask mTimerTask = new TimerTask() {  
-		@Override  
-		public void run() {  
-			if(mediaPlayer==null)  
-				return;  
-			if (mediaPlayer.isPlaying() && seekbar.isPressed() == false) {  
-				handleProgress.sendEmptyMessage(0);  
+	
+	private TimerTask getTimerTask(){
+		return new TimerTask() {  
+			@Override  
+			public void run() {  
+				if(mediaPlayer==null)  
+					return;  
+				if (mediaPlayer.isPlaying() && seekbar.isPressed() == false) {  
+					handleProgress.sendEmptyMessage(0);  
+				}  
 			}  
-		}  
-	};  
+		};  
+	}
 
 	Handler handleProgress = new Handler() {  
 		public void handleMessage(Message msg) {  

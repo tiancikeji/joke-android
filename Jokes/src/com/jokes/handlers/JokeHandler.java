@@ -23,12 +23,15 @@ public class JokeHandler extends AbsHandler {
 			JSONObject oJsonObject = array.getJSONObject(ii);
 			Joke joke = new Joke(oJsonObject);
 			
+			
 			/*final int status = oJsonObject.getInt("status");
 						if (status == Constant.STATUS_NEW || status == Constant.STATUS_CANCEL ||
 					status == Constant.STATUS_ACCEPT || status == Constant.STATUS_FINISH) {
 				list.add(info);
 			}*/
-			jokes.add(joke);
+			if(joke.getLength() > 0){
+				jokes.add(joke);
+			}
 		}
 		return jokes;
 	}

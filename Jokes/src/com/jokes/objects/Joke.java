@@ -23,9 +23,6 @@ public class Joke {
 	private String fullAudioUrl;
 	private String fullPictureUrl;
 
-//	{"id":104,"name":"iOSTest","picture_url":null,"audio_url":"audio-3f144c40c9132f9ad715b7203e80f0fa789a349e-1372306598.mp3",
-//		"approved":1,"created_at":null,"updated_at":null,"uid":null,"description":"123","length":0,
-//		"num_plays":0,"myjoke_id":null,"num_likes":0}
 	public Joke(JSONObject json){
 		try{
 			this.pictureUrl = json.getString("picture_url");
@@ -41,8 +38,6 @@ public class Joke {
 			this.fullAudioUrl = json.getString("full_audio_url");
 			this.fullPictureUrl = json.getString("full_picture_url");
 			
-			Log.e("JOKE", fullPictureUrl);
-			Log.e("JOKE", fullAudioUrl);
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
 		}
@@ -164,7 +159,7 @@ public class Joke {
 		return "Joke [pictureUrl=" + pictureUrl + ", audioUrl=" + audioUrl
 				+ ", approved=" + approved + ", createdAt=" + createdAt
 				+ ", updatedAt=" + updatedAt + ", userId=" + uid + ", id="
-				+ id + ", name=" + name + "]";
+				+ id + ", name=" + name + ", length=" + length +"]";
 	}
 	
 	
