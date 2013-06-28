@@ -395,10 +395,16 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			startPlayAnim();
 			jokeCurrent = jokeList.get(index_joke);
 			textview_duration.setText(jokeCurrent.getLength()+"\"");
-			isPlay = true;
-			AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getFullAudioUrl()), this);	
-			mTimer = new Timer();
-			mTimer.schedule(mTimerTask, 0, 1000);
+			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
+			if(!isPlay){
+				isPlay = true;
+				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeList.get(index_joke).getFullAudioUrl()), this);	
+				mTimer = new Timer();
+				mTimer.schedule(mTimerTask, 0, 1000);
+			}else{
+				mediaPlayer.start();
+				isPlay = true;
+			}
 		} catch (IllegalArgumentException e) {
 			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
 		} catch (SecurityException e) {
