@@ -204,14 +204,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
 		jokeLikeList = new ArrayList<Joke>();
-<<<<<<< HEAD
 		ApiRequests.getJokes(mainHandler, jokeList, DataManagerApp.uid, page);
-		//ApiRequests.getLikeJokes(mainHandler, jokeLikeList, DataManagerApp.uid);
-		
-=======
-		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, page);
 
->>>>>>> f2b77712caab6e376dc4b0fc80daff8cefe507ad
 		if(loadSettingTime().equals(getTodayToString())){
 			//不是今天第一次进入
 			framelayout_date.setVisibility(View.GONE);
