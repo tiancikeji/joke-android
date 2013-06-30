@@ -5,12 +5,13 @@ import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.os.Handler;
 import android.util.Log;
+
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 import com.jokes.handlers.JokeHandler;
-import com.jokes.handlers.LikeHandler;
 import com.jokes.objects.GeneralResponse;
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
@@ -23,8 +24,10 @@ public class ApiRequests {
 	private static final String API_URL = "/api";
 	private static final String JOKE_URL = BASE_URL + API_URL + "/myjokes";
 	private static final String LIKE_URL = BASE_URL + API_URL + "/likes";
+	private static final String FEEDBACK_URL = BASE_URL + API_URL + "/feedbacks";
 	//private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
+	
 	
 	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid,final int page){
 		new Thread(new Runnable() {	
@@ -32,8 +35,9 @@ public class ApiRequests {
 			public void run() {
 				HttpRequest response = HttpRequest.get(JOKE_URL, true, "page", page, "uid", uid);
 				JokeHandler handler = new JokeHandler();
-				final String responseStr = response.body();
+				String responseStr = "";
 				try {
+					responseStr = response.body();
 					jokes.clear(); 
 					jokes.addAll((List<Joke>)handler.parseResponse(responseStr));
 					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
@@ -93,7 +97,7 @@ public class ApiRequests {
 					if(new JSONObject(responseStr).getBoolean("success")){
 						responseHandler.sendEmptyMessage(HandlerCodes.CREATE_JOKE_SUCCESS);
 					} else {
-						//TODO
+					
 					}
 				} catch (JSONException e) {
 					Log.e(DEBUG_TAG, "Error parsing response = " + e + " | " + responseStr);
@@ -109,10 +113,18 @@ public class ApiRequests {
 			public void run() {
 				HttpRequest response = HttpRequest.post(LIKE_URL, true, "myjoke_id",
 						jokeId, "uid", userId, "isLike", 1);
-				LikeHandler handler = new LikeHandler();
 				final String responseStr = response.body();
-				//TODO look at response
-				
+				try {
+					JSONObject resp = new JSONObject(responseStr);
+					if(resp.getBoolean("success")){
+						responseHandler.sendEmptyMessage(HandlerCodes.LIKE_SUCCESS);
+					} else {
+						responseHandler.sendEmptyMessage(HandlerCodes.LIKE_FAILURE);	
+					}
+				} catch (JSONException e1) {
+					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_FAILURE);
+					Log.e(DEBUG_TAG, "Like " + e1.toString());
+				}
 				try {
 					//like.setFromLike((Like)handler.parseResponse(responseStr));
 					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_SUCCESS);
@@ -152,6 +164,29 @@ public class ApiRequests {
 			}
 		}).start();
 		
+	}
+	
+	public static void addFeedback(final Handler responseHandler, final File audio, final String uid){
+		new Thread(new Runnable() {	
+			@Override
+			public void run() {
+				HttpRequest request = HttpRequest.post(FEEDBACK_URL);
+				request.part("feedbackFileData", audio);
+				request.part("feedback[uid]", uid);
+				request.part("feedback[length]", AudioUtils.getAudioFileLength(audio));
+				
+				final String responseStr = request.body();
+				try {
+					if(new JSONObject(responseStr).getBoolean("success")){
+						responseHandler.sendEmptyMessage(HandlerCodes.CREATE_FEEDBACK_SUCCESS);
+					} else {
+					}
+				} catch (JSONException e) {
+					Log.e(DEBUG_TAG, "Error parsing response = " + e + " | " + responseStr);
+					responseHandler.sendEmptyMessage(HandlerCodes.CREATE_FEEDBACK_FAILURE);
+				}
+			}
+		}).start();
 	}
 	
 

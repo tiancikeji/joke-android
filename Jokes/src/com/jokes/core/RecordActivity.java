@@ -38,6 +38,7 @@ import com.jokes.objects.Joke;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
 import com.jokes.utils.AudioUtils;
+import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.Installation;
 
@@ -156,7 +157,7 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			Joke joke = new Joke();
 			joke.setName("笑话");
 			joke.setDescription("笑话");
-			ApiRequests.addJoke(mainHandler, joke, imageFile, mp3RecordedFile, Installation.id(this));
+			ApiRequests.addJoke(mainHandler, joke, imageFile, mp3RecordedFile, DataManagerApp.uid);
 			Toast.makeText(this, "正在发布...", Toast.LENGTH_SHORT).show();
 			button_send.setEnabled(false);
 			break;
