@@ -24,6 +24,13 @@
             android:layout_weight="1" >
         </LinearLayout>
 
+                <Button
+                    android:id="@+id/homepage_button_refresh"
+                    android:layout_width="50dp"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="right"
+                    android:textSize="12sp"
+                    android:text="刷新" />
         <Button
             android:id="@+id/homepage_button_record"
             android:layout_width="50dp"
@@ -98,16 +105,6 @@
                          ><!-- android:max="100" -->
                     </SeekBar>
 
-                <ImageView
-                    android:id="@+id/homepage_imageview_progress"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="left"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="#fe0000"
-                    android:visibility="gone" />
-
             </LinearLayout>
 
             <Button
@@ -116,7 +113,26 @@
                 android:layout_height="100dp"
                 android:layout_gravity="center"
                 android:background="@drawable/btn_favorite_big" />
-        </FrameLayout>
+                    <LinearLayout 
+                        android:id="@+id/homepage_linearlayout_progressdialog"
+                        android:layout_width="wrap_content"
+                		android:layout_height="wrap_content"
+                		android:orientation="horizontal"
+                		android:layout_gravity="center"
+                		android:gravity="center">
+                        <ProgressBar 
+                            android:id="@+id/homepage_progressbar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"></ProgressBar>
+						<TextView 
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content" 
+							android:gravity="center"
+							android:text="加载中，请稍侯..." 
+							android:textSize="15sp" 
+							android:textColor="#000000"></TextView>
+                    </LinearLayout>
+                </FrameLayout>
 
         <FrameLayout
             android:layout_width="fill_parent"
@@ -135,7 +151,7 @@
             </Button>
 
             <TextView
-                android:id="@+id/homepage_textview_favorite"
+                        android:id="@+id/homepage_textview_numlikes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|left"

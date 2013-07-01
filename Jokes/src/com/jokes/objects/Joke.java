@@ -18,7 +18,9 @@ public class Joke {
 	private int id;
 	private String name;
 	private String description;
-	private boolean isLike = false;
+	private int num_plays;
+	private int num_likes;
+	private int isLike;
 	private int length;
 	private String fullAudioUrl;
 	private String fullPictureUrl;
@@ -37,6 +39,9 @@ public class Joke {
 			this.length = json.getInt("length");
 			this.fullAudioUrl = json.getString("full_audio_url");
 			this.fullPictureUrl = json.getString("full_picture_url");
+			this.num_plays = json.getInt("num_plays");
+			this.num_likes = json.getInt("num_likes");
+			this.isLike = json.getInt("is_like");
 			
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
@@ -50,6 +55,18 @@ public class Joke {
 		this.length = 0;
 	}
 
+	public int getNumPlays(){
+		return num_plays;
+	}
+	public void setNumPlays(int num_plays){
+		this.num_plays = num_plays;
+	}
+	public int getNumLikes(){
+		return num_likes;
+	}
+	public void setNumLikes(int num_likes){
+		this.num_likes = num_likes;
+	}
 	
 	public int getLength() {
 		return length;
@@ -127,10 +144,19 @@ public class Joke {
 		this.name = name;
 	}
 	public boolean getIsLike(){
-		return isLike;
+		if(isLike == 0)
+			return false;
+		else
+			return true;
 	}
 	public void setIsLike(boolean islike){
-		this.isLike = islike;
+//		this.isLike = islike;
+		if(islike){
+			isLike = 1;
+		}else{
+			isLike = 0;
+		}
+		
 	}
 	
 	@Override

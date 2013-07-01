@@ -29,11 +29,12 @@ public class ApiRequests {
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
 	
 	
-	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid,final int page){
+	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid, final int page){
 		new Thread(new Runnable() {	
 			@Override
 			public void run() {
 				HttpRequest response = HttpRequest.get(JOKE_URL, true, "page", page, "uid", uid);
+//				HttpRequest response = HttpRequest.get(JOKE_URL, true, "date", date,"uid", uid);
 				JokeHandler handler = new JokeHandler();
 				String responseStr = "";
 				try {
