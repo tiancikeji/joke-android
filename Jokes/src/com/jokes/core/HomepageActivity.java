@@ -42,14 +42,21 @@ import android.widget.Toast;
 
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
+import com.jokes.share.WeChatShare;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioUtils;
 import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.ImageDownLoadTask;
+import com.tencent.mm.sdk.openapi.BaseReq;
+import com.tencent.mm.sdk.openapi.BaseResp;
+import com.tencent.mm.sdk.openapi.ConstantsAPI;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
+import com.tencent.mm.sdk.openapi.ShowMessageFromWX;
 
 public class HomepageActivity extends Activity implements OnClickListener,AnimationListener,
-	OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener{
+	OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener, IWXAPIEventHandler{
 
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int PLAY_NEXT = 100001;
@@ -92,6 +99,9 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private Joke jokeCurrent;//正在播放的音频 Play the audio
 	private List<Joke> jokeLikeList;
 	private int jokeIndex = 0;//当前播放索引
+	
+	//分享
+	private IWXAPI weChatShareApi;
 	
 	private int date = 0;//用来记录 当前笑话 日期
 	boolean isGetJokeSuccesss = true;//记录第一次获取笑话列表失败
@@ -256,8 +266,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			deleteSettingTime();
 			saveSettingTime("true");
 		}
-		
-		//WeChatShare.regToWx(this);
+		weChatShareApi = WeChatShare.regToWx(this);
+		weChatShareApi.handleIntent(getIntent(), this);
 	}
 
 	@Override
@@ -349,6 +359,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);
 		linearlayout_progressdialog = (LinearLayout)findViewById(R.id.homepage_linearlayout_progressdialog);
 	}
+	
+	
 
 	private void initMediaPlayer(){
 		mediaPlayer = new MediaPlayer();
@@ -401,6 +413,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 			break;
 		case R.id.homepage_button_share:
+			WeChatShare.sendAppInfo(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
+			
 			break;
 		case R.id.homepage_framelayout_play:
 			if(jokeList.size() > 0){
@@ -454,7 +468,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			}else{
 				startPlayCounttimer((int)countDownTime);
 			}
-			
 			
 			textview_duration.setText(jokeCurrent.getLength()+"\"");
 			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
@@ -849,7 +862,76 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) + n); 
 		    return String.format("%1$04d%2$02d%3$02d", 
 					calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH));
-		} 
+		}
+
+		@Override
+		public void onReq(BaseReq req) {
+			switch (req.getType()) {
+			case ConstantsAPI.COMMAND_GETMESSAGE_FROM_WX:
+				goToGetMsg();		
+				break;
+			case ConstantsAPI.COMMAND_SHOWMESSAGE_FROM_WX:
+				goToShowMsg((ShowMessageFromWX.Req) req);
+				break;
+			default:
+				break;
+			}
+		}
+		@Override
+		public void onResp(BaseResp resp) {
+			int result = 0;
+			
+			switch (resp.errCode) {
+			case BaseResp.ErrCode.ERR_OK:
+				result = R.string.errcode_success ;
+				break;
+			case BaseResp.ErrCode.ERR_USER_CANCEL:
+				result = R.string.errcode_cancel;
+				break;
+			case BaseResp.ErrCode.ERR_AUTH_DENIED:
+				result = R.string.errcode_deny;
+				break;
+			default:
+				result = R.string.errcode_unknown;
+				break;
+			}
+			
+			Toast.makeText(this, result, Toast.LENGTH_LONG).show();
+		}
+		
+		private void goToGetMsg() {
+			/*Intent intent = new Intent(this, GetFromWXActivity.class);
+			intent.putExtras(getIntent());
+			startActivity(intent);
+			finish();*/
+			Log.d(DEBUG_TAG, "Go Get Msg WeChat");
+		}
+		
+		private void goToShowMsg(ShowMessageFromWX.Req showReq) {
+			Log.d(DEBUG_TAG, "Show Msg WeChat");
+			
+			/*
+			WXMediaMessage wxMsg = showReq.message;		
+			WXAppExtendObject obj = (WXAppExtendObject) wxMsg.mediaObject;
+			
+			StringBuffer msg = new StringBuffer(); 
+			msg.append("description: ");
+			msg.append(wxMsg.description);
+			msg.append("\n");
+			msg.append("extInfo: ");
+			msg.append(obj.extInfo);
+			msg.append("\n");
+			msg.append("filePath: ");
+			msg.append(obj.filePath);
+			
+			Intent intent = new Intent(this, ShowFromWXActivity.class);
+			//intent.putExtra(Constants.ShowMsgActivity.STitle, wxMsg.title);
+			//intent.putExtra(Constants.ShowMsgActivity.SMessage, msg.toString());
+			//intent.putExtra(Constants.ShowMsgActivity.BAThumbData, wxMsg.thumbData);
+			startActivity(intent);
+			finish();*/
+		}
+		
 		
 }
 

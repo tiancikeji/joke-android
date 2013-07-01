@@ -27,11 +27,11 @@ public class Joke {
 
 	public Joke(JSONObject json){
 		try{
-			this.pictureUrl = json.getString("picture_url");
+			//this.pictureUrl = json.getString("picture_url");
 			this.approved 	= json.getInt("approved") == APPROVED;
-			this.audioUrl 	= json.getString("audio_url");
+			//this.audioUrl 	= json.getString("audio_url");
 			this.createdAt 	= json.getString("created_at");
-			this.updatedAt 	= json.getString("updated_at");
+			//this.updatedAt 	= json.getString("updated_at");
 			this.uid 		= json.getString("uid");
 			this.id			= json.getInt("id");
 			this.name		= json.getString("name");

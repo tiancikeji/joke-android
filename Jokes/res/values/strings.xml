@@ -2,7 +2,12 @@
 <resources>
 
     <string name="app_name">Jokes</string>
+	<string name="hello_world">hello, world</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    
+    <string name="errcode_success">微信分享已成功</string>
+    <string name="errcode_cancel"></string>
+    <string name="errcode_deny">微信分享失败</string>
+    <string name="errcode_unknown">微信分享失败</string>
 
 </resources>
