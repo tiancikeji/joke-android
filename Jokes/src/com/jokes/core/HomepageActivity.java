@@ -39,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.utils.ApiRequests;
@@ -46,7 +47,6 @@ import com.jokes.utils.AudioUtils;
 import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.ImageDownLoadTask;
-import com.jokes.utils.WeChatShare;
 
 public class HomepageActivity extends Activity implements OnClickListener,AnimationListener,
 	OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener{
@@ -131,7 +131,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 						linearlayout_progressdialog.setVisibility(View.GONE);
 					}else{
 						isGetJokeSuccesss = false;
-						ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,getDateAfterFormat_(date--));
+						ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date--));
 					}
 				}else{
 				jokeIndex = 0;
@@ -153,7 +153,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 					linearlayout_progressdialog.setVisibility(View.GONE);
 				}else{
 					isGetJokeSuccesss = false;
-					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,getDateAfterFormat_(date--));
+					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date--));
 				}
 				
 				break;
@@ -189,7 +189,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				}
 				//当未播放笑话剩下一条时，加载新笑话
 				if(jokeList.size() - (jokeIndex+1) == 0){
-					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,getDateAfterFormat_(date--));
+					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date--));
 				}
 				break;
 			case CHANGEVOLUME:
@@ -245,7 +245,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		jokeLikeList = new ArrayList<Joke>();
 		
 //		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, getDateAfterFormat_(date));
-		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, "20130626");
+		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//"20130626");
 
 		if(loadSettingTime().equals(getTodayToString())){
 			//不是今天第一次进入
@@ -375,7 +375,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			break;
 		case R.id.homepage_button_refresh:
 			date = 0;
-			ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, getDateAfterFormat_(date));
+			ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date));
 			break;
 		case R.id.homepage_button_record:
 			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
@@ -421,24 +421,25 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 	private void loadJoke(){
 		if(jokeList != null && jokeList.size()>0){
-      if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
-        new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
-            ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
-      }
-      Joke joke = jokeList.get(jokeIndex);
-      Log.d(DEBUG_TAG, "Load Joke Called " + joke);
-      textview_duration.setText(joke.getLength() + "\"");
-        if(jokeList.get(jokeIndex).getIsLike()){
-        button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-      }else{
-        button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
-          textview_duration.setText(jokeList.get(jokeIndex).getLength() + "\"");
-        }
+	      if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
+	        new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
+	            ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
+	      }
+	      Joke joke = jokeList.get(jokeIndex);
+	      Log.d(DEBUG_TAG, "Load Joke Called " + joke);
+	      textview_duration.setText(joke.getLength() + "\"");
+	      if(jokeList.get(jokeIndex).getIsLike()){
+	    	  button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
+	      } 
+	      else{
+	        button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+	          textview_duration.setText(jokeList.get(jokeIndex).getLength() + "\"");
+	      }
         textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
         textview_numlikes.setText(jokeList.get(jokeIndex).getNumLikes()+"");
-      }
-    }
+	    }
 	}
+    
 
 	/**
 	 * 开始
