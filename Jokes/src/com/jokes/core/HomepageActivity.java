@@ -44,6 +44,7 @@ import com.jokes.utils.AudioUtils;
 import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.ImageDownLoadTask;
+import com.jokes.utils.WeChatShare;
 
 public class HomepageActivity extends Activity implements OnClickListener,AnimationListener,
 	OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener{
@@ -215,6 +216,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			deleteSettingTime();
 			saveSettingTime("true");
 		}
+		
+		//WeChatShare.regToWx(this);
 	}
 
 	@Override
@@ -366,18 +369,20 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 
 	private void loadJoke(){
-		if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
-			new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
-					ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
-		}
-		Joke joke = jokeList.get(jokeIndex);
-		Log.d(DEBUG_TAG, "Load Joke Called " + joke);
-		textview_duration.setText(joke.getLength() + "\"");
-		if(isLike(jokeList.get(jokeIndex))){
-			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-			joke.setIsLike(true);
-		}else{
-			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+		if(jokeList.size() > 0 ){
+			if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
+				new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
+						ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
+			}
+			Joke joke = jokeList.get(jokeIndex);
+			Log.d(DEBUG_TAG, "Load Joke Called " + joke);
+			textview_duration.setText(joke.getLength() + "\"");
+			if(isLike(jokeList.get(jokeIndex))){
+				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
+				joke.setIsLike(true);
+			}else{
+				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+			}
 		}
 	}
 

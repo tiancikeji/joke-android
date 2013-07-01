@@ -14,9 +14,9 @@ public class WeChatShare {
 	private static final String APP_ID = "wxb3b0db608a4925ee";
 	private static final String APP_KEY= "037a31a483194fe7d86b10470269590";
 	
-	private IWXAPI api;
+	private static IWXAPI api;
 	
-	public void regToWx(Context context){
+	public static void regToWx(Context context){
 		api = WXAPIFactory.createWXAPI(context, APP_ID, true);
 		api.registerApp(APP_ID);
 		
