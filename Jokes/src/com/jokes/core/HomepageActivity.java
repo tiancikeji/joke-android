@@ -102,8 +102,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	
 	//分享
 	private IWXAPI weChatShareApi;
+	private int page = 2;//当前页为page-1
 	
-	private int date = 0;//用来记录 当前笑话 日期
 	boolean isGetJokeSuccesss = true;//记录第一次获取笑话列表失败
 	private boolean isPlay = false;//判断是否正在播放
 	private boolean isPaused = false;
@@ -130,40 +130,19 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			switch(msg.what){
 			case HandlerCodes.GET_JOKES_SUCCESS:
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = "+jokeList.size());
-				if(jokeList.size() == 0){
-					//刷新笑话或获取笑话列表失败，则日期减一获取，再次失败则提示明天再来
-					if(!isGetJokeSuccesss){
-						//明天再来
-						if(jokeCurrent != null)
-							Toast.makeText(context,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
-						else
-							Toast.makeText(context,"获取笑话列表失败",Toast.LENGTH_SHORT).show();
-						linearlayout_progressdialog.setVisibility(View.GONE);
-					}else{
-						isGetJokeSuccesss = false;
-						ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date--));
-					}
-				}else{
+				page++;
 				jokeIndex = 0;
 				if(!isPlay){
 					loadJoke();
 						linearlayout_progressdialog.setVisibility(View.GONE);
-					}
 				}
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
 				linearlayout_progressdialog.setVisibility(View.GONE);
-				//刷新笑话或获取笑话列表失败，则日期减一获取，再次失败则提示明天再来
-				if(!isGetJokeSuccesss){
-					//明天再来
-					if(jokeCurrent != null)
-						Toast.makeText(context,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
-					else
-						Toast.makeText(context,"获取笑话列表失败",Toast.LENGTH_SHORT).show();
-					linearlayout_progressdialog.setVisibility(View.GONE);
+				if(page == 0){
+					Toast.makeText(context,"获取笑话列表失败",Toast.LENGTH_SHORT).show();
 				}else{
-					isGetJokeSuccesss = false;
-					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date--));
+					Toast.makeText(context,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
 				}
 				
 				break;
@@ -199,8 +178,11 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				}
 				//当未播放笑话剩下一条时，加载新笑话
 				if(jokeList.size() - (jokeIndex+1) == 0){
-					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date--));
+					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
 				}
+				//不是今天第一次进入
+				framelayout_date.setVisibility(View.GONE);
+				
 				break;
 			case CHANGEVOLUME:
 				changeView(count);
@@ -254,8 +236,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		like = new Like();
 		jokeLikeList = new ArrayList<Joke>();
 		
-//		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, getDateAfterFormat_(date));
-		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//"20130626");
+		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
 
 		if(loadSettingTime().equals(getTodayToString())){
 			//不是今天第一次进入
@@ -367,6 +348,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		mediaPlayer.setOnCompletionListener(this);
 		mediaPlayer.setOnBufferingUpdateListener(this);  
 		mediaPlayer.setOnPreparedListener(this);
+		seekbar.setProgress(0);
 	}
 
 	private void initAnim(){
@@ -386,8 +368,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			startActivity(intent1);
 			break;
 		case R.id.homepage_button_refresh:
-			date = 0;
-			ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, 1);//getDateAfterFormat_(date));
+			page = 2;
+			ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, page);
 			break;
 		case R.id.homepage_button_record:
 			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
@@ -397,7 +379,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			if(!jokeCurrent.getIsLike()){
 				ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
 
-				//假操作
+				//假操作，先改变界面，用户体验好，后台ApiRequests.likeJoke；
 				jokeCurrent.setIsLike(true);
 				button_favorite_big.setVisibility(View.VISIBLE);
 				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
@@ -510,14 +492,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		releaseWakeLock();
 		//暂停笑话
 		Log.d(DEBUG_TAG, "Pause Joke called");
-//		isStartAnim = false;
 		AudioUtils.pausePlaying(mediaPlayer);
 		isPaused = true;
-		//		linearlayout_volume.setVisibility(View.GONE);
-		//		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-		//		textview_duration.setText("无数据");
-		//		textview_playCount.setVisibility(View.VISIBLE);
-		//		textview_playCount.setText("无数据");
 	}
 
 
@@ -541,9 +517,9 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private void currentJoke(){
 		linearlayout_volume.setVisibility(View.GONE);
 		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-		textview_duration.setText("150"+"\"");
+		textview_duration.setText(jokeList.get(jokeIndex).getLength()+"\"");
 		textview_playCount.setVisibility(View.VISIBLE);
-		textview_playCount.setText("3456");
+		textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
 	}
 
 	/**
@@ -590,20 +566,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	}
 
 	/**
-	 * 判断笑话是否已喜欢
-	 */
-	private boolean isLike(Joke joke){
-		if(jokeLikeList.size()>0){
-			for(int i=0; i<jokeLikeList.size();i++){
-				if(joke.getId()==jokeLikeList.get(i).getId()){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * 保存是否是第一次进入程序
 	 */
 	public void saveSettingTime(String isFrist){
@@ -628,18 +590,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		editor.remove("DATE");
 		editor.remove("ISFRIST");
 		editor.commit();
-	}
-
-	public static String getTodayToString() {
-		// 转换日期，获得今天之后n天的日期
-		Calendar calendar = Calendar.getInstance();
-		Date date = new Date();
-		date = calendar.getTime();
-		calendar.setTime(date);
-		return String.format("%1$04d-%2$02d-%3$02d",
-				calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-				calendar.get(Calendar.DAY_OF_MONTH));
-
 	}
 
 	/**
@@ -787,6 +737,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
+		//播放结束，先将播放状态还原为未播放状态
+		currentJoke();
 		mp.reset();
 		jokeIndex++;
 		isPlay = false;
@@ -851,6 +803,22 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			wakelock.release();
 			wakelock = null;
 		}
+	}
+	
+	/**
+	 * 获取日期并格式化
+	 * @return
+	 */
+	public static String getTodayToString() {
+		// 转换日期，获得今天之后n天的日期
+		Calendar calendar = Calendar.getInstance();
+		Date date = new Date();
+		date = calendar.getTime();
+		calendar.setTime(date);
+		return String.format("%1$04d-%2$02d-%3$02d",
+				calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+				calendar.get(Calendar.DAY_OF_MONTH));
+
 	}
 	
 	//转换日期，获得今天之后n天的日期
