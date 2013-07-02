@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.v4.app.FragmentActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +40,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jokes.ext.VerticalViewPager.OnPageChangeListener;
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
 import com.jokes.share.WeChatShare;
@@ -47,7 +48,7 @@ import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioUtils;
 import com.jokes.utils.DataManagerApp;
 import com.jokes.utils.HandlerCodes;
-import com.jokes.utils.ImageDownLoadTask;
+import com.jokes.utils.JokePageAdapter;
 import com.tencent.mm.sdk.openapi.BaseReq;
 import com.tencent.mm.sdk.openapi.BaseResp;
 import com.tencent.mm.sdk.openapi.ConstantsAPI;
@@ -55,8 +56,8 @@ import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.sdk.openapi.ShowMessageFromWX;
 
-public class HomepageActivity extends Activity implements OnClickListener,AnimationListener,
-	OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener, IWXAPIEventHandler{
+public class HomepageActivity extends FragmentActivity implements OnClickListener,AnimationListener,
+	OnPreparedListener, OnCompletionListener , IWXAPIEventHandler, OnBufferingUpdateListener, OnPageChangeListener{
 
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int PLAY_NEXT = 100001;
@@ -105,12 +106,9 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	private int page = 2;//当前页为page-1
 	
 	boolean isGetJokeSuccesss = true;//记录第一次获取笑话列表失败
-	private boolean isPlay = false;//判断是否正在播放
-	private boolean isPaused = false;
 	Animation myAnimation_Alpha;
 
 	MediaPlayer mediaPlayer;
-	Context context;
 	
 	TimerTask mTimerTask;
 	private Timer mTimer;//播放进度条使用timer
@@ -123,43 +121,58 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	int count = 0;
 	boolean add = true;
 	
+	//For Paging through joke list
+    private JokePageAdapter jokePageAdapter;
+    private com.jokes.ext.VerticalViewPager viewPager;
+    private View currentPagerView;
+	
 	private Handler mainHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
 
 			switch(msg.what){
 			case HandlerCodes.GET_JOKES_SUCCESS:
-				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = "+jokeList.size());
+				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = " + jokeList.size());
+				
+				//linearlayout_progressdialog.setVisibility(View.GONE);
+				 jokePageAdapter = new JokePageAdapter(HomepageActivity.this.getSupportFragmentManager(), 
+						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler);
+			     viewPager.setAdapter(jokePageAdapter);
+			     currentPagerView = viewPager.getChildAt(0);
+			     jokePageAdapter.setCurrentView(currentPagerView);
+				
+				/*
 				page++;
 				jokeIndex = 0;
 				if(!isPlay){
 					loadJoke();
-						linearlayout_progressdialog.setVisibility(View.GONE);
-				}
+					linearlayout_progressdialog.setVisibility(View.GONE);
+				}*/
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
-				linearlayout_progressdialog.setVisibility(View.GONE);
+//				linearlayout_progressdialog.setVisibility(View.GONE);
 				if(page == 0){
-					Toast.makeText(context,"获取笑话列表失败",Toast.LENGTH_SHORT).show();
+					Toast.makeText(HomepageActivity.this,"获取笑话列表失败",Toast.LENGTH_SHORT).show();
 				}else{
-					Toast.makeText(context,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
+					Toast.makeText(HomepageActivity.this,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
 				}
 				
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
-				Log.d(DEBUG_TAG, "Like Succes " + like);
-				jokeCurrent.setIsLike(true);
+				Button button_favorite_big = (Button)currentPagerView.findViewById(R.id.homepage_button_favorite_big);
+				Button button_favorite_small = (Button)currentPagerView.findViewById(R.id.homepage_button_favorite_small);
 				button_favorite_big.setVisibility(View.VISIBLE);
+				myAnimation_Alpha = AnimationUtils.loadAnimation(HomepageActivity.this, R.anim.anim_alpha_heart);
 				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
+				myAnimation_Alpha.setDuration(JokePageAdapter.LIKE_BTN_ANI_LEN);
 				button_favorite_big.startAnimation(myAnimation_Alpha);
-
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
 				break;
 			case HandlerCodes.LIKE_FAILURE:
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
-				jokeCurrent.setIsLike(false);
-				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+				//jokeCurrent.setIsLike(false);
+				//button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
 				break;
 			case HandlerCodes.UNLIKE_FAILURE:
 
@@ -168,21 +181,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 				break;
 			case HandlerCodes.GET_LIKEJOKES_FAILURE:
-				break;
-			case PLAY_NEXT:
-				//判断笑话是否还有下一条
-				if(jokeList.size()-1 >= jokeIndex && jokeList.size()>0){
-					textview_date.setVisibility(View.GONE);
-					loadJoke();
-					playJoke();
-				}
-				//当未播放笑话剩下一条时，加载新笑话
-				if(jokeList.size() - (jokeIndex+1) == 0){
-					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
-				}
-				//不是今天第一次进入
-				framelayout_date.setVisibility(View.GONE);
-				
 				break;
 			case CHANGEVOLUME:
 				changeView(count);
@@ -204,7 +202,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.homepage_activity);
-		context = getApplicationContext();
 		/*
 		final String uid = Installation.id(this);
 		jokeList = new ArrayList<Joke>();
@@ -226,18 +223,21 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			e.printStackTrace();
 		}*/
 
-		initView();
-		initAnim();
-		initValues();
+		//initView();
+		//initAnim();
+		//initValues();
 
 		initMediaPlayer();
 
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
 		jokeLikeList = new ArrayList<Joke>();
-		
+		viewPager = (com.jokes.ext.VerticalViewPager) findViewById(R.id.mainJokeListPager);
+		viewPager.setOnPageChangeListener(this);
 		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
-
+		
+		
+/*
 		if(loadSettingTime().equals(getTodayToString())){
 			//不是今天第一次进入
 			framelayout_date.setVisibility(View.GONE);
@@ -248,7 +248,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			saveSettingTime("true");
 		}
 		weChatShareApi = WeChatShare.regToWx(this);
-		weChatShareApi.handleIntent(getIntent(), this);
+		weChatShareApi.handleIntent(getIntent(), this);*/
 	}
 
 	@Override
@@ -269,7 +269,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if(isPlay){
+		if(mediaPlayer.isPlaying()){
 			AudioUtils.stopPlaying(mediaPlayer);
 		}
 		if(null != mTimer){
@@ -283,8 +283,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	 */
 	@Override
 	public void onAnimationEnd(Animation arg0) {
-		button_favorite_big.setVisibility(View.GONE);
-
+		(currentPagerView.findViewById(R.id.homepage_button_favorite_big)).setVisibility(View.GONE);
 	}
 
 	@Override
@@ -308,7 +307,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		button_favorite_small = (Button)findViewById(R.id.homepage_button_favorite_small);
 		textview_numlikes = (TextView)findViewById(R.id.homepage_textview_numlikes);
 		framelayout_play = (FrameLayout)findViewById(R.id.homepage_framelayout_play);
-		linearlayout_volume = (LinearLayout)findViewById(R.id.homepage_linearlayout_volume);
+		//linearlayout_volume = (LinearLayout)findViewById(R.id.homepage_linearlayout_volume);
 		button_share = (Button)findViewById(R.id.homepage_button_share);
 		framelayout_date = (FrameLayout)findViewById(R.id.homepage_framelayout_date);
 		textview_date = (TextView)findViewById(R.id.homepage_textview_date);
@@ -324,7 +323,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		button_favorite_small.setOnClickListener(this);
 		framelayout_play.setOnClickListener(this);
 		button_share.setOnClickListener(this);
-
+/*
 		imageview_volume_1 =  (ImageView)findViewById(R.id.homepage_imageview_volume_1);
 		imageview_volume_2 =  (ImageView)findViewById(R.id.homepage_imageview_volume_2);
 		imageview_volume_3 =  (ImageView)findViewById(R.id.homepage_imageview_volume_3);
@@ -337,7 +336,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		imageview_volume_10 =  (ImageView)findViewById(R.id.homepage_imageview_volume_10);
 		imageview_volume_11 =  (ImageView)findViewById(R.id.homepage_imageview_volume_11);
 		imageview_volume_12 =  (ImageView)findViewById(R.id.homepage_imageview_volume_12);
-		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);
+		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);*/
 		linearlayout_progressdialog = (LinearLayout)findViewById(R.id.homepage_linearlayout_progressdialog);
 	}
 	
@@ -348,7 +347,6 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		mediaPlayer.setOnCompletionListener(this);
 		mediaPlayer.setOnBufferingUpdateListener(this);  
 		mediaPlayer.setOnPreparedListener(this);
-		seekbar.setProgress(0);
 	}
 
 	private void initAnim(){
@@ -377,7 +375,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			break;
 		case R.id.homepage_button_favorite_small:
 			if(!jokeCurrent.getIsLike()){
-				ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
+				ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
 
 				//假操作，先改变界面，用户体验好，后台ApiRequests.likeJoke；
 				jokeCurrent.setIsLike(true);
@@ -399,6 +397,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			
 			break;
 		case R.id.homepage_framelayout_play:
+			/*
 			if(jokeList.size() > 0){
 				if(isPlay && !isPaused){
 					pauseJoke();
@@ -408,41 +407,20 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			}else{
 				Log.e(DEBUG_TAG, "无笑话列表");
 			}
-			break;
+			break;*/
 
 		}
 
 	}
 
 
-	private void loadJoke(){
-		if(jokeList != null && jokeList.size()>0){
-	      if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
-	        new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
-	            ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
-	      }
-	      Joke joke = jokeList.get(jokeIndex);
-	      Log.d(DEBUG_TAG, "Load Joke Called " + joke);
-	      textview_duration.setText(joke.getLength() + "\"");
-	      if(jokeList.get(jokeIndex).getIsLike()){
-	    	  button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-	      } 
-	      else{
-	        button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
-	          textview_duration.setText(jokeList.get(jokeIndex).getLength() + "\"");
-	      }
-        textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
-        textview_numlikes.setText(jokeList.get(jokeIndex).getNumLikes()+"");
-	    }
-	}
-    
-
 	/**
 	 * 开始
 	 */
-	private void playJoke(){
+	/*
+	private void playJoke(View view){
 		try {
-			linearlayout_volume.setVisibility(View.VISIBLE);
+			//((LinearLayout)view.findViewById(R.id.homepage_linearlayout_volume)).setVisibility(View.VISIBLE);
 			jokeCurrent = jokeList.get(jokeIndex);
 			//判断之前的倒计时是否完成，如果countDownTime不等于0，说明用户之前是暂停笑话，而不是笑话播放完成
 			if(countDownTime <=0){
@@ -453,8 +431,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			
 			textview_duration.setText(jokeCurrent.getLength()+"\"");
 			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
-			if(!isPlay && !isPaused){
-				isPlay = true;
+			if(!isPlaying && !isPaused){
+				isPlaying = true;
 				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeCurrent.getFullAudioUrl()), this);	
 				mTimer = new Timer();
 				mTimerTask = getTimerTask();
@@ -478,38 +456,24 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		}
 		framelayout_play.setBackgroundResource(R.drawable.btn);
 		textview_playCount.setVisibility(View.GONE);
-	}
+	}*/
 
-	/**
-	 * 暂停
-	 */
-	private void pauseJoke(){
-		//暂停笑话的同时暂停动画效果
-		if(null != countDownTimer){
-			countDownTimer.cancel();
-		}
-		//暂停，释放锁
-		releaseWakeLock();
-		//暂停笑话
-		Log.d(DEBUG_TAG, "Pause Joke called");
-		AudioUtils.pausePlaying(mediaPlayer);
-		isPaused = true;
-	}
+
 
 
 	/**
 	 * 停止
 	 */
-	private void stopJoke(){
+	/*private void stopJoke(){
 		//暂停笑话
-		isPlay = false;
+		isPlaying = false;
 		AudioUtils.stopPlaying(mediaPlayer);
 		textview_playCount.setVisibility(View.VISIBLE);
 		textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
 		textview_duration.setText(jokeCurrent.getLength()+"\"");
 		linearlayout_volume.setVisibility(View.GONE);
 		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-	}
+	}*/
 
 	/**
 	 * 未开始
@@ -731,13 +695,22 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 	@Override
 	public void onPrepared(MediaPlayer arg0) {
-		isPlay = true;
 		arg0.start();
+	}
+	
+	@Override
+	public void onBufferingUpdate(MediaPlayer arg0, int bufferingProgress) {
+		//seekbar.setSecondaryProgress(bufferingProgress);  
+		//int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
+		//Log.d(currentProgress+"% play", bufferingProgress + "% buffer");
 	}
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
+		mp.reset();
+		jokePageAdapter.resetPlayer();
 		//播放结束，先将播放状态还原为未播放状态
+		/*
 		currentJoke();
 		mp.reset();
 		jokeIndex++;
@@ -746,14 +719,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		mTimer.cancel();
 		mTimerTask.cancel();
 		// 播放下一条
-		mainHandler.sendEmptyMessage(PLAY_NEXT);
-	}
-
-	@Override
-	public void onBufferingUpdate(MediaPlayer arg0, int bufferingProgress) {
-		seekbar.setSecondaryProgress(bufferingProgress);  
-		//int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
-		//Log.d(currentProgress+"% play", bufferingProgress + "% buffer");
+		mainHandler.sendEmptyMessage(PLAY_NEXT);*/
 	}
 	
 	private TimerTask getTimerTask(){
@@ -898,6 +864,26 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			//intent.putExtra(Constants.ShowMsgActivity.BAThumbData, wxMsg.thumbData);
 			startActivity(intent);
 			finish();*/
+		}
+
+		@Override
+		public void onPageScrolled(int position, float positionOffset,
+				int positionOffsetPixels) {
+			mediaPlayer.reset();
+			jokePageAdapter.resetPlayer();
+			
+		}
+
+		@Override
+		public void onPageSelected(int position) {
+			currentPagerView = viewPager.getChildAt(position);
+			jokePageAdapter.setCurrentView(currentPagerView);
+		}
+
+		@Override
+		public void onPageScrollStateChanged(int state) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 		

@@ -108,7 +108,7 @@ public class ApiRequests {
 		}).start();
 	}
 	
-	public static void likeJoke(final Handler responseHandler, final int jokeId, final String userId, final Like like){
+	public static void likeJoke(final Handler responseHandler, final int jokeId, final String userId){
 		new Thread(new Runnable() {	
 			@Override
 			public void run() {

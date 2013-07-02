@@ -149,6 +149,10 @@ public class Joke {
 		else
 			return true;
 	}
+	public void setIsLike(int isLike) {
+		this.isLike = isLike;
+	}
+
 	public void setIsLike(boolean islike){
 //		this.isLike = islike;
 		if(islike){

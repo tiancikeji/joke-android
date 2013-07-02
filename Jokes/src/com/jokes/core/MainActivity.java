@@ -31,7 +31,7 @@ public class MainActivity extends Activity {
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = "+jokeList.size());
 				if(jokeList.size() > 0){
 					Joke joke = jokeList.get(0);
-					ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
+					//ApiRequests.likeJoke(mainHandler, joke.getId(), joke.getUserId(), like);
 				}
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
