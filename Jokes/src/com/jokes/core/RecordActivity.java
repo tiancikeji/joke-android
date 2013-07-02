@@ -4,13 +4,12 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.BreakIterator;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.PixelFormat;
@@ -33,14 +32,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.jokes.objects.Joke;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
 import com.jokes.utils.AudioUtils;
-import com.jokes.utils.DataManagerApp;
+import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
-import com.jokes.utils.Installation;
+import com.jokes.utils.UmengAnaly;
+import com.umeng.analytics.MobclickAgent;
 
 public class RecordActivity extends Activity implements OnClickListener, OnInfoListener{
 	private final static String DEBUG_TAG = "RecordActivity";
@@ -125,16 +124,20 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.record_activity);
 		init();
+		//友盟统计：记录进入录音页面
+		UmengAnaly.AnalyOnClickRecord(this);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		MobclickAgent.onPause(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		MobclickAgent.onResume(this);
 	}
 
 	@Override
@@ -157,9 +160,11 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			Joke joke = new Joke();
 			joke.setName("笑话");
 			joke.setDescription("笑话");
-			ApiRequests.addJoke(mainHandler, joke, imageFile, mp3RecordedFile, DataManagerApp.uid);
+			ApiRequests.addJoke(mainHandler, joke, imageFile, mp3RecordedFile, Constant.uid);
 			Toast.makeText(this, "正在发布...", Toast.LENGTH_SHORT).show();
 			button_send.setEnabled(false);
+			//友盟统计：发布音频
+			UmengAnaly.AnalyOnClickRecordSend(this);
 			break;
 		case R.id.record_button_record:
 			//点击开始录音，再次点击停止了录音
@@ -177,6 +182,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				mp3RecordedFile = audioRecorder.stopRecordingAudio(this);
 				displayLengthOfAudioFile();
 			
+				//友盟统计：录制音频
+				UmengAnaly.AnalyOnClickRecordRecord(this);
 			}else{
 				audioRecorder = new AudioRecorder();
 				audioRecorder.startRecordingAudio(this);
@@ -285,6 +292,10 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 						//将图片显示到控件
 						imageview_pic.setBackgroundColor(00000000);
 						imageview_pic.setImageBitmap(bipmpTemp);
+						
+						//友盟统计：添加图片
+						UmengAnaly.AnalyOnClickRecordAddPic(this);
+						
 					} catch(IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

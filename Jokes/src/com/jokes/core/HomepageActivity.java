@@ -1,9 +1,6 @@
 package com.jokes.core;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,7 +21,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.FragmentActivity;
-import android.telephony.TelephonyManager;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,21 +43,22 @@ import com.jokes.objects.Like;
 import com.jokes.share.WeChatShare;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioUtils;
-import com.jokes.utils.DataManagerApp;
+import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
+import com.jokes.utils.Installation;
 import com.jokes.utils.JokePageAdapter;
+import com.jokes.utils.Tools;
 import com.tencent.mm.sdk.openapi.BaseReq;
 import com.tencent.mm.sdk.openapi.BaseResp;
 import com.tencent.mm.sdk.openapi.ConstantsAPI;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.sdk.openapi.ShowMessageFromWX;
+import com.umeng.analytics.MobclickAgent;
 
 public class HomepageActivity extends FragmentActivity implements OnClickListener,AnimationListener,
 	OnPreparedListener, OnCompletionListener , IWXAPIEventHandler, OnBufferingUpdateListener, OnPageChangeListener{
-
 	private static final String DEBUG_TAG = "JOKE";
-	private static final int PLAY_NEXT = 100001;
 	private static final int CHANGEVOLUME = 100002;
 
 	Button button_setting;//设置按钮
@@ -92,34 +90,29 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	ImageView imageview_volume_11;
 	ImageView imageview_volume_12;
 	ImageView imageview_volume_13;
-	
+
 	LinearLayout linearlayout_progressdialog;//正在加载提示
 
 	private List<Joke> jokeList;
 	private Like like;
 	private Joke jokeCurrent;//正在播放的音频 Play the audio
-	private List<Joke> jokeLikeList;
 	private int jokeIndex = 0;//当前播放索引
-	
+
 	//分享
 	private IWXAPI weChatShareApi;
 	private int page = 2;//当前页为page-1
-	
+
 	boolean isGetJokeSuccesss = true;//记录第一次获取笑话列表失败
 	Animation myAnimation_Alpha;
 
 	MediaPlayer mediaPlayer;
-	
 	TimerTask mTimerTask;
 	private Timer mTimer;//播放进度条使用timer
 	CountDownTimer countDownTimer;//播放动画效果的倒计时
 	long countDownTime = 0;//倒计时剩余时间
-	
+
 	WakeLock wakelock = null;//保持程序部睡眠
-	
-	//用来控制音频动画效果
-	int count = 0;
-	boolean add = true;
+	private static String UID; //TODO save this so it doesn't change 
 	
 	//For Paging through joke list
     private JokePageAdapter jokePageAdapter;
@@ -136,7 +129,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				
 				//linearlayout_progressdialog.setVisibility(View.GONE);
 				 jokePageAdapter = new JokePageAdapter(HomepageActivity.this.getSupportFragmentManager(), 
-						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler);
+						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler, UID);
 			     viewPager.setAdapter(jokePageAdapter);
 			     currentPagerView = viewPager.getChildAt(0);
 			     jokePageAdapter.setCurrentView(currentPagerView);
@@ -156,7 +149,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				}else{
 					Toast.makeText(HomepageActivity.this,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
 				}
-				
+
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Button button_favorite_big = (Button)currentPagerView.findViewById(R.id.homepage_button_favorite_big);
@@ -183,7 +176,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			case HandlerCodes.GET_LIKEJOKES_FAILURE:
 				break;
 			case CHANGEVOLUME:
-				changeView(count);
+				//changeView(count);
 				break;
 			case HandlerCodes.CREATE_JOKE_SUCCESS:
 				Log.d(DEBUG_TAG, "Create joke success");
@@ -199,9 +192,11 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+//		MobclickAgent.onError(this);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.homepage_activity);
+		setUid();
 		/*
 		final String uid = Installation.id(this);
 		jokeList = new ArrayList<Joke>();
@@ -229,21 +224,24 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 		initMediaPlayer();
 
-		jokeList = new ArrayList<Joke>();
-		like = new Like();
-		jokeLikeList = new ArrayList<Joke>();
 		viewPager = (com.jokes.ext.VerticalViewPager) findViewById(R.id.mainJokeListPager);
 		viewPager.setOnPageChangeListener(this);
-		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
+		jokeList = new ArrayList<Joke>();
+		ApiRequests.getJokes(mainHandler, jokeList, UID , 3);
 		
 		
 /*
 		if(loadSettingTime().equals(getTodayToString())){
+		like = new Like();
+
+		ApiRequests.getJokes(mainHandler, jokeList,Constant.uid,page);
+
+		if(loadSettingTime().equals(Tools.getTodayToString())){
 			//不是今天第一次进入
 			framelayout_date.setVisibility(View.GONE);
 		}else{
 			//今天第一次进入
-			textview_date.setText(getTodayToString());
+			textview_date.setText(Tools.getTodayToString());
 			deleteSettingTime();
 			saveSettingTime("true");
 		}
@@ -254,11 +252,13 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	@Override
 	protected void onPause() {
 		super.onPause();
+		MobclickAgent.onPause(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		MobclickAgent.onResume(this);
 	}
 
 	@Override
@@ -296,6 +296,20 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	public void onAnimationStart(Animation arg0) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private void setUid(){
+		SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
+		final String preferencesUidString = preferences.getString(Constant.PREFERENCES_UID_KEY, null);
+		if(null == preferencesUidString){
+			UID = Installation.id(this);
+			Editor editor = preferences.edit();
+			editor.putString(Constant.PREFERENCES_UID_KEY, UID);
+			editor.apply();
+		} else {
+			UID = preferencesUidString;
+		}
+		Constant.uid = UID;
 	}
 
 	private void initView(){
@@ -339,8 +353,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);*/
 		linearlayout_progressdialog = (LinearLayout)findViewById(R.id.homepage_linearlayout_progressdialog);
 	}
-	
-	
+
+
 
 	private void initMediaPlayer(){
 		mediaPlayer = new MediaPlayer();
@@ -349,14 +363,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		mediaPlayer.setOnPreparedListener(this);
 	}
 
-	private void initAnim(){
-		myAnimation_Alpha = AnimationUtils.loadAnimation(this, R.anim.anim_alpha_heart);	
-	}
-
-	private void initValues(){
-		TelephonyManager tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-		DataManagerApp.uid = tm.getDeviceId();
-	}
 
 	@Override
 	public void onClick(View view) {
@@ -367,7 +373,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			break;
 		case R.id.homepage_button_refresh:
 			page = 2;
-			ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, page);
+			ApiRequests.getJokes(mainHandler, jokeList, UID, page);
 			break;
 		case R.id.homepage_button_record:
 			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
@@ -390,11 +396,12 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()-1)+"");
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
 			}
+			
 
 			break;
 		case R.id.homepage_button_share:
 			WeChatShare.sendAppInfo(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
-			
+
 			break;
 		case R.id.homepage_framelayout_play:
 			/*
@@ -428,7 +435,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			}else{
 				startPlayCounttimer((int)countDownTime);
 			}
-			
+
 			textview_duration.setText(jokeCurrent.getLength()+"\"");
 			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
 			if(!isPlaying && !isPaused){
@@ -441,7 +448,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				mediaPlayer.start();
 				isPaused = false;
 			} else{
-				
+
 				//mediaPlayer.start();
 				//isPlay = true;
 			}
@@ -495,31 +502,30 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		}
 		//启动倒计时时给程序加锁，爆出cpu运行
 		acquireWakeLock();
-		
-		countDownTimer = new CountDownTimer((time+1) * 1000, 1000) {
 
+		/*
+		countDownTimer = new CountDownTimer((time+1) * 1000, 1000) {
 			public void onTick(long millisUntilFinished) {
 				countDownTime = millisUntilFinished;
-			//通知改变动画
-			if(add){
-				if(count > 7){
-					add = false;
-					count--;
-				}else{
-					mainHandler.sendEmptyMessage(CHANGEVOLUME);
-					count++;
-				}
+				//通知改变动画
+				if(add){
+					if(count > 7){
+						add = false;
+						count--;
+					}else{
+						mainHandler.sendEmptyMessage(CHANGEVOLUME);
+						count++;
+					}
 
-			}else if(!add){
-				if(count < 0){
-					add = true;
-					count++;
-				}else{
-					mainHandler.sendEmptyMessage(CHANGEVOLUME);
-					count--;
+				}else if(!add){
+					if(count < 0){
+						add = true;
+						count++;
+					}else{
+						mainHandler.sendEmptyMessage(CHANGEVOLUME);
+						count--;
+					}
 				}
-			}
-			}
 
 			public void onFinish() {
 				countDownTime = 0;
@@ -527,6 +533,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				releaseWakeLock();
 			}
 		}.start();
+			}*/
 	}
 
 	/**
@@ -536,7 +543,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		SharedPreferences mShared = null;
 		mShared = getSharedPreferences("Jokes", Context.MODE_PRIVATE);  
 		Editor editor = mShared.edit();  
-		editor.putString("DATE", getTodayToString()); 
+		editor.putString("DATE", Tools.getTodayToString()); 
 		editor.putString("ISFRIST", isFrist);
 		editor.commit();  
 	}
@@ -556,142 +563,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		editor.commit();
 	}
 
-	/**
-	 * 根据音量改变控件大小
-	 */
-	private void changeView(int volume){
-		switch(volume){
-		case 0:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_red_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_red_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_red_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_red_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_red_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_red_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_red_1);
-		}
-		break;
-		case 1:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_red_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_red_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_red_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_red_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_red_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
-		}
-		break;
-		case 2:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_red_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_red_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_red_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
-		}
-		break;
-		case 3:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_red_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_red_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
-		}
-		break;
-		case 4:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_red_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_red_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
-		}
-		break;
-		case 5:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_gray_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_red_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_red_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_gray_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
-		}
-		break;
-		case 6:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_gray_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_gray_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_red_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_gray_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_gray_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
-		}
-		break;
-		case 7:{
-			imageview_volume_1.setBackgroundResource(R.drawable.vertical_gray_1);
-			imageview_volume_2.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_3.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_4.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_5.setBackgroundResource(R.drawable.vertical_gray_5);
-			imageview_volume_6.setBackgroundResource(R.drawable.vertical_gray_6);
-			imageview_volume_7.setBackgroundResource(R.drawable.vertical_gray_7);
-			imageview_volume_8.setBackgroundResource(R.drawable.vertical_gray_6);
-			imageview_volume_9.setBackgroundResource(R.drawable.vertical_gray_5);
-			imageview_volume_10.setBackgroundResource(R.drawable.vertical_gray_4);
-			imageview_volume_11.setBackgroundResource(R.drawable.vertical_gray_3);
-			imageview_volume_12.setBackgroundResource(R.drawable.vertical_gray_2);
-			imageview_volume_13.setBackgroundResource(R.drawable.vertical_gray_1);
-		}
-		break;
-		}
-
-	}
 
 	@Override
 	public void onPrepared(MediaPlayer arg0) {
@@ -715,13 +586,12 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		mp.reset();
 		jokeIndex++;
 		isPlay = false;
-		isPaused = false;
-		mTimer.cancel();
+		isPaused = false;		mTimer.cancel();
 		mTimerTask.cancel();
 		// 播放下一条
 		mainHandler.sendEmptyMessage(PLAY_NEXT);*/
 	}
-	
+
 	private TimerTask getTimerTask(){
 		return new TimerTask() {  
 			@Override  
@@ -747,7 +617,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			}  
 		};  
 	}; 
-	
+
 	/**
 	 * 给程序加锁，保持CPU 运转，屏幕和键盘灯有可能是关闭的
 	 */
@@ -760,7 +630,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			}
 		}
 	}
-	
+
 	/**
 	 * 释放倒计时锁
 	 */
@@ -770,84 +640,57 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			wakelock = null;
 		}
 	}
-	
-	/**
-	 * 获取日期并格式化
-	 * @return
-	 */
-	public static String getTodayToString() {
-		// 转换日期，获得今天之后n天的日期
-		Calendar calendar = Calendar.getInstance();
-		Date date = new Date();
-		date = calendar.getTime();
-		calendar.setTime(date);
-		return String.format("%1$04d-%2$02d-%3$02d",
-				calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-				calendar.get(Calendar.DAY_OF_MONTH));
 
+	@Override
+	public void onReq(BaseReq req) {
+		switch (req.getType()) {
+		case ConstantsAPI.COMMAND_GETMESSAGE_FROM_WX:
+			goToGetMsg();		
+			break;
+		case ConstantsAPI.COMMAND_SHOWMESSAGE_FROM_WX:
+			goToShowMsg((ShowMessageFromWX.Req) req);
+			break;
+		default:
+			break;
+		}
 	}
-	
-	//转换日期，获得今天之后n天的日期
-		public static String getDateAfterFormat_(int n) {  
-		    Calendar calendar = Calendar.getInstance(); 
-		    Date date = new Date();
-			date = calendar.getTime();
-			calendar.setTime(date);    
-			calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) + n); 
-		    return String.format("%1$04d%2$02d%3$02d", 
-					calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH));
+	@Override
+	public void onResp(BaseResp resp) {
+		int result = 0;
+
+		switch (resp.errCode) {
+		case BaseResp.ErrCode.ERR_OK:
+			result = R.string.errcode_success ;
+			break;
+		case BaseResp.ErrCode.ERR_USER_CANCEL:
+			result = R.string.errcode_cancel;
+			break;
+		case BaseResp.ErrCode.ERR_AUTH_DENIED:
+			result = R.string.errcode_deny;
+			break;
+		default:
+			result = R.string.errcode_unknown;
+			break;
 		}
 
-		@Override
-		public void onReq(BaseReq req) {
-			switch (req.getType()) {
-			case ConstantsAPI.COMMAND_GETMESSAGE_FROM_WX:
-				goToGetMsg();		
-				break;
-			case ConstantsAPI.COMMAND_SHOWMESSAGE_FROM_WX:
-				goToShowMsg((ShowMessageFromWX.Req) req);
-				break;
-			default:
-				break;
-			}
-		}
-		@Override
-		public void onResp(BaseResp resp) {
-			int result = 0;
-			
-			switch (resp.errCode) {
-			case BaseResp.ErrCode.ERR_OK:
-				result = R.string.errcode_success ;
-				break;
-			case BaseResp.ErrCode.ERR_USER_CANCEL:
-				result = R.string.errcode_cancel;
-				break;
-			case BaseResp.ErrCode.ERR_AUTH_DENIED:
-				result = R.string.errcode_deny;
-				break;
-			default:
-				result = R.string.errcode_unknown;
-				break;
-			}
-			
-			Toast.makeText(this, result, Toast.LENGTH_LONG).show();
-		}
-		
-		private void goToGetMsg() {
-			/*Intent intent = new Intent(this, GetFromWXActivity.class);
+		Toast.makeText(this, result, Toast.LENGTH_LONG).show();
+	}
+
+	private void goToGetMsg() {
+		/*Intent intent = new Intent(this, GetFromWXActivity.class);
 			intent.putExtras(getIntent());
 			startActivity(intent);
 			finish();*/
-			Log.d(DEBUG_TAG, "Go Get Msg WeChat");
-		}
-		
-		private void goToShowMsg(ShowMessageFromWX.Req showReq) {
-			Log.d(DEBUG_TAG, "Show Msg WeChat");
-			
-			/*
+		Log.d(DEBUG_TAG, "Go Get Msg WeChat");
+	}
+
+	private void goToShowMsg(ShowMessageFromWX.Req showReq) {
+		Log.d(DEBUG_TAG, "Show Msg WeChat");
+
+		/*
 			WXMediaMessage wxMsg = showReq.message;		
 			WXAppExtendObject obj = (WXAppExtendObject) wxMsg.mediaObject;
-			
+
 			StringBuffer msg = new StringBuffer(); 
 			msg.append("description: ");
 			msg.append(wxMsg.description);
@@ -857,7 +700,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			msg.append("\n");
 			msg.append("filePath: ");
 			msg.append(obj.filePath);
-			
+
 			Intent intent = new Intent(this, ShowFromWXActivity.class);
 			//intent.putExtra(Constants.ShowMsgActivity.STitle, wxMsg.title);
 			//intent.putExtra(Constants.ShowMsgActivity.SMessage, msg.toString());
@@ -884,6 +727,16 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		public void onPageScrollStateChanged(int state) {
 			// TODO Auto-generated method stub
 			
+		}
+		
+		public void onSettingsButtonClick(View view){
+			Intent intent1 = new Intent(HomepageActivity.this,SettingActivity.class);
+			startActivity(intent1);
+		}
+		
+		public void onRecordButtonClick(View view){
+			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
+			startActivity(intent2);
 		}
 		
 		

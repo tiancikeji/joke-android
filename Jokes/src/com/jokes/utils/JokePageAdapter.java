@@ -2,11 +2,14 @@ package com.jokes.utils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +21,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.jokes.core.R;
@@ -36,20 +40,26 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private OnPreparedListener onPreparedListener;
 	private Handler responseHandler;
 	private Button likeButton;
+	private String UID;
 	
 	private boolean isPlaying = false;
 	private boolean isPaused  = false;
 	
 	private View currentView;
+	private SeekBar seekBar;
+	
+	private Timer mTimer;
+	private TimerTask mTimerTask;
 	
 	public JokePageAdapter(android.support.v4.app.FragmentManager fm, Context context, List<Joke> jokes, MediaPlayer mp,
-			OnPreparedListener onPreparedListener, Handler responseHandler){
+			OnPreparedListener onPreparedListener, Handler responseHandler, String UID){
 		this.context = context;
 		this.jokes = jokes;
 		this.mp = mp;
 		this.fm = fm;
 		this.onPreparedListener = onPreparedListener;
 		this.responseHandler = responseHandler;
+		this.UID = UID;
 	}
 
 	@Override
@@ -78,6 +88,9 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		TextView jokeIndexView = (TextView)view.findViewById(R.id.jokeIndexHack); //).setText(position);
 		jokeIndexView.setText(String.valueOf(position));
 		((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setOnClickListener(this);
+		TextView dateTextView = (TextView)view.findViewById(R.id.homepage_textview_date);
+		dateTextView.setText(joke.getCreatedAt().substring(0, 11));
+		//new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(originalString)
 		
 		if(!joke.getIsLike()){
 			likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
@@ -88,6 +101,15 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	public void resetPlayer(){
 		isPlaying = false;
 		isPaused = false;
+		if(null != mTimer){
+			mTimer.cancel();
+		}
+		if(null != mTimerTask){
+			mTimerTask.cancel();
+		}
+		if(null != seekBar){
+			seekBar.setProgress(0);
+		}
 	}
 	
 	
@@ -138,7 +160,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			//likeButton.setVisibility(View.GONE);
 			Joke joke = getJokeFromView(view);
 			Log.d(DEBUG_TAG, "home button = " + joke.getCreatedAt());
-			ApiRequests.likeJoke(responseHandler, joke.getId() , "A");
+			ApiRequests.likeJoke(responseHandler, joke.getId() , UID);
 		break;
 		}
 		
@@ -161,7 +183,11 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 				
 				if(!isPlaying && !isPaused){
 					isPlaying = true;
-					AudioUtils.prepareStreamAudio(mp, ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()), onPreparedListener);	
+					AudioUtils.prepareStreamAudio(mp, ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()), onPreparedListener);
+					seekBar = (SeekBar)currentView.findViewById(R.id.homepage_seekbar_progress);
+					mTimer = new Timer();
+					mTimerTask = getTimerTask();
+					mTimer.schedule(mTimerTask, 0, 1000);
 					if(!joke.getIsLike()){					
 						likeButton = (Button)currentView.findViewById(R.id.homepage_button_favorite_big);
 						Log.d(DEBUG_TAG, "like button " + likeButton);
@@ -237,5 +263,31 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		// TODO Auto-generated method stub
 		
 	}
+	
+	private TimerTask getTimerTask(){
+		return new TimerTask() {  
+			@Override  
+			public void run() {  
+				if(mp==null)  
+					return;  
+				if (mp.isPlaying() && seekBar.isPressed() == false) {  
+					handleProgress.sendEmptyMessage(0);  
+				}  
+			}  
+		};  
+	}
+
+	Handler handleProgress = new Handler() {  
+		public void handleMessage(Message msg) {  
+
+			int position = mp.getCurrentPosition();  
+			int duration = mp.getDuration();  
+
+			if (duration > 0) {  
+				long pos = seekBar.getMax() * position / duration;  
+				seekBar.setProgress((int) pos);  
+			}  
+		};  
+	};
 
 }

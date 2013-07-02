@@ -3,7 +3,6 @@ package com.jokes.utils;
 import java.io.File;
 import java.io.IOException;
 
-import android.R.integer;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.util.Log;
