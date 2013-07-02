@@ -15,14 +15,13 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.jokes.objects.Joke;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
 import com.jokes.utils.AudioUtils;
-import com.jokes.utils.DataManagerApp;
+import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
-import com.jokes.utils.Installation;
+import com.jokes.utils.UmengAnaly;
+import com.umeng.analytics.MobclickAgent;
 
 public class FeedbackActivity extends Activity implements OnClickListener, OnCompletionListener{
 
@@ -80,6 +79,22 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.feedback_activity);
 		init();
+		//友盟统计：进入意见反馈
+		UmengAnaly.AnalyOnClickFeedback(this);
+	}
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		MobclickAgent.onPause(this);
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		MobclickAgent.onResume(this);
 	}
 
 	@Override
@@ -90,9 +105,11 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 			break;
 		case R.id.feedback_button_send:
 		{
-			ApiRequests.addFeedback(mainHandler, mp3RecordedFile, DataManagerApp.uid);
+			ApiRequests.addFeedback(mainHandler, mp3RecordedFile, Constant.uid);
 			Toast.makeText(this, "正在发布...", Toast.LENGTH_SHORT).show();
 			button_send.setEnabled(false);
+			//友盟统计：发布意见反馈
+			UmengAnaly.AnalyOnClickFeedbackSend(this);
 			break;
 		}
 		case R.id.feedback_button_record:
@@ -104,6 +121,8 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 				button_play.setVisibility(View.VISIBLE);
 				mp3RecordedFile = audioRecorder.stopRecordingAudio(this);
 				displayLengthOfAudioFile();
+				//友盟统计：录制音频
+				UmengAnaly.AnalyOnClickFeedbaceRocord(this);
 			}else{
 				audioRecorder = new AudioRecorder();
 				audioRecorder.startRecordingAudio(this);

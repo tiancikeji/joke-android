@@ -4,8 +4,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.jokes.mywidget.MyToast;
-import com.jokes.utils.DataManagerApp;
+import com.jokes.utils.UmengAnaly;
+import com.umeng.analytics.MobclickAgent;
 
 import android.app.Activity;
 import android.content.Context;
@@ -49,11 +49,13 @@ public class SettingActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onPause() {
 		super.onPause();
+		MobclickAgent.onPause(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		MobclickAgent.onResume(this);
 	}
 
 	@Override
@@ -77,8 +79,12 @@ public class SettingActivity extends Activity implements OnClickListener{
 			textview_cache.setText("清除缓存（已用0M）");
 //			MyToast toast = new MyToast(SettingActivity.this,"缓存已清除");
 //			toast.startMyToast();
+			//友盟统计：清除缓存
+			UmengAnaly.AnalyCache(this);
 			break;
 		case R.id.setting_framelayout_offlinedownload:
+			//友盟统计：下载离线
+			UmengAnaly.AnalyOffLineDownload(this);
 			break;
 		case R.id.setting_framelayout_feedback:
 			Intent intent = new Intent(SettingActivity.this,FeedbackActivity.class);

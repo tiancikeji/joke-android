@@ -2,8 +2,6 @@ package com.jokes.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,18 +43,20 @@ import com.jokes.objects.Like;
 import com.jokes.share.WeChatShare;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioUtils;
-import com.jokes.utils.DataManagerApp;
+import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.ImageDownLoadTask;
+import com.jokes.utils.Tools;
 import com.tencent.mm.sdk.openapi.BaseReq;
 import com.tencent.mm.sdk.openapi.BaseResp;
 import com.tencent.mm.sdk.openapi.ConstantsAPI;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.sdk.openapi.ShowMessageFromWX;
+import com.umeng.analytics.MobclickAgent;
 
 public class HomepageActivity extends Activity implements OnClickListener,AnimationListener,
-	OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener, IWXAPIEventHandler{
+OnPreparedListener, OnCompletionListener ,OnBufferingUpdateListener, IWXAPIEventHandler{
 
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int PLAY_NEXT = 100001;
@@ -91,19 +91,18 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	ImageView imageview_volume_11;
 	ImageView imageview_volume_12;
 	ImageView imageview_volume_13;
-	
+
 	LinearLayout linearlayout_progressdialog;//正在加载提示
 
 	private List<Joke> jokeList;
 	private Like like;
 	private Joke jokeCurrent;//正在播放的音频 Play the audio
-	private List<Joke> jokeLikeList;
 	private int jokeIndex = 0;//当前播放索引
-	
+
 	//分享
 	private IWXAPI weChatShareApi;
 	private int page = 2;//当前页为page-1
-	
+
 	boolean isGetJokeSuccesss = true;//记录第一次获取笑话列表失败
 	private boolean isPlay = false;//判断是否正在播放
 	private boolean isPaused = false;
@@ -111,18 +110,18 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 	MediaPlayer mediaPlayer;
 	Context context;
-	
+
 	TimerTask mTimerTask;
 	private Timer mTimer;//播放进度条使用timer
 	CountDownTimer countDownTimer;//播放动画效果的倒计时
 	long countDownTime = 0;//倒计时剩余时间
-	
+
 	WakeLock wakelock = null;//保持程序部睡眠
-	
+
 	//用来控制音频动画效果
 	int count = 0;
 	boolean add = true;
-	
+
 	private Handler mainHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
@@ -134,7 +133,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				jokeIndex = 0;
 				if(!isPlay){
 					loadJoke();
-						linearlayout_progressdialog.setVisibility(View.GONE);
+					linearlayout_progressdialog.setVisibility(View.GONE);
 				}
 				break;
 			case HandlerCodes.GET_JOKES_FAILURE:
@@ -144,7 +143,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				}else{
 					Toast.makeText(context,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
 				}
-				
+
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Log.d(DEBUG_TAG, "Like Succes " + like);
@@ -178,11 +177,11 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				}
 				//当未播放笑话剩下一条时，加载新笑话
 				if(jokeList.size() - (jokeIndex+1) == 0){
-					ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
+					ApiRequests.getJokes(mainHandler, jokeList,Constant.uid,page);
 				}
 				//不是今天第一次进入
 				framelayout_date.setVisibility(View.GONE);
-				
+
 				break;
 			case CHANGEVOLUME:
 				changeView(count);
@@ -201,6 +200,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+//		MobclickAgent.onError(this);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.homepage_activity);
@@ -234,16 +234,15 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 		jokeList = new ArrayList<Joke>();
 		like = new Like();
-		jokeLikeList = new ArrayList<Joke>();
-		
-		ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid,page);
 
-		if(loadSettingTime().equals(getTodayToString())){
+		ApiRequests.getJokes(mainHandler, jokeList,Constant.uid,page);
+
+		if(loadSettingTime().equals(Tools.getTodayToString())){
 			//不是今天第一次进入
 			framelayout_date.setVisibility(View.GONE);
 		}else{
 			//今天第一次进入
-			textview_date.setText(getTodayToString());
+			textview_date.setText(Tools.getTodayToString());
 			deleteSettingTime();
 			saveSettingTime("true");
 		}
@@ -254,11 +253,13 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 	@Override
 	protected void onPause() {
 		super.onPause();
+		MobclickAgent.onPause(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		MobclickAgent.onResume(this);
 	}
 
 	@Override
@@ -340,8 +341,8 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);
 		linearlayout_progressdialog = (LinearLayout)findViewById(R.id.homepage_linearlayout_progressdialog);
 	}
-	
-	
+
+
 
 	private void initMediaPlayer(){
 		mediaPlayer = new MediaPlayer();
@@ -357,7 +358,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 	private void initValues(){
 		TelephonyManager tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-		DataManagerApp.uid = tm.getDeviceId();
+		Constant.uid = tm.getDeviceId();
 	}
 
 	@Override
@@ -369,34 +370,37 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			break;
 		case R.id.homepage_button_refresh:
 			page = 2;
-			ApiRequests.getJokes(mainHandler, jokeList,DataManagerApp.uid, page);
+			ApiRequests.getJokes(mainHandler, jokeList,Constant.uid, page);
 			break;
 		case R.id.homepage_button_record:
 			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
 			startActivity(intent2);
 			break;
 		case R.id.homepage_button_favorite_small:
-			if(!jokeCurrent.getIsLike()){
-				ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
+			if(jokeCurrent != null){
+				if(!jokeCurrent.getIsLike()){
+					ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId(), like);
 
-				//假操作，先改变界面，用户体验好，后台ApiRequests.likeJoke；
-				jokeCurrent.setIsLike(true);
-				button_favorite_big.setVisibility(View.VISIBLE);
-				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
-				button_favorite_big.startAnimation(myAnimation_Alpha);
-				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-				textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()+1)+"");
-			}else{
-				ApiRequests.unlikeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
-				if(jokeList.get(jokeIndex).getNumLikes() != 0)
-				textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()-1)+"");
-				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+					//假操作，先改变界面，用户体验好，后台ApiRequests.likeJoke；
+					jokeCurrent.setIsLike(true);
+					button_favorite_big.setVisibility(View.VISIBLE);
+					myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
+					button_favorite_big.startAnimation(myAnimation_Alpha);
+					button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
+					textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()+1)+"");
+				}else{
+					ApiRequests.unlikeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
+					if(jokeList.get(jokeIndex).getNumLikes() != 0)
+						textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()-1)+"");
+					button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+				}
 			}
+			
 
 			break;
 		case R.id.homepage_button_share:
 			WeChatShare.sendAppInfo(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
-			
+
 			break;
 		case R.id.homepage_framelayout_play:
 			if(jokeList.size() > 0){
@@ -417,25 +421,25 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 
 	private void loadJoke(){
 		if(jokeList != null && jokeList.size()>0){
-	      if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
-	        new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
-	            ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
-	      }
-	      Joke joke = jokeList.get(jokeIndex);
-	      Log.d(DEBUG_TAG, "Load Joke Called " + joke);
-	      textview_duration.setText(joke.getLength() + "\"");
-	      if(jokeList.get(jokeIndex).getIsLike()){
-	    	  button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-	      } 
-	      else{
-	        button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
-	          textview_duration.setText(jokeList.get(jokeIndex).getLength() + "\"");
-	      }
-        textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
-        textview_numlikes.setText(jokeList.get(jokeIndex).getNumLikes()+"");
-	    }
+			if(jokeList.get(jokeIndex).getFullPictureUrl() != null && !jokeList.get(jokeIndex).getFullPictureUrl().equals("null")){
+				new ImageDownLoadTask(jokeList.get(jokeIndex).getId(),
+						ApiRequests.buildAbsoluteUrl(jokeList.get(jokeIndex).getFullPictureUrl()), this).execute(imageview_pic);
+			}
+			Joke joke = jokeList.get(jokeIndex);
+			Log.d(DEBUG_TAG, "Load Joke Called " + joke);
+			textview_duration.setText(joke.getLength() + "\"");
+			if(jokeList.get(jokeIndex).getIsLike()){
+				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
+			} 
+			else{
+				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+				textview_duration.setText(jokeList.get(jokeIndex).getLength() + "\"");
+			}
+			textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
+			textview_numlikes.setText(jokeList.get(jokeIndex).getNumLikes()+"");
+		}
 	}
-    
+
 
 	/**
 	 * 开始
@@ -450,7 +454,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			}else{
 				startPlayCounttimer((int)countDownTime);
 			}
-			
+
 			textview_duration.setText(jokeCurrent.getLength()+"\"");
 			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
 			if(!isPlay && !isPaused){
@@ -463,7 +467,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 				mediaPlayer.start();
 				isPaused = false;
 			} else{
-				
+
 				//mediaPlayer.start();
 				//isPlay = true;
 			}
@@ -531,30 +535,30 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		}
 		//启动倒计时时给程序加锁，爆出cpu运行
 		acquireWakeLock();
-		
+
 		countDownTimer = new CountDownTimer((time+1) * 1000, 1000) {
 
 			public void onTick(long millisUntilFinished) {
 				countDownTime = millisUntilFinished;
-			//通知改变动画
-			if(add){
-				if(count > 7){
-					add = false;
-					count--;
-				}else{
-					mainHandler.sendEmptyMessage(CHANGEVOLUME);
-					count++;
-				}
+				//通知改变动画
+				if(add){
+					if(count > 7){
+						add = false;
+						count--;
+					}else{
+						mainHandler.sendEmptyMessage(CHANGEVOLUME);
+						count++;
+					}
 
-			}else if(!add){
-				if(count < 0){
-					add = true;
-					count++;
-				}else{
-					mainHandler.sendEmptyMessage(CHANGEVOLUME);
-					count--;
+				}else if(!add){
+					if(count < 0){
+						add = true;
+						count++;
+					}else{
+						mainHandler.sendEmptyMessage(CHANGEVOLUME);
+						count--;
+					}
 				}
-			}
 			}
 
 			public void onFinish() {
@@ -572,7 +576,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		SharedPreferences mShared = null;
 		mShared = getSharedPreferences("Jokes", Context.MODE_PRIVATE);  
 		Editor editor = mShared.edit();  
-		editor.putString("DATE", getTodayToString()); 
+		editor.putString("DATE", Tools.getTodayToString()); 
 		editor.putString("ISFRIST", isFrist);
 		editor.commit();  
 	}
@@ -755,7 +759,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 		//int currentProgress=seekbar.getMax()*mediaPlayer.getCurrentPosition()/mediaPlayer.getDuration();  
 		//Log.d(currentProgress+"% play", bufferingProgress + "% buffer");
 	}
-	
+
 	private TimerTask getTimerTask(){
 		return new TimerTask() {  
 			@Override  
@@ -781,7 +785,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			}  
 		};  
 	}; 
-	
+
 	/**
 	 * 给程序加锁，保持CPU 运转，屏幕和键盘灯有可能是关闭的
 	 */
@@ -794,7 +798,7 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			}
 		}
 	}
-	
+
 	/**
 	 * 释放倒计时锁
 	 */
@@ -804,84 +808,57 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			wakelock = null;
 		}
 	}
-	
-	/**
-	 * 获取日期并格式化
-	 * @return
-	 */
-	public static String getTodayToString() {
-		// 转换日期，获得今天之后n天的日期
-		Calendar calendar = Calendar.getInstance();
-		Date date = new Date();
-		date = calendar.getTime();
-		calendar.setTime(date);
-		return String.format("%1$04d-%2$02d-%3$02d",
-				calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-				calendar.get(Calendar.DAY_OF_MONTH));
 
+	@Override
+	public void onReq(BaseReq req) {
+		switch (req.getType()) {
+		case ConstantsAPI.COMMAND_GETMESSAGE_FROM_WX:
+			goToGetMsg();		
+			break;
+		case ConstantsAPI.COMMAND_SHOWMESSAGE_FROM_WX:
+			goToShowMsg((ShowMessageFromWX.Req) req);
+			break;
+		default:
+			break;
+		}
 	}
-	
-	//转换日期，获得今天之后n天的日期
-		public static String getDateAfterFormat_(int n) {  
-		    Calendar calendar = Calendar.getInstance(); 
-		    Date date = new Date();
-			date = calendar.getTime();
-			calendar.setTime(date);    
-			calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) + n); 
-		    return String.format("%1$04d%2$02d%3$02d", 
-					calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH));
+	@Override
+	public void onResp(BaseResp resp) {
+		int result = 0;
+
+		switch (resp.errCode) {
+		case BaseResp.ErrCode.ERR_OK:
+			result = R.string.errcode_success ;
+			break;
+		case BaseResp.ErrCode.ERR_USER_CANCEL:
+			result = R.string.errcode_cancel;
+			break;
+		case BaseResp.ErrCode.ERR_AUTH_DENIED:
+			result = R.string.errcode_deny;
+			break;
+		default:
+			result = R.string.errcode_unknown;
+			break;
 		}
 
-		@Override
-		public void onReq(BaseReq req) {
-			switch (req.getType()) {
-			case ConstantsAPI.COMMAND_GETMESSAGE_FROM_WX:
-				goToGetMsg();		
-				break;
-			case ConstantsAPI.COMMAND_SHOWMESSAGE_FROM_WX:
-				goToShowMsg((ShowMessageFromWX.Req) req);
-				break;
-			default:
-				break;
-			}
-		}
-		@Override
-		public void onResp(BaseResp resp) {
-			int result = 0;
-			
-			switch (resp.errCode) {
-			case BaseResp.ErrCode.ERR_OK:
-				result = R.string.errcode_success ;
-				break;
-			case BaseResp.ErrCode.ERR_USER_CANCEL:
-				result = R.string.errcode_cancel;
-				break;
-			case BaseResp.ErrCode.ERR_AUTH_DENIED:
-				result = R.string.errcode_deny;
-				break;
-			default:
-				result = R.string.errcode_unknown;
-				break;
-			}
-			
-			Toast.makeText(this, result, Toast.LENGTH_LONG).show();
-		}
-		
-		private void goToGetMsg() {
-			/*Intent intent = new Intent(this, GetFromWXActivity.class);
+		Toast.makeText(this, result, Toast.LENGTH_LONG).show();
+	}
+
+	private void goToGetMsg() {
+		/*Intent intent = new Intent(this, GetFromWXActivity.class);
 			intent.putExtras(getIntent());
 			startActivity(intent);
 			finish();*/
-			Log.d(DEBUG_TAG, "Go Get Msg WeChat");
-		}
-		
-		private void goToShowMsg(ShowMessageFromWX.Req showReq) {
-			Log.d(DEBUG_TAG, "Show Msg WeChat");
-			
-			/*
+		Log.d(DEBUG_TAG, "Go Get Msg WeChat");
+	}
+
+	private void goToShowMsg(ShowMessageFromWX.Req showReq) {
+		Log.d(DEBUG_TAG, "Show Msg WeChat");
+
+		/*
 			WXMediaMessage wxMsg = showReq.message;		
 			WXAppExtendObject obj = (WXAppExtendObject) wxMsg.mediaObject;
-			
+
 			StringBuffer msg = new StringBuffer(); 
 			msg.append("description: ");
 			msg.append(wxMsg.description);
@@ -891,16 +868,16 @@ public class HomepageActivity extends Activity implements OnClickListener,Animat
 			msg.append("\n");
 			msg.append("filePath: ");
 			msg.append(obj.filePath);
-			
+
 			Intent intent = new Intent(this, ShowFromWXActivity.class);
 			//intent.putExtra(Constants.ShowMsgActivity.STitle, wxMsg.title);
 			//intent.putExtra(Constants.ShowMsgActivity.SMessage, msg.toString());
 			//intent.putExtra(Constants.ShowMsgActivity.BAThumbData, wxMsg.thumbData);
 			startActivity(intent);
 			finish();*/
-		}
-		
-		
+	}
+
+
 }
 
 
