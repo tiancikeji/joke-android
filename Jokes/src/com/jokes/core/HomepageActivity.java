@@ -122,7 +122,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	//For Paging through joke list
     private JokePageAdapter jokePageAdapter;
     private com.jokes.ext.VerticalViewPager viewPager;
-    private View currentPagerView;
 	private PullToRefreshViewPager mPullToRefreshViewPager;
 	
 	private Handler mainHandler = new Handler(){
@@ -137,8 +136,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				 jokePageAdapter = new JokePageAdapter(HomepageActivity.this.getSupportFragmentManager(), 
 						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler, UID);
 			     viewPager.setAdapter(jokePageAdapter);
-			     currentPagerView = viewPager.getChildAt(0);
-			     jokePageAdapter.setCurrentView(currentPagerView);
 				
 				/*
 				page++;
@@ -158,8 +155,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
-				Button button_favorite_big = (Button)currentPagerView.findViewById(R.id.homepage_button_favorite_big);
-				Button button_favorite_small = (Button)currentPagerView.findViewById(R.id.homepage_button_favorite_small);
+				Button button_favorite_big = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_big);
+				Button button_favorite_small = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_small);
 				button_favorite_big.setVisibility(View.VISIBLE);
 				myAnimation_Alpha = AnimationUtils.loadAnimation(HomepageActivity.this, R.anim.anim_alpha_heart);
 				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
@@ -238,25 +235,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		viewPager.setOnPageChangeListener(this);
 		jokeList = new ArrayList<Joke>();
 		ApiRequests.getJokes(mainHandler, jokeList, UID , 0);
-		
-		
-/*
-		if(loadSettingTime().equals(getTodayToString())){
-		like = new Like();
-
-		ApiRequests.getJokes(mainHandler, jokeList,Constant.uid,page);
-
-		if(loadSettingTime().equals(Tools.getTodayToString())){
-			//不是今天第一次进入
-			framelayout_date.setVisibility(View.GONE);
-		}else{
-			//今天第一次进入
-			textview_date.setText(Tools.getTodayToString());
-			deleteSettingTime();
-			saveSettingTime("true");
-		}
-		weChatShareApi = WeChatShare.regToWx(this);
-		weChatShareApi.handleIntent(getIntent(), this);*/
 	}
 
 	@Override
@@ -293,7 +271,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	 */
 	@Override
 	public void onAnimationEnd(Animation arg0) {
-		(currentPagerView.findViewById(R.id.homepage_button_favorite_big)).setVisibility(View.GONE);
+		(jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_big)).setVisibility(View.GONE);
 	}
 
 	@Override
@@ -322,50 +300,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		Constant.uid = UID;
 	}
 
-	private void initView(){
-		button_setting = (Button)findViewById(R.id.homepage_button_setting);
-		button_refresh = (Button)findViewById(R.id.homepage_button_refresh);
-		button_record = (Button)findViewById(R.id.homepage_button_record);
-		button_favorite_big = (Button)findViewById(R.id.homepage_button_favorite_big);
-		button_favorite_big.setVisibility(View.GONE);
-		button_favorite_small = (Button)findViewById(R.id.homepage_button_favorite_small);
-		textview_numlikes = (TextView)findViewById(R.id.homepage_textview_numlikes);
-		framelayout_play = (FrameLayout)findViewById(R.id.homepage_framelayout_play);
-		//linearlayout_volume = (LinearLayout)findViewById(R.id.homepage_linearlayout_volume);
-		button_share = (Button)findViewById(R.id.homepage_button_share);
-		framelayout_date = (FrameLayout)findViewById(R.id.homepage_framelayout_date);
-		textview_date = (TextView)findViewById(R.id.homepage_textview_date);
-		imageview_pic = (ImageView)findViewById(R.id.homepage_imageview_pic);
-		seekbar = (SeekBar)findViewById(R.id.homepage_seekbar_progress);
-
-		textview_duration = (TextView)findViewById(R.id.homepage_textview_duration);
-		textview_playCount = (TextView)findViewById(R.id.homepage_textview_playcount);
-
-		button_setting.setOnClickListener(this);
-		button_refresh.setOnClickListener(this);
-		button_record.setOnClickListener(this);
-		button_favorite_small.setOnClickListener(this);
-		framelayout_play.setOnClickListener(this);
-		button_share.setOnClickListener(this);
-/*
-		imageview_volume_1 =  (ImageView)findViewById(R.id.homepage_imageview_volume_1);
-		imageview_volume_2 =  (ImageView)findViewById(R.id.homepage_imageview_volume_2);
-		imageview_volume_3 =  (ImageView)findViewById(R.id.homepage_imageview_volume_3);
-		imageview_volume_4 =  (ImageView)findViewById(R.id.homepage_imageview_volume_4);
-		imageview_volume_5 =  (ImageView)findViewById(R.id.homepage_imageview_volume_5);
-		imageview_volume_6 =  (ImageView)findViewById(R.id.homepage_imageview_volume_6);
-		imageview_volume_7 =  (ImageView)findViewById(R.id.homepage_imageview_volume_7);
-		imageview_volume_8 =  (ImageView)findViewById(R.id.homepage_imageview_volume_8);
-		imageview_volume_9 =  (ImageView)findViewById(R.id.homepage_imageview_volume_9);
-		imageview_volume_10 =  (ImageView)findViewById(R.id.homepage_imageview_volume_10);
-		imageview_volume_11 =  (ImageView)findViewById(R.id.homepage_imageview_volume_11);
-		imageview_volume_12 =  (ImageView)findViewById(R.id.homepage_imageview_volume_12);
-		imageview_volume_13 =  (ImageView)findViewById(R.id.homepage_imageview_volume_13);*/
-		linearlayout_progressdialog = (LinearLayout)findViewById(R.id.homepage_linearlayout_progressdialog);
-	}
-
-
-
+	
 	private void initMediaPlayer(){
 		mediaPlayer = new MediaPlayer();
 		mediaPlayer.setOnCompletionListener(this);
@@ -429,68 +364,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		}
 
 	}
-
-
-	/**
-	 * 开始
-	 */
-	/*
-	private void playJoke(View view){
-		try {
-			//((LinearLayout)view.findViewById(R.id.homepage_linearlayout_volume)).setVisibility(View.VISIBLE);
-			jokeCurrent = jokeList.get(jokeIndex);
-			//判断之前的倒计时是否完成，如果countDownTime不等于0，说明用户之前是暂停笑话，而不是笑话播放完成
-			if(countDownTime <=0){
-				startPlayCounttimer(jokeCurrent.getLength());
-			}else{
-				startPlayCounttimer((int)countDownTime);
-			}
-
-			textview_duration.setText(jokeCurrent.getLength()+"\"");
-			//Log.d(DEBUG_TAG, "isPlay = " + isPlay + " , index_joke = " + index_joke);
-			if(!isPlaying && !isPaused){
-				isPlaying = true;
-				AudioUtils.prepareStreamAudio(mediaPlayer, ApiRequests.buildAbsoluteUrl(jokeCurrent.getFullAudioUrl()), this);	
-				mTimer = new Timer();
-				mTimerTask = getTimerTask();
-				mTimer.schedule(mTimerTask, 0, 1000);
-			}else if(isPaused){
-				mediaPlayer.start();
-				isPaused = false;
-			} else{
-
-				//mediaPlayer.start();
-				//isPlay = true;
-			}
-		} catch (IllegalArgumentException e) {
-			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
-		} catch (SecurityException e) {
-			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
-		} catch (IllegalStateException e) {
-			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
-		} catch (IOException e) {
-			Log.e(DEBUG_TAG, "Exception in PlayJoke " + e + ", " + e.getMessage());
-		}
-		framelayout_play.setBackgroundResource(R.drawable.btn);
-		textview_playCount.setVisibility(View.GONE);
-	}*/
-
-
-
-
-	/**
-	 * 停止
-	 */
-	/*private void stopJoke(){
-		//暂停笑话
-		isPlaying = false;
-		AudioUtils.stopPlaying(mediaPlayer);
-		textview_playCount.setVisibility(View.VISIBLE);
-		textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
-		textview_duration.setText(jokeCurrent.getLength()+"\"");
-		linearlayout_volume.setVisibility(View.GONE);
-		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-	}*/
 
 	/**
 	 * 未开始
@@ -601,33 +474,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		// 播放下一条
 		mainHandler.sendEmptyMessage(PLAY_NEXT);*/
 	}
-
-	private TimerTask getTimerTask(){
-		return new TimerTask() {  
-			@Override  
-			public void run() {  
-				if(mediaPlayer==null)  
-					return;  
-				if (mediaPlayer.isPlaying() && seekbar.isPressed() == false) {  
-					handleProgress.sendEmptyMessage(0);  
-				}  
-			}  
-		};  
-	}
-
-	Handler handleProgress = new Handler() {  
-		public void handleMessage(Message msg) {  
-
-			int position = mediaPlayer.getCurrentPosition();  
-			int duration = mediaPlayer.getDuration();  
-
-			if (duration > 0) {  
-				long pos = seekbar.getMax() * position / duration;  
-				seekbar.setProgress((int) pos);  
-			}  
-		};  
-	}; 
-
 	/**
 	 * 给程序加锁，保持CPU 运转，屏幕和键盘灯有可能是关闭的
 	 */
@@ -724,13 +570,10 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				int positionOffsetPixels) {
 			mediaPlayer.reset();
 			jokePageAdapter.resetPlayer();
-			
 		}
 
 		@Override
 		public void onPageSelected(int position) {
-			currentPagerView = viewPager.getChildAt(position);
-			jokePageAdapter.setCurrentView(currentPagerView);
 		}
 
 		@Override

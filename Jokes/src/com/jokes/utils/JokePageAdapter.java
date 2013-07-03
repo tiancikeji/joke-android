@@ -181,6 +181,8 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					startPlayCounttimer((int)countDownTime);
 				}*/
 				
+				
+				
 				if(!isPlaying && !isPaused){
 					isPlaying = true;
 					AudioUtils.prepareStreamAudio(mp, ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()), onPreparedListener);
@@ -242,11 +244,10 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		return jokes.get(Integer.parseInt(indexTextView.getText().toString()));
 	}
 	
-	//Super Hack
-	public void setCurrentView(View view){
-		currentView = view;
+	public View getCurrentView(){
+		return currentView;
 	}
-
+	
 	@Override
 	public void onAnimationEnd(Animation arg0) {
 		likeButton.setVisibility(View.VISIBLE);
@@ -289,5 +290,9 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			}  
 		};  
 	};
+	
+	public void setPrimaryItem(android.view.ViewGroup container, int position, Object object) {
+			currentView = (View)object;
+	}
 
 }
