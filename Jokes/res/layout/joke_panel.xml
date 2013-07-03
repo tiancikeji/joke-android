@@ -162,6 +162,14 @@
 			        android:layout_height="wrap_content"
 			        android:visibility="gone"/>
 
+                    <ImageView
+                        android:id="@+id/homepage_imageview_volume"
+                        android:layout_width="37dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                    	android:layout_marginLeft="30dp"
+                        android:src="@drawable/animation_play"
+                        android:visibility="gone" />
 <!--  
                 <LinearLayout
                     android:id="@+id/homepage_linearlayout_volume"

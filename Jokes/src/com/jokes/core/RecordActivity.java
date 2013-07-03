@@ -6,10 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.PixelFormat;
@@ -96,7 +94,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				break;
 			case HandlerCodes.CREATE_JOKE_SUCCESS:
 				Toast.makeText(RecordActivity.this, "已经上传，请等待审核", Toast.LENGTH_LONG).show();
-				button_send.setEnabled(false);
+//				button_send.setEnabled(false);
+				button_send.setTag(false);
 				CountDownTimer timer = new CountDownTimer(3000, 3000) {
 					@Override
 					public void onTick(long arg0) {
@@ -111,7 +110,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				break;
 			case HandlerCodes.CREATE_JOKE_FAILURE:
 				Toast.makeText(RecordActivity.this, "上传失败了", Toast.LENGTH_LONG).show();
-				button_send.setEnabled(false);
+//				button_send.setEnabled(false);
+				button_send.setTag(false);
 				break;
 			}
 		}
@@ -157,14 +157,18 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			finish();
 			break;
 		case R.id.record_button_send:
-			Joke joke = new Joke();
-			joke.setName("笑话");
-			joke.setDescription("笑话");
-			ApiRequests.addJoke(mainHandler, joke, imageFile, mp3RecordedFile, Constant.uid);
-			Toast.makeText(this, "正在发布...", Toast.LENGTH_SHORT).show();
-			button_send.setEnabled(false);
-			//友盟统计：发布音频
-			UmengAnaly.AnalyOnClickRecordSend(this);
+			if((Boolean)button_send.getTag()){
+				Joke joke = new Joke();
+				joke.setName("笑话");
+				joke.setDescription("笑话");
+				ApiRequests.addJoke(mainHandler, joke, imageFile, mp3RecordedFile, Constant.uid);
+				Toast.makeText(this, "正在发布...", Toast.LENGTH_SHORT).show();
+//				button_send.setEnabled(false);
+				button_send.setTag(false);
+				//友盟统计：发布音频
+				UmengAnaly.AnalyOnClickRecordSend(this);
+			}
+			
 			break;
 		case R.id.record_button_record:
 			//点击开始录音，再次点击停止了录音
@@ -309,7 +313,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	private void init(){
 		button_back = (Button)findViewById(R.id.record_button_back);
 		button_send = (Button)findViewById(R.id.record_button_send);
-		button_send.setBackgroundResource(R.drawable.btn_current);
+//		button_send.setBackgroundResource(R.drawable.btn_current);
+		button_send.setTag(true);
 		button_send.setVisibility(View.GONE);
 		linearlayout_record = (LinearLayout)findViewById(R.id.record_linearlayout_record);
 		button_record = (Button)findViewById(R.id.record_button_record);

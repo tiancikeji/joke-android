@@ -20,9 +20,9 @@ import com.tencent.mm.sdk.platformtools.Util;
 
 public class WeChatShare {
 	
-	private static final String APP_ID = "wxb3b0db608a4925ee";
+	private static final String APP_ID = "wxc15df4cc42ae252b";//"wxb3b0db608a4925ee";
 	//private static final String APP_ID = "wxd930ea5d5a258f4f";
-	private static final String APP_KEY= "037a31a483194fe7d86b10470269590";
+	private static final String APP_KEY= "658010a294485a9e81df8788bd025b14";//"037a31a483194fe7d86b10470269590";
 	
 	public static IWXAPI regToWx(Context context){
 		IWXAPI api;
