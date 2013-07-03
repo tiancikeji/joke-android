@@ -49,14 +49,16 @@
             android:background="@drawable/btn_homepage_record" />
     </LinearLayout>
 
-    <com.jokes.ext.VerticalViewPager
+      <com.handmark.pulltorefresh.extras.viewpager.PullToRefreshViewPager
+        xmlns:ptr="http://schemas.android.com/apk/res-auto"
         android:id="@+id/mainJokeListPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        ptr:ptrAnimationStyle="flip"
+        ptr:ptrHeaderBackground="@android:color/darker_gray"
+        ptr:ptrMode="both" 
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/titleBarLayout" >
-
-    </com.jokes.ext.VerticalViewPager>
+        android:layout_below="@+id/titleBarLayout" />
 
     <LinearLayout
         android:layout_width="fill_parent"

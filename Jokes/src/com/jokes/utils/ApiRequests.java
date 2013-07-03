@@ -14,7 +14,6 @@ import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 import com.jokes.handlers.JokeHandler;
 import com.jokes.objects.GeneralResponse;
 import com.jokes.objects.Joke;
-import com.jokes.objects.Like;
 
 @SuppressWarnings("unchecked")
 public class ApiRequests {

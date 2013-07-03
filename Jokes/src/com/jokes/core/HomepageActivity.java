@@ -21,7 +21,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,6 +36,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.handmark.pulltorefresh.extras.viewpager.PullToRefreshViewPager;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.jokes.ext.VerticalViewPager;
 import com.jokes.ext.VerticalViewPager.OnPageChangeListener;
 import com.jokes.objects.Joke;
 import com.jokes.objects.Like;
@@ -57,7 +60,9 @@ import com.tencent.mm.sdk.openapi.ShowMessageFromWX;
 import com.umeng.analytics.MobclickAgent;
 
 public class HomepageActivity extends FragmentActivity implements OnClickListener,AnimationListener,
-	OnPreparedListener, OnCompletionListener , IWXAPIEventHandler, OnBufferingUpdateListener, OnPageChangeListener{
+	OnPreparedListener, OnCompletionListener , IWXAPIEventHandler, OnBufferingUpdateListener, OnPageChangeListener, 
+	OnRefreshListener<VerticalViewPager>{
+	
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int CHANGEVOLUME = 100002;
 
@@ -118,6 +123,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
     private JokePageAdapter jokePageAdapter;
     private com.jokes.ext.VerticalViewPager viewPager;
     private View currentPagerView;
+	private PullToRefreshViewPager mPullToRefreshViewPager;
 	
 	private Handler mainHandler = new Handler(){
 		@Override
@@ -126,7 +132,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			switch(msg.what){
 			case HandlerCodes.GET_JOKES_SUCCESS:
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = " + jokeList.size());
-				
+				mPullToRefreshViewPager.onRefreshComplete();
 				//linearlayout_progressdialog.setVisibility(View.GONE);
 				 jokePageAdapter = new JokePageAdapter(HomepageActivity.this.getSupportFragmentManager(), 
 						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler, UID);
@@ -224,10 +230,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 		initMediaPlayer();
 
-		viewPager = (com.jokes.ext.VerticalViewPager) findViewById(R.id.mainJokeListPager);
+
+		mPullToRefreshViewPager = (PullToRefreshViewPager) findViewById(R.id.mainJokeListPager);
+		mPullToRefreshViewPager.setOnRefreshListener(this);
+
+		viewPager = mPullToRefreshViewPager.getRefreshableView();
 		viewPager.setOnPageChangeListener(this);
 		jokeList = new ArrayList<Joke>();
-		ApiRequests.getJokes(mainHandler, jokeList, UID , 3);
+		ApiRequests.getJokes(mainHandler, jokeList, UID , 0);
 		
 		
 /*
@@ -737,6 +747,12 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		public void onRecordButtonClick(View view){
 			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
 			startActivity(intent2);
+		}
+
+		@Override
+		public void onRefresh(PullToRefreshBase<VerticalViewPager> refreshView) {
+			ApiRequests.getJokes(mainHandler, jokeList, UID, 0);
+			
 		}
 		
 		
