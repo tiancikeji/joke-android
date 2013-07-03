@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:drawable="@drawable/btn_current_1" android:state_pressed="true"/>
-    <item android:drawable="@drawable/btn_current"/>
+    <item android:drawable="@drawable/btn_current_n" android:state_pressed="true"/>
+    <item android:drawable="@drawable/btn_current_p"/>
 
 </selector>

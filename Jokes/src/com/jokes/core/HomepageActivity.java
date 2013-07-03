@@ -166,12 +166,20 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				myAnimation_Alpha.setDuration(JokePageAdapter.LIKE_BTN_ANI_LEN);
 				button_favorite_big.startAnimation(myAnimation_Alpha);
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
+				button_favorite_small.setTag(true);
+				TextView textview_numlikes = (TextView)currentPagerView.findViewById(R.id.homepage_textview_numlikes);
+				textview_numlikes.setText((Integer.parseInt(textview_numlikes.getText().toString())+1)+"");
 				break;
 			case HandlerCodes.LIKE_FAILURE:
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
-				//jokeCurrent.setIsLike(false);
-				//button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+				Button temp_button_favorite_small = (Button)currentPagerView.findViewById(R.id.homepage_button_favorite_small);
+				TextView temp_textview = (TextView)currentPagerView.findViewById(R.id.homepage_textview_numlikes);
+				if(Integer.parseInt(temp_textview.getText().toString()) != 0){
+					temp_textview.setText((Integer.parseInt(temp_textview.getText().toString())-1)+"");
+				}
+				temp_button_favorite_small.setTag(false);
+				temp_button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
 				break;
 			case HandlerCodes.UNLIKE_FAILURE:
 

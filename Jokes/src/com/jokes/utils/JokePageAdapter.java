@@ -6,6 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.content.Context;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -24,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.jokes.core.HomepageActivity;
 import com.jokes.core.R;
 import com.jokes.ext.PagerAdapter;
 import com.jokes.ext.VerticalViewPager;
@@ -40,6 +43,9 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private OnPreparedListener onPreparedListener;
 	private Handler responseHandler;
 	private Button likeButton;
+//	private ImageView imageview_volume;
+//	private TextView textview_playcount;
+//	private TextView textview_numlikes;
 	private String UID;
 	
 	private boolean isPlaying = false;
@@ -68,6 +74,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	}
 	
 	private void setViewFromJoke(View view, Joke joke, int position){
+		
 		ImageView imageview_pic = (ImageView)view.findViewById(R.id.homepage_imageview_pic);
 		if(joke.getFullPictureUrl() != null && !joke.getFullPictureUrl().equals("null")){
 			new ImageDownLoadTask(joke.getId(),
@@ -85,6 +92,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		}
 		((TextView)view.findViewById(R.id.homepage_textview_playcount)).setText(joke.getNumPlays()+"");
 		((TextView)view.findViewById(R.id.homepage_textview_numlikes)).setText(joke.getNumLikes()+"");	
+		
 		TextView jokeIndexView = (TextView)view.findViewById(R.id.jokeIndexHack); //).setText(position);
 		jokeIndexView.setText(String.valueOf(position));
 		((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setOnClickListener(this);
@@ -94,8 +102,11 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		
 		if(!joke.getIsLike()){
 			likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
-			likeButton.setOnClickListener(this);
+//			likeButton.setOnClickListener(this);
 		}
+		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setOnClickListener(this);
+		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getIsLike());
+		
 	}
 	
 	public void resetPlayer(){
@@ -115,6 +126,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	
 	@Override
 	public Object instantiateItem(View collection, int position) {
+		Log.e("JokepageAdapter", "instantiateItem"+position);
 	    Joke joke = jokes.get(position);
 	    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	    View layout = inflater.inflate(R.layout.joke_panel, null);
@@ -150,7 +162,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
     }
 
 	@Override
-	public void onClick(View view) {
+	public void onClick(final View view) {
 		switch(view.getId()){
 		case R.id.homepage_framelayout_play:
 			playJoke(view);
@@ -158,10 +170,23 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		case R.id.homepage_button_favorite_big:
 			//Button likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
 			//likeButton.setVisibility(View.GONE);
-			Joke joke = getJokeFromView(view);
-			Log.d(DEBUG_TAG, "home button = " + joke.getCreatedAt());
-			ApiRequests.likeJoke(responseHandler, joke.getId() , UID);
+			
+//			Joke joke = getJokeFromView(view);
+//			Log.d(DEBUG_TAG, "home button = " + joke.getCreatedAt());
+//			ApiRequests.likeJoke(responseHandler, joke.getId() , UID);
 		break;
+		case R.id.homepage_button_favorite_small:
+			Button likeButton_small = (Button)view.findViewById(R.id.homepage_button_favorite_small);
+			Joke temp_joke = getJokeFromView(view);
+			boolean islike = (Boolean)((Button)view.findViewById(R.id.homepage_button_favorite_small)).getTag();
+			if(!islike){
+				Log.e("JokePageAdapter","false");
+				ApiRequests.likeJoke(responseHandler, temp_joke.getId() , UID);
+			}else{
+				Log.e("JokePageAdapter","true");
+				ApiRequests.unlikeJoke(responseHandler, temp_joke.getId(), temp_joke.getUserId());
+			}
+			break;
 		}
 		
 	}
@@ -169,6 +194,8 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private void playJoke(View view){
 		if(isPlaying && !isPaused){
 			pauseJoke();
+			AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
+			animationDrawable.stop();
 		} else {
 			Joke joke = getJokeFromView(view);
 			
@@ -182,28 +209,37 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 				}*/
 				
 				if(!isPlaying && !isPaused){
+					//播放音频，去掉播放按钮的三角图片，替换为空白；隐藏播放次数；显示动画图片，开启动画；
+					((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setBackgroundResource(R.drawable.btn);
+					((TextView)view.findViewById(R.id.homepage_textview_playcount)).setVisibility(View.GONE);
+					((ImageView)view.findViewById(R.id.homepage_imageview_volume)).setVisibility(View.VISIBLE);
+					AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
+					animationDrawable.start();
+					
 					isPlaying = true;
 					AudioUtils.prepareStreamAudio(mp, ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()), onPreparedListener);
 					seekBar = (SeekBar)currentView.findViewById(R.id.homepage_seekbar_progress);
 					mTimer = new Timer();
 					mTimerTask = getTimerTask();
 					mTimer.schedule(mTimerTask, 0, 1000);
-					if(!joke.getIsLike()){					
-						likeButton = (Button)currentView.findViewById(R.id.homepage_button_favorite_big);
-						Log.d(DEBUG_TAG, "like button " + likeButton);
-						likeButton.setVisibility(View.VISIBLE);
-						AlphaAnimation fadeInAnimation = new AlphaAnimation(0.0f, 1.0f);
-						fadeInAnimation.setAnimationListener(this);
-						fadeInAnimation.setDuration(LIKE_BTN_ANI_LEN);
-						likeButton.setAnimation(fadeInAnimation);
-						likeButton.startAnimation(fadeInAnimation);
-					}
+//					if(!joke.getIsLike()){					
+//						likeButton = (Button)currentView.findViewById(R.id.homepage_button_favorite_big);
+//						Log.d(DEBUG_TAG, "like button " + likeButton);
+//						likeButton.setVisibility(View.VISIBLE);
+//						AlphaAnimation fadeInAnimation = new AlphaAnimation(0.0f, 1.0f);
+//						fadeInAnimation.setAnimationListener(this);
+//						fadeInAnimation.setDuration(LIKE_BTN_ANI_LEN);
+//						likeButton.setAnimation(fadeInAnimation);
+//						likeButton.startAnimation(fadeInAnimation);
+//					}
 					//mTimer = new Timer();
 					//mTimerTask = getTimerTask();
 					//mTimer.schedule(mTimerTask, 0, 1000);
 				}else if(isPaused){
 					mp.start();
 					isPaused = false;
+					AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
+					animationDrawable.start();
 				} else{
 				}
 			} catch (IllegalArgumentException e) {
