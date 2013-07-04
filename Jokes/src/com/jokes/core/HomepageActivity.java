@@ -32,6 +32,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -164,14 +165,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				button_favorite_big.startAnimation(myAnimation_Alpha);
 				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
 				button_favorite_small.setTag(true);
-				TextView textview_numlikes = (TextView)currentPagerView.findViewById(R.id.homepage_textview_numlikes);
+				TextView textview_numlikes = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_numlikes);
 				textview_numlikes.setText((Integer.parseInt(textview_numlikes.getText().toString())+1)+"");
 				break;
 			case HandlerCodes.LIKE_FAILURE:
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
-				Button temp_button_favorite_small = (Button)currentPagerView.findViewById(R.id.homepage_button_favorite_small);
-				TextView temp_textview = (TextView)currentPagerView.findViewById(R.id.homepage_textview_numlikes);
+				Button temp_button_favorite_small = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_small);
+				TextView temp_textview = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_numlikes);
 				if(Integer.parseInt(temp_textview.getText().toString()) != 0){
 					temp_textview.setText((Integer.parseInt(temp_textview.getText().toString())-1)+"");
 				}
@@ -241,6 +242,13 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 		viewPager = mPullToRefreshViewPager.getRefreshableView();
 		viewPager.setOnPageChangeListener(this);
+		
+		viewPager.setPadding(0, 5, 0, 5);
+		//viewPager.setPageMargin(getResources().getDimensionPixelOffset(R.dimen.viewpager_margin));
+		viewPager.setVerticalFadingEdgeEnabled(true);
+		viewPager.setFadingEdgeLength(10);
+		
+		
 		jokeList = new ArrayList<Joke>();
 		ApiRequests.getJokes(mainHandler, jokeList, UID , 0);
 	}

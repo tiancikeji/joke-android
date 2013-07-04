@@ -23,6 +23,8 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -126,7 +128,6 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	
 	@Override
 	public Object instantiateItem(View collection, int position) {
-		Log.e("JokepageAdapter", "instantiateItem"+position);
 	    Joke joke = jokes.get(position);
 	    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	    View layout = inflater.inflate(R.layout.joke_panel, null);
@@ -329,6 +330,8 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	
 	public void setPrimaryItem(android.view.ViewGroup container, int position, Object object) {
 			currentView = (View)object;
+			//RelativeLayout imgFrameLayout = (RelativeLayout) currentView.findViewById(R.id.bottomSpacerPanel);
+			//0imgFrameLayout.setVisibility(View.GONE);
 	}
 
 }
