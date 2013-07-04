@@ -35,6 +35,7 @@
         <activity
             android:name="com.jokes.core.HomepageActivity"
             android:screenOrientation="portrait"
+            android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
@@ -33,6 +34,7 @@ import com.jokes.core.R;
 import com.jokes.ext.PagerAdapter;
 import com.jokes.ext.VerticalViewPager;
 import com.jokes.objects.Joke;
+import com.tencent.mm.sdk.openapi.IWXAPI;
 
 public class JokePageAdapter extends PagerAdapter implements OnClickListener, AnimationListener {
 	private static final String DEBUG_TAG = "JOKE";
@@ -60,7 +62,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private TimerTask mTimerTask;
 	
 	public JokePageAdapter(android.support.v4.app.FragmentManager fm, Context context, List<Joke> jokes, MediaPlayer mp,
-			OnPreparedListener onPreparedListener, Handler responseHandler, String UID){
+			OnPreparedListener onPreparedListener, Handler responseHandler, String UID,IWXAPI weChatShareApi){
 		this.context = context;
 		this.jokes = jokes;
 		this.mp = mp;
@@ -81,6 +83,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		if(joke.getFullPictureUrl() != null && !joke.getFullPictureUrl().equals("null")){
 			new ImageDownLoadTask(joke.getId(),
 					ApiRequests.buildAbsoluteUrl(joke.getFullPictureUrl()), context).execute(imageview_pic);
+			imageview_pic.setTag(joke.getId());
 		}
 		
 		((TextView)view.findViewById(R.id.homepage_textview_duration)).setText(joke.getLength() + "\"");
@@ -108,7 +111,8 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		}
 		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setOnClickListener(this);
 		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getIsLike());
-		
+		((Button)view.findViewById(R.id.homepage_button_share)).setOnClickListener(this);
+		((Button)view.findViewById(R.id.homepage_button_share)).setTag(""+ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()));
 	}
 	
 	public void resetPlayer(){
@@ -187,6 +191,15 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 				Log.e("JokePageAdapter","true");
 				ApiRequests.unlikeJoke(responseHandler, temp_joke.getId(), temp_joke.getUserId());
 			}
+			break;
+		case R.id.homepage_button_share:
+//			WeChatShare.sendAppInfo(weChatShareApi, context.getResources(), context);
+			Message msg = new Message();
+			msg.what = HandlerCodes.MESSAGE_SHARE;
+			Bundle bundle = new Bundle();
+//			bundle.putString("joke_id", ""+((Button)view.findViewById(R.id.homepage_button_share)).getTag());
+			msg.setData(bundle);
+			responseHandler.sendMessage(msg);
 			break;
 		}
 		

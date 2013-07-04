@@ -27,6 +27,8 @@ public class HandlerCodes {
 	public static final int CREATE_FEEDBACK_SUCCESS = 14;
 	public static final int CREATE_FEEDBACK_FAILURE = 15;
 	
+
+	public static final int MESSAGE_SHARE = 16;//通知开启分享功能
 	
 	public static final int CLOSE = 99;
 

@@ -68,4 +68,50 @@
         android:orientation="horizontal" >
     </LinearLayout>
 
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center_horizontal|bottom"
+        android:orientation="vertical">
+        
+        <LinearLayout 
+        	android:id="@+id/homepage_linearlayout_share"
+        	android:layout_width="200dp"
+        	android:layout_height="wrap_content"
+        	android:orientation="vertical"
+        	android:gravity="center"
+        	android:visibility="gone"
+        	android:background="#80cccccc">
+        	
+            <Button 
+	            android:id="@+id/homepage_button_friendscircle"
+	            android:layout_width="150dp"
+	        	android:layout_height="40dp"
+	        	android:layout_marginTop="5dp"
+	        	android:text="分享到朋友圈"
+	        	android:textSize="10sp"
+	        	android:onClick="onShareToFriendsCircleButtonClick"
+	        	android:background="@drawable/btn_current_2"/>
+	        <Button 
+	            android:id="@+id/homepage_button_sharetofriend"
+	            android:layout_width="150dp"
+	        	android:layout_height="40dp"
+	        	android:layout_marginTop="5dp"
+	        	android:layout_marginBottom="5dp"
+	        	android:text="分享给微信好友"
+	        	android:textSize="10sp"
+	        	android:onClick="onShareToFriendButtonClick"
+	        	android:background="@drawable/btn_current_2"/>
+	        <Button 
+	            android:id="@+id/homepage_button_cancel"
+	            android:layout_width="150dp"
+	        	android:layout_height="40dp"
+	        	android:layout_marginBottom="5dp"
+	        	android:text="取消"
+	        	android:textSize="10sp"
+	        	android:onClick="onShareToCancelButtonClick"
+	        	android:background="@drawable/btn_current_2"/>
+        </LinearLayout>
+        
+    </LinearLayout>
 </RelativeLayout>

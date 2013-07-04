@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -28,6 +29,7 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -98,7 +100,9 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	ImageView imageview_volume_13;
 
 	LinearLayout linearlayout_progressdialog;//正在加载提示
-
+	
+	LinearLayout linearlayout_share;//选择分享方式的linearlayout
+	
 	private List<Joke> jokeList;
 	private Like like;
 	private Joke jokeCurrent;//正在播放的音频 Play the audio
@@ -135,7 +139,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				mPullToRefreshViewPager.onRefreshComplete();
 				//linearlayout_progressdialog.setVisibility(View.GONE);
 				 jokePageAdapter = new JokePageAdapter(HomepageActivity.this.getSupportFragmentManager(), 
-						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler, UID);
+						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler, UID, weChatShareApi);
 			     viewPager.setAdapter(jokePageAdapter);
 				
 				/*
@@ -196,6 +200,9 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			case HandlerCodes.CREATE_JOKE_FAILURE:
 				Log.d(DEBUG_TAG, "Create joke failure");
 				break;
+			case HandlerCodes.MESSAGE_SHARE:
+				startAnimShare();
+				break;
 			}
 		}
 	};
@@ -236,7 +243,9 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 		initMediaPlayer();
 
-
+		weChatShareApi = WeChatShare.regToWx(this);
+		weChatShareApi.handleIntent(getIntent(), this);
+		
 		mPullToRefreshViewPager = (PullToRefreshViewPager) findViewById(R.id.mainJokeListPager);
 		mPullToRefreshViewPager.setOnRefreshListener(this);
 
@@ -361,7 +370,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 			break;
 		case R.id.homepage_button_share:
-			WeChatShare.sendAppInfo(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
+//			WeChatShare.sendAppInfo(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
 
 			break;
 		case R.id.homepage_framelayout_play:
@@ -479,6 +488,11 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	public void onCompletion(MediaPlayer mp) {
 		mp.reset();
 		jokePageAdapter.resetPlayer();
+		AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).getDrawable();
+		animationDrawable.stop();
+		((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).setVisibility(View.GONE);
+		framelayout_play = (FrameLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_framelayout_play);
+		framelayout_play.setBackgroundResource(R.drawable.playback_play);
 		//播放结束，先将播放状态还原为未播放状态
 		/*
 		currentJoke();
@@ -614,6 +628,104 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			
 		}
 		
+		/**
+		 * 加载分享选择框动画
+		 */
+		private void startAnimShare(){
+			linearlayout_share = (LinearLayout)findViewById(R.id.homepage_linearlayout_share);//选择分享方式的linearlayout
+			
+			//判断是否支持分享到朋友圈
+//			if(!WeChatShare.checkIsShareToFriendsCircle(weChatShareApi)){
+			if(true){
+				Button button_shareToFriendsCircle = (Button)findViewById(R.id.homepage_button_friendscircle);
+				button_shareToFriendsCircle.setVisibility(View.GONE);
+			}
+			int yOffset  = (int)(linearlayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);
+
+			Animation animation = new TranslateAnimation(0F,0F, yOffset,0);
+			animation.setDuration(3000);               //设置动画持续时间              
+			animation.setRepeatCount(0);    
+			animation.setAnimationListener(new AnimationListener(){
+
+				@Override
+				public void onAnimationEnd(Animation arg0) {
+					linearlayout_share.setVisibility(View.VISIBLE);
+				}
+
+				@Override
+				public void onAnimationRepeat(Animation arg0) {
+				}
+
+				@Override
+				public void onAnimationStart(Animation arg0) {
+				}
+				
+			});
+			linearlayout_share.setVisibility(View.VISIBLE);
+			linearlayout_share.startAnimation(animation);
+		}
+	
+	/**
+	 * 分享到朋友圈
+	 */
+	public void onShareToFriendsCircleButtonClick(View view){
+		
+//		WeChatShare.sendAppInfoToFriendsFriendsCircle(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
+		WeChatShare.sendMusic(weChatShareApi, 
+				HomepageActivity.this.getResources(), 
+				HomepageActivity.this, 
+				""+(((Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_share)).getTag()),
+				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()),
+				2);
+		linearlayout_share.setVisibility(View.GONE);
+	}
+	
+	/**
+	 * 分享到微信好友
+	 */
+	public void onShareToFriendButtonClick(View view){
+		
+		WeChatShare.sendMusic(weChatShareApi, 
+				HomepageActivity.this.getResources(), 
+				HomepageActivity.this, 
+				""+(((Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_share)).getTag()),
+				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()),
+				1);
+		linearlayout_share.setVisibility(View.GONE);
+	}
+	
+	/**
+	 * 取消分享
+	 */
+	public void onShareToCancelButtonClick(View view){
+		linearlayout_share = (LinearLayout)findViewById(R.id.homepage_linearlayout_share);//选择分享方式的linearlayout
+		
+		int yOffset  = (int)(linearlayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);//偏移
+
+		Animation animation = new TranslateAnimation(0F,0F, 0,yOffset);
+		animation.setDuration(3000);               //设置动画持续时间              
+		animation.setRepeatCount(0);    
+		animation.setAnimationListener(new AnimationListener(){
+
+			@Override
+			public void onAnimationEnd(Animation arg0) {
+				linearlayout_share.setVisibility(View.GONE);
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation arg0) {
+			}
+
+			@Override
+			public void onAnimationStart(Animation arg0) {
+			}
+			
+		});
+		linearlayout_share.startAnimation(animation);
+		
+	}
+	
+	
 		
 }
 
