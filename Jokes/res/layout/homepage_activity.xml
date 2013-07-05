@@ -49,6 +49,32 @@
             android:onClick="onRecordButtonClick"
             android:background="@drawable/btn_homepage_record" />
     </LinearLayout>
+    
+            <FrameLayout
+        android:id="@+id/homepage_framelayout_date"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+         android:layout_below="@+id/titleBarLayout"
+        android:orientation="horizontal" >
+        
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/hello_world"
+            android:layout_gravity="center"
+            android:src="@drawable/homepage_activity_date_line" />
+
+        <TextView
+            android:id="@+id/homepage_textview_date"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:textColor="#999999"
+            android:textSize="12sp" />
+    </FrameLayout>
+        
 
       <com.handmark.pulltorefresh.extras.viewpager.PullToRefreshViewPager
         xmlns:ptr="http://schemas.android.com/apk/res-auto"
@@ -59,7 +85,7 @@
         ptr:ptrHeaderBackground="@android:color/darker_gray"
         ptr:ptrMode="both" 
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/titleBarLayout" />
+        android:layout_below="@+id/homepage_framelayout_date" />
 
     <LinearLayout
         android:layout_width="fill_parent"

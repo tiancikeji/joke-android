@@ -60,6 +60,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	
 	private Timer mTimer;
 	private TimerTask mTimerTask;
+	private Joke joke;
 	
 	public JokePageAdapter(android.support.v4.app.FragmentManager fm, Context context, List<Joke> jokes, MediaPlayer mp,
 			OnPreparedListener onPreparedListener, Handler responseHandler, String UID,IWXAPI weChatShareApi){
@@ -101,8 +102,6 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		TextView jokeIndexView = (TextView)view.findViewById(R.id.jokeIndexHack); //).setText(position);
 		jokeIndexView.setText(String.valueOf(position));
 		((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setOnClickListener(this);
-		TextView dateTextView = (TextView)view.findViewById(R.id.homepage_textview_date);
-		dateTextView.setText(joke.getCreatedAt().substring(0, 11));
 		//new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(originalString)
 		
 		if(!joke.getIsLike()){
@@ -132,7 +131,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	
 	@Override
 	public Object instantiateItem(View collection, int position) {
-	    Joke joke = jokes.get(position);
+	    joke = jokes.get(position);
 	    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	    View layout = inflater.inflate(R.layout.joke_panel, null);
 	    setViewFromJoke(layout, joke, position); 
@@ -211,7 +210,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
 			animationDrawable.stop();
 		} else {
-			Joke joke = getJokeFromView(view);
+			joke = getJokeFromView(view);
 			
 			try {
 				//((LinearLayout)view.findViewById(R.id.homepage_linearlayout_volume)).setVisibility(View.VISIBLE);
@@ -286,6 +285,10 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		isPaused = true;
 	}
 	
+	public Joke getCurrentJoke(){
+		return joke;
+	}
+	
 	private Joke getJokeFromView(View view){
 		TextView indexTextView = (TextView)view.findViewById(R.id.jokeIndexHack);
 		if(null == indexTextView){
@@ -352,7 +355,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	 */
 	@Override
 	public float getPageHeight(int position) {
-		return(0.88f);
+		return(0.9f);
 	};
 	//@Override public float getPageWidth(int position) { return(0.5f); }
 }

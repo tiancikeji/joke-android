@@ -140,6 +140,10 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				 jokePageAdapter = new JokePageAdapter(HomepageActivity.this.getSupportFragmentManager(), 
 						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler, UID, weChatShareApi);
 			     viewPager.setAdapter(jokePageAdapter);
+			     if(jokeList.size() > 0){
+			    	 TextView dateTextView = (TextView)findViewById(R.id.homepage_textview_date);
+			    	 dateTextView.setText(jokeList.get(0).getCreatedAt().substring(0, 11)); 
+			     }
 				
 				/*
 				page++;
@@ -251,7 +255,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		viewPager = mPullToRefreshViewPager.getRefreshableView();
 		viewPager.setOnPageChangeListener(this);
 		
-		viewPager.setPadding(0, 5, 0, 5);
+		viewPager.setPadding(0, 5, 0, 15);
 		//viewPager.setPageMargin(getResources().getDimensionPixelOffset(R.dimen.viewpager_margin));
 		viewPager.setVerticalFadingEdgeEnabled(true);
 		viewPager.setFadingEdgeLength(10);
@@ -603,6 +607,9 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 		@Override
 		public void onPageSelected(int position) {
+			TextView dateTextView = (TextView)findViewById(R.id.homepage_textview_date);
+			Joke joke = jokePageAdapter.getCurrentJoke();
+			dateTextView.setText(joke.getCreatedAt().substring(0, 11));
 		}
 
 		@Override
