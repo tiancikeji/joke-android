@@ -60,6 +60,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
+        android:visibility="gone"
         android:background="@drawable/item2" >
 
         <TextView
@@ -118,11 +119,13 @@
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="1dp"
+            android:visibility="gone"
             android:background="@drawable/line" />
 
         <FrameLayout
             android:id="@+id/setting_framelayout_update"
             android:layout_width="fill_parent"
+            android:visibility="gone"
             android:layout_height="66dp" >
 
             <TextView

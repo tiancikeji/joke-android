@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +17,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -314,6 +317,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 	}
 	
+	@SuppressLint("NewApi")
 	private void setUid(){
 		SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
 		final String preferencesUidString = preferences.getString(Constant.PREFERENCES_UID_KEY, null);
@@ -641,15 +645,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			linearlayout_share = (LinearLayout)findViewById(R.id.homepage_linearlayout_share);//选择分享方式的linearlayout
 			
 			//判断是否支持分享到朋友圈
-//			if(!WeChatShare.checkIsShareToFriendsCircle(weChatShareApi)){
-			if(true){
+			if(!WeChatShare.checkIsShareToFriendsCircle(weChatShareApi)){
 				Button button_shareToFriendsCircle = (Button)findViewById(R.id.homepage_button_friendscircle);
 				button_shareToFriendsCircle.setVisibility(View.GONE);
 			}
 			int yOffset  = (int)(linearlayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);
 
 			Animation animation = new TranslateAnimation(0F,0F, yOffset,0);
-			animation.setDuration(3000);               //设置动画持续时间              
+			animation.setDuration(2000);               //设置动画持续时间              
 			animation.setRepeatCount(0);    
 			animation.setAnimationListener(new AnimationListener(){
 
@@ -675,15 +678,13 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	 * 分享到朋友圈
 	 */
 	public void onShareToFriendsCircleButtonClick(View view){
-		
-//		WeChatShare.sendAppInfoToFriendsFriendsCircle(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
-		WeChatShare.sendMusic(weChatShareApi, 
+		linearlayout_share.setVisibility(View.GONE);
+		WeChatShare.sendMusicToFriendsCircle(weChatShareApi, 
 				HomepageActivity.this.getResources(), 
 				HomepageActivity.this, 
 				""+(((Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_share)).getTag()),
-				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()),
-				2);
-		linearlayout_share.setVisibility(View.GONE);
+				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()));
+		
 	}
 	
 	/**
@@ -691,12 +692,11 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	 */
 	public void onShareToFriendButtonClick(View view){
 		
-		WeChatShare.sendMusic(weChatShareApi, 
+		WeChatShare.sendMusicToFriend(weChatShareApi, 
 				HomepageActivity.this.getResources(), 
 				HomepageActivity.this, 
 				""+(((Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_share)).getTag()),
-				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()),
-				1);
+				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()));
 		linearlayout_share.setVisibility(View.GONE);
 	}
 	
@@ -709,7 +709,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		int yOffset  = (int)(linearlayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);//偏移
 
 		Animation animation = new TranslateAnimation(0F,0F, 0,yOffset);
-		animation.setDuration(3000);               //设置动画持续时间              
+		animation.setDuration(2000);               //设置动画持续时间              
 		animation.setRepeatCount(0);    
 		animation.setAnimationListener(new AnimationListener(){
 
