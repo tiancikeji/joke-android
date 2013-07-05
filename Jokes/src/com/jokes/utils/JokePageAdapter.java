@@ -347,4 +347,12 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			//0imgFrameLayout.setVisibility(View.GONE);
 	}
 
+	/*
+	 * Trick PageAdapter into thinking height 
+	 */
+	@Override
+	public float getPageHeight(int position) {
+		return(0.88f);
+	};
+	//@Override public float getPageWidth(int position) { return(0.5f); }
 }
