@@ -79,6 +79,11 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		return jokes.size();
 	}
 	
+	public void addToJokeListAndRefresh(List<Joke> moreJokes){
+		jokes.addAll(moreJokes);
+		this.notifyDataSetChanged();
+	}
+	
 	private void setViewFromJoke(View view, Joke joke, int position){
 		
 		ImageView imageview_pic = (ImageView)view.findViewById(R.id.homepage_imageview_pic);
@@ -214,16 +219,6 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			joke = getJokeFromView(view);
 			
 			try {
-				//((LinearLayout)view.findViewById(R.id.homepage_linearlayout_volume)).setVisibility(View.VISIBLE);
-				/*
-				if(countDownTime <=0){
-					startPlayCounttimer(jokeCurrent.getLength());
-				}else{
-					startPlayCounttimer((int)countDownTime);
-				}*/
-				
-				
-				
 				if(!isPlaying && !isPaused){
 					//播放音频，去掉播放按钮的三角图片，替换为空白；隐藏播放次数；显示动画图片，开启动画；
 					((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setBackgroundResource(R.drawable.btn);

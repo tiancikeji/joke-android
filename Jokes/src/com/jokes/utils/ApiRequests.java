@@ -28,7 +28,7 @@ public class ApiRequests {
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
 	
 	
-	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid, final int page){
+	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid, final int page, final boolean clearList){
 		new Thread(new Runnable() {	
 			@Override
 			public void run() {
@@ -38,7 +38,9 @@ public class ApiRequests {
 				String responseStr = "";
 				try {
 					responseStr = response.body();
-					jokes.clear(); 
+					if(clearList){
+						jokes.clear();
+					}
 					jokes.addAll((List<Joke>)handler.parseResponse(responseStr));
 					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
 				} catch (HttpRequestException e) {

@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
+import android.graphics.AvoidXfermode.Mode;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
@@ -25,6 +26,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -70,6 +72,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int CHANGEVOLUME = 100002;
+	private static final int DATE_STR_LEN_MINUS_TIME = 11;
 
 	Button button_setting;//设置按钮
 	Button button_refresh;//刷新
@@ -86,22 +89,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	SeekBar seekbar;//播放进度条
 	TextView textview_duration;//时长
 	TextView textview_playCount;//播放次数
-
-	ImageView imageview_volume_1;
-	ImageView imageview_volume_2;
-	ImageView imageview_volume_3;
-	ImageView imageview_volume_4;
-	ImageView imageview_volume_5;
-	ImageView imageview_volume_6;
-	ImageView imageview_volume_7;
-	ImageView imageview_volume_8;
-	ImageView imageview_volume_9;
-	ImageView imageview_volume_10;
-	ImageView imageview_volume_11;
-	ImageView imageview_volume_12;
-	ImageView imageview_volume_13;
-
-	LinearLayout linearlayout_progressdialog;//正在加载提示
 	
 	LinearLayout linearlayout_share;//选择分享方式的linearlayout
 	
@@ -130,6 +117,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
     private JokePageAdapter jokePageAdapter;
     private com.jokes.ext.VerticalViewPager viewPager;
 	private PullToRefreshViewPager mPullToRefreshViewPager;
+	private int currentPagingJokePage = 1;
 	
 	private Handler mainHandler = new Handler(){
 		@Override
@@ -137,25 +125,26 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 			switch(msg.what){
 			case HandlerCodes.GET_JOKES_SUCCESS:
+			{
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = " + jokeList.size());
 				mPullToRefreshViewPager.onRefreshComplete();
-				//linearlayout_progressdialog.setVisibility(View.GONE);
-				 jokePageAdapter = new JokePageAdapter(HomepageActivity.this.getSupportFragmentManager(), 
-						 HomepageActivity.this, jokeList, mediaPlayer, HomepageActivity.this, mainHandler, UID, weChatShareApi);
-			     viewPager.setAdapter(jokePageAdapter);
-			     if(jokeList.size() > 0){
-			    	 TextView dateTextView = (TextView)findViewById(R.id.homepage_textview_date);
-			    	 dateTextView.setText(jokeList.get(0).getCreatedAt().substring(0, 11)); 
-			     }
-				
-				/*
-				page++;
-				jokeIndex = 0;
-				if(!isPlay){
-					loadJoke();
-					linearlayout_progressdialog.setVisibility(View.GONE);
-				}*/
+				if(currentPagingJokePage <= 1){
+					jokePageAdapter = new JokePageAdapter(
+							HomepageActivity.this.getSupportFragmentManager(),
+							HomepageActivity.this, jokeList, mediaPlayer,
+							HomepageActivity.this, mainHandler, UID, weChatShareApi);
+					viewPager.setAdapter(jokePageAdapter);
+					if (jokeList.size() > 0) {
+						TextView dateTextView = (TextView) findViewById(R.id.homepage_textview_date);
+						dateTextView.setText(jokeList.get(0).getCreatedAt()
+								.substring(0, DATE_STR_LEN_MINUS_TIME));
+					}
+				} else {
+					//jokePageAdapter.addToJokeListAndRefresh(jokeList);
+					jokePageAdapter.notifyDataSetChanged();
+				}
 				break;
+			}
 			case HandlerCodes.GET_JOKES_FAILURE:
 //				linearlayout_progressdialog.setVisibility(View.GONE);
 				if(page == 0){
@@ -182,6 +171,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			case HandlerCodes.LIKE_FAILURE:
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
+			{
 				Button temp_button_favorite_small = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_small);
 				TextView temp_textview = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_numlikes);
 				if(Integer.parseInt(temp_textview.getText().toString()) != 0){
@@ -190,6 +180,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				temp_button_favorite_small.setTag(false);
 				temp_button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
 				break;
+			}
 			case HandlerCodes.UNLIKE_FAILURE:
 
 				break;
@@ -266,7 +257,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		
 		
 		jokeList = new ArrayList<Joke>();
-		ApiRequests.getJokes(mainHandler, jokeList, UID , 0);
+		ApiRequests.getJokes(mainHandler, jokeList, UID , 0, true);
 	}
 
 	@Override
@@ -351,7 +342,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			break;
 		case R.id.homepage_button_refresh:
 			page = 2;
-			ApiRequests.getJokes(mainHandler, jokeList, UID, page);
+			ApiRequests.getJokes(mainHandler, jokeList, UID, page, true);
 			break;
 		case R.id.homepage_button_record:
 			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
@@ -483,6 +474,12 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	@Override
 	public void onPrepared(MediaPlayer arg0) {
 		arg0.start();
+		//Fix the length of the joke if it is wrong, a temp fix for uploading using web version not having length
+		View view = jokePageAdapter.getCurrentView();
+		Joke joke = jokePageAdapter.getJokeFromView(view);
+		int length = (int) Math.round(((float)arg0.getDuration() / 1000.0)); 
+		joke.setLength(length);
+		((TextView)view.findViewById(R.id.homepage_textview_duration)).setText(length + "\"");
 	}
 	
 	@Override
@@ -635,7 +632,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 		@Override
 		public void onRefresh(PullToRefreshBase<VerticalViewPager> refreshView) {
-			ApiRequests.getJokes(mainHandler, jokeList, UID, 0);
+			if(refreshView.getCurrentMode() == com.handmark.pulltorefresh.library.PullToRefreshBase.Mode.PULL_FROM_END){
+				currentPagingJokePage++;
+				ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, false);
+				
+			} else {
+				currentPagingJokePage = 1;
+				ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, true);
+			}
 			
 		}
 		
