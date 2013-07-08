@@ -6,19 +6,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
-import android.graphics.AvoidXfermode.Mode;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -26,7 +23,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -468,7 +464,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	public void onPrepared(MediaPlayer arg0) {
 		arg0.start();
 		jokePageAdapter.startPlayAnimation();
-		ApiRequests.addPlay(mainHandler, jokePageAdapter.getCurrentJoke(), Constant.uid);
+		Joke joke = jokePageAdapter.getCurrentJoke();
+		ApiRequests.addPlay(mainHandler, joke, Constant.uid);
 		//Fix the length of the joke if it is wrong, a temp fix for uploading using web version not having length
 		/*View view = jokePageAdapter.getCurrentView();
 		Joke joke = jokePageAdapter.getJokeFromView(view);
@@ -597,6 +594,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			TextView dateTextView = (TextView)findViewById(R.id.homepage_textview_date);
 			Joke joke = jokePageAdapter.getCurrentJoke();
 			dateTextView.setText(joke.getCreatedAt().substring(0, 11));
+			//TextView playCountTextView = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_playcount);
+			//playCountTextView.setText(String.valueOf(joke.getNumPlays()));
 		}
 
 		@Override

@@ -209,7 +209,10 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 				if(!isPlaying && !isPaused){
 					//播放音频，去掉播放按钮的三角图片，替换为空白；隐藏播放次数；显示动画图片，开启动画；
 					((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setBackgroundResource(R.drawable.btn);
-					((TextView)view.findViewById(R.id.homepage_textview_playcount)).setVisibility(View.GONE);
+					TextView playCountTextView = (TextView)view.findViewById(R.id.homepage_textview_playcount);
+					playCountTextView.setText(String.valueOf(joke.getNumPlays()));
+					joke.setNumPlays(joke.getNumPlays() + 1);
+					playCountTextView.setVisibility(View.GONE);
 					((ImageView)view.findViewById(R.id.homepage_imageview_volume)).setVisibility(View.VISIBLE);
 					
 					isPlaying = true;
