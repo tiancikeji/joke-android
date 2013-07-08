@@ -116,7 +116,6 @@ public class ApiRequests {
 				HttpRequest response = HttpRequest.post(LIKE_URL, true, "myjoke_id",
 						jokeId, "uid", userId, "isLike", 1);
 				final String responseStr = response.body();
-				Log.e("ApiRequests", responseStr + "=" + jokeId + "=" + userId);
 				try {
 					JSONObject resp = new JSONObject(responseStr);
 					if(resp.getBoolean("success")){

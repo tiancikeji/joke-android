@@ -160,7 +160,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Button button_favorite_big = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_big);
-				Log.e("喜欢：", "喜欢");
 				linearlayout_like_small = ((LinearLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_linearlayout_favorite_small));
 				linearlayout_like_small.setClickable(true);
 				linearlayout_like_small.setTag(true);

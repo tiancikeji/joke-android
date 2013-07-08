@@ -118,6 +118,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		((Button)view.findViewById(R.id.homepage_button_share)).setOnClickListener(this);
 		((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small)).setOnClickListener(this);
 		((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small)).setTag(joke.getIsLike());
+		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getId());
 		((Button)view.findViewById(R.id.homepage_button_share)).setTag(""+ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()));
 	}
 	
@@ -183,12 +184,12 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			LinearLayout linearlayout_like_small = ((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small));
 			
 			linearlayout_like_small.setClickable(false);
-			Joke temp_joke = getJokeFromView(view);
+//			Joke temp_joke = getJokeFromView(view);
 			boolean islike = (Boolean)(linearlayout_like_small.getTag());
 			if(!islike){
-				ApiRequests.likeJoke(responseHandler, temp_joke.getId() , UID);
+				ApiRequests.likeJoke(responseHandler, Integer.parseInt(""+((Button)view.findViewById(R.id.homepage_button_favorite_small)).getTag()) , UID);
 			}else{
-				ApiRequests.unlikeJoke(responseHandler, temp_joke.getId(), UID);
+				ApiRequests.unlikeJoke(responseHandler, Integer.parseInt(""+((Button)view.findViewById(R.id.homepage_button_favorite_small)).getTag()), UID);
 			}
 			break;
 		case R.id.homepage_button_share:
