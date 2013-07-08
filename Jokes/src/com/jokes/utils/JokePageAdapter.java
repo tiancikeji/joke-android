@@ -17,20 +17,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.LinearLayout;
 
-import com.jokes.core.HomepageActivity;
 import com.jokes.core.R;
 import com.jokes.ext.PagerAdapter;
 import com.jokes.ext.VerticalViewPager;
@@ -62,6 +58,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private Timer mTimer;
 	private TimerTask mTimerTask;
 	private Joke joke;
+	private AnimationDrawable animationDrawable;
 	
 	public JokePageAdapter(android.support.v4.app.FragmentManager fm, Context context, List<Joke> jokes, MediaPlayer mp,
 			OnPreparedListener onPreparedListener, Handler responseHandler, String UID,IWXAPI weChatShareApi){
@@ -155,17 +152,6 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	public boolean isViewFromObject(View view, Object object) {
 	    return view == object;
 	}
-/*
-	@Override
-	public Fragment getItem(int index) {
-		Joke joke = jokes.get(index);
-        Fragment fragment = new JokeFragment();
-        Bundle args = new Bundle();
-        // Our object is just an integer :-P
-        //args.putInt(DemoObjectFragment.ARG_OBJECT, i + 1);
-        //fragment.setArguments(args);
-        return fragment;
-	}*/
 	
     @Override
     public CharSequence getPageTitle(int position) {
@@ -210,10 +196,11 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		
 	}
 	
+	
 	private void playJoke(View view){
 		if(isPlaying && !isPaused){
 			pauseJoke();
-			AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
+			animationDrawable = getAnimationDrawable(view);
 			animationDrawable.stop();
 		} else {
 			joke = getJokeFromView(view);
@@ -224,32 +211,20 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setBackgroundResource(R.drawable.btn);
 					((TextView)view.findViewById(R.id.homepage_textview_playcount)).setVisibility(View.GONE);
 					((ImageView)view.findViewById(R.id.homepage_imageview_volume)).setVisibility(View.VISIBLE);
-					AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
-					animationDrawable.start();
 					
 					isPlaying = true;
+					
+					//FIXME this is not actually working
+					((ProgressBar)currentView.findViewById(R.id.bufferingAudioSpinner)).setVisibility(View.VISIBLE);
 					AudioUtils.prepareStreamAudio(mp, ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()), onPreparedListener);
 					seekBar = (SeekBar)currentView.findViewById(R.id.homepage_seekbar_progress);
 					mTimer = new Timer();
 					mTimerTask = getTimerTask();
 					mTimer.schedule(mTimerTask, 0, 1000);
-//					if(!joke.getIsLike()){					
-//						likeButton = (Button)currentView.findViewById(R.id.homepage_button_favorite_big);
-//						Log.d(DEBUG_TAG, "like button " + likeButton);
-//						likeButton.setVisibility(View.VISIBLE);
-//						AlphaAnimation fadeInAnimation = new AlphaAnimation(0.0f, 1.0f);
-//						fadeInAnimation.setAnimationListener(this);
-//						fadeInAnimation.setDuration(LIKE_BTN_ANI_LEN);
-//						likeButton.setAnimation(fadeInAnimation);
-//						likeButton.startAnimation(fadeInAnimation);
-//					}
-					//mTimer = new Timer();
-					//mTimerTask = getTimerTask();
-					//mTimer.schedule(mTimerTask, 0, 1000);
 				}else if(isPaused){
 					mp.start();
 					isPaused = false;
-					AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
+					AnimationDrawable animationDrawable = getAnimationDrawable(view);
 					animationDrawable.start();
 				} else{
 				}
@@ -265,6 +240,12 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		}
 		//framelayout_play.setBackgroundResource(R.drawable.btn);
 		//textview_playCount.setVisibility(View.GONE);
+	}
+	
+	public void startPlayAnimation(){
+		((ProgressBar)currentView.findViewById(R.id.bufferingAudioSpinner)).setVisibility(View.GONE);
+		animationDrawable = getAnimationDrawable(currentView);
+		animationDrawable.start();
 	}
 	/**
 	 * 暂停
@@ -284,6 +265,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	public Joke getCurrentJoke(){
 		return joke;
 	}
+	
 	
 	public Joke getJokeFromView(View view){
 		TextView indexTextView = (TextView)view.findViewById(R.id.jokeIndexHack);
@@ -341,17 +323,40 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	};
 	
 	public void setPrimaryItem(android.view.ViewGroup container, int position, Object object) {
-			currentView = (View)object;
-			//RelativeLayout imgFrameLayout = (RelativeLayout) currentView.findViewById(R.id.bottomSpacerPanel);
-			//0imgFrameLayout.setVisibility(View.GONE);
+		View tempNewView = (View)object;
+		if(null != currentView && tempNewView != currentView){
+			((FrameLayout)currentView.findViewById(R.id.homepage_framelayout_play)).setBackgroundResource(R.drawable.playback_play);
+			((TextView)currentView.findViewById(R.id.homepage_textview_playcount)).setVisibility(View.VISIBLE);
+			((ImageView)currentView.findViewById(R.id.homepage_imageview_volume)).setVisibility(View.GONE);
+			if(null != animationDrawable && animationDrawable.isRunning()){
+				animationDrawable.stop();
+			}
+		}
+		currentView = (View)object;
 	}
 
 	/*
-	 * Trick PageAdapter into thinking height 
+	 * Trick PageAdapter into thinking height is less than it actually is
 	 */
 	@Override
 	public float getPageHeight(int position) {
 		return(0.9f);
 	};
+	
+	private AnimationDrawable getAnimationDrawable(View view){
+		return (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
+	}
+	
+	/**
+	 * 释放倒计时锁
+	 */
+	/*private void releaseWakeLock(){
+		if(null != wakelock){
+			wakelock.release();
+			wakelock = null;
+		}
+	}*/
+	
+	
 	//@Override public float getPageWidth(int position) { return(0.5f); }
 }

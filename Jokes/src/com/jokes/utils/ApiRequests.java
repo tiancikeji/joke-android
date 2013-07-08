@@ -24,6 +24,7 @@ public class ApiRequests {
 	private static final String JOKE_URL = BASE_URL + API_URL + "/myjokes";
 	private static final String LIKE_URL = BASE_URL + API_URL + "/likes";
 	private static final String FEEDBACK_URL = BASE_URL + API_URL + "/feedbacks";
+	private static final String PLAY_URL = BASE_URL + API_URL + "/myjokes/play";
 	//private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
 	
@@ -75,6 +76,32 @@ public class ApiRequests {
 			}
 		}).start();
 	}
+
+	public static void addPlay(final Handler responseHandler, final Joke joke, final String uid){
+		new Thread(new Runnable() {	
+			@Override
+			public void run() {
+				
+				HttpRequest request = HttpRequest.post(PLAY_URL);
+				request.part("uid", uid);
+				request.part("id", joke.getId());
+				
+				final String responseStr = request.body();
+				try {
+					if(new JSONObject(responseStr).getBoolean("success")){
+						responseHandler.sendEmptyMessage(HandlerCodes.ADD_PLAY_SUCCESS);
+					} else {
+					
+					}
+				} catch (JSONException e) {
+					Log.e(DEBUG_TAG, "Error parsing response = " + e + " | " + responseStr);
+					responseHandler.sendEmptyMessage(HandlerCodes.ADD_PLAY_FAILURE);
+				}
+			}
+		}).start();
+	}
+	
+	
 	
 	public static void addJoke(final Handler responseHandler, final Joke joke, final File image,
 			final File audio, final String uid){

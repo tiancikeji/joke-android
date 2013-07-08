@@ -201,6 +201,12 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			case HandlerCodes.MESSAGE_SHARE:
 				startAnimShare();
 				break;
+			case HandlerCodes.ADD_PLAY_FAILURE:
+				Log.e(DEBUG_TAG, "Error adding play");
+				break;
+			case HandlerCodes.ADD_PLAY_SUCCESS:
+				Log.d(DEBUG_TAG, "Add play success");
+				break;
 			}
 		}
 	};
@@ -372,19 +378,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 //			WeChatShare.sendAppInfo(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
 
 			break;
-		case R.id.homepage_framelayout_play:
-			/*
-			if(jokeList.size() > 0){
-				if(isPlay && !isPaused){
-					pauseJoke();
-				}else{
-					playJoke();
-				}
-			}else{
-				Log.e(DEBUG_TAG, "无笑话列表");
-			}
-			break;*/
-
 		}
 
 	}
@@ -474,12 +467,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	@Override
 	public void onPrepared(MediaPlayer arg0) {
 		arg0.start();
+		jokePageAdapter.startPlayAnimation();
+		ApiRequests.addPlay(mainHandler, jokePageAdapter.getCurrentJoke(), Constant.uid);
 		//Fix the length of the joke if it is wrong, a temp fix for uploading using web version not having length
-		View view = jokePageAdapter.getCurrentView();
+		/*View view = jokePageAdapter.getCurrentView();
 		Joke joke = jokePageAdapter.getJokeFromView(view);
 		int length = (int) Math.round(((float)arg0.getDuration() / 1000.0)); 
 		joke.setLength(length);
-		((TextView)view.findViewById(R.id.homepage_textview_duration)).setText(length + "\"");
+		((TextView)view.findViewById(R.id.homepage_textview_duration)).setText(length + "\"");*/
 	}
 	
 	@Override
@@ -498,16 +493,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).setVisibility(View.GONE);
 		framelayout_play = (FrameLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_framelayout_play);
 		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-		//播放结束，先将播放状态还原为未播放状态
-		/*
-		currentJoke();
-		mp.reset();
-		jokeIndex++;
-		isPlay = false;
-		isPaused = false;		mTimer.cancel();
-		mTimerTask.cancel();
-		// 播放下一条
-		mainHandler.sendEmptyMessage(PLAY_NEXT);*/
 	}
 	/**
 	 * 给程序加锁，保持CPU 运转，屏幕和键盘灯有可能是关闭的
