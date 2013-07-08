@@ -35,6 +35,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,7 +75,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	Button button_refresh;//刷新
 	Button button_record;//录音按钮
 	Button button_favorite_big;//图片中间收藏按钮
-	Button button_favorite_small;//收藏按钮
+//	Button button_favorite_small;//收藏按钮
 	TextView textview_numlikes;
 	FrameLayout framelayout_play;//播放按钮
 	LinearLayout linearlayout_volume;//播放音量状态
@@ -86,7 +87,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	TextView textview_duration;//时长
 	TextView textview_playCount;//播放次数
 	
-	LinearLayout linearlayout_share;//选择分享方式的linearlayout
+//	LinearLayout linearlayout_share;//选择分享方式的linearlayout
+	RelativeLayout relativeLayout_share;
 	
 	private List<Joke> jokeList;
 	private Like like;
@@ -116,6 +118,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	private int currentPagingJokePage = 1;
 	
 	private Handler mainHandler = new Handler(){
+		Button button_favorite_small;
+		LinearLayout linearlayout_like_small;
 		@Override
 		public void handleMessage(Message msg) {
 
@@ -152,33 +156,42 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Button button_favorite_big = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_big);
-				Button button_favorite_small = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_small);
+				linearlayout_like_small = ((LinearLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_linearlayout_favorite_small));
+				linearlayout_like_small.setClickable(true);
+				linearlayout_like_small.setTag(true);
+				button_favorite_small = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_small);
+				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
+				
 				button_favorite_big.setVisibility(View.VISIBLE);
 				myAnimation_Alpha = AnimationUtils.loadAnimation(HomepageActivity.this, R.anim.anim_alpha_heart);
 				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
 				myAnimation_Alpha.setDuration(JokePageAdapter.LIKE_BTN_ANI_LEN);
 				button_favorite_big.startAnimation(myAnimation_Alpha);
-				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-				button_favorite_small.setTag(true);
+				
 				TextView textview_numlikes = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_numlikes);
 				textview_numlikes.setText((Integer.parseInt(textview_numlikes.getText().toString())+1)+"");
-				
 				break;
 			case HandlerCodes.LIKE_FAILURE:
+//				Toast.makeText(HomepageActivity.this,"喜欢失败",Toast.LENGTH_SHORT).show();
+				linearlayout_like_small = ((LinearLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_linearlayout_favorite_small));
+				linearlayout_like_small.setClickable(true);
 				break;
 			case HandlerCodes.UNLIKE_SUCCESS:
-			{
-				Button temp_button_favorite_small = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_small);
+				button_favorite_small = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_small);
+				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+				linearlayout_like_small = ((LinearLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_linearlayout_favorite_small));
+				linearlayout_like_small.setClickable(true);
+				linearlayout_like_small.setTag(false);
 				TextView temp_textview = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_numlikes);
 				if(Integer.parseInt(temp_textview.getText().toString()) != 0){
 					temp_textview.setText((Integer.parseInt(temp_textview.getText().toString())-1)+"");
 				}
-				temp_button_favorite_small.setTag(false);
-				temp_button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+				
+				
 				break;
-			}
 			case HandlerCodes.UNLIKE_FAILURE:
-
+				linearlayout_like_small = ((LinearLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_linearlayout_favorite_small));
+				linearlayout_like_small.setClickable(true);
 				break;
 			case HandlerCodes.GET_LIKEJOKES_SUCCESS:
 
@@ -351,24 +364,23 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			startActivity(intent2);
 			break;
 		case R.id.homepage_button_favorite_small:
-			if(!jokeCurrent.getIsLike()){
-				ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
-
-				//假操作，先改变界面，用户体验好，后台ApiRequests.likeJoke；
-				jokeCurrent.setIsLike(true);
-				button_favorite_big.setVisibility(View.VISIBLE);
-				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
-				button_favorite_big.startAnimation(myAnimation_Alpha);
-				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
-				textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()+1)+"");
-			}else{
-				ApiRequests.unlikeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
-				if(jokeList.get(jokeIndex).getNumLikes() != 0)
-				textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()-1)+"");
-				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
-			}
+//			if(!jokeCurrent.getIsLike()){
+//				ApiRequests.likeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
+//
+//				//假操作，先改变界面，用户体验好，后台ApiRequests.likeJoke；
+//				jokeCurrent.setIsLike(true);
+//				button_favorite_big.setVisibility(View.VISIBLE);
+//				myAnimation_Alpha.setAnimationListener(HomepageActivity.this);
+//				button_favorite_big.startAnimation(myAnimation_Alpha);
+//				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_1);
+//				textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()+1)+"");
+//			}else{
+//				ApiRequests.unlikeJoke(mainHandler, jokeCurrent.getId(), jokeCurrent.getUserId());
+//				if(jokeList.get(jokeIndex).getNumLikes() != 0)
+//				textview_numlikes.setText((jokeList.get(jokeIndex).getNumLikes()-1)+"");
+//				button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
+//			}
 			
-
 			break;
 		case R.id.homepage_button_share:
 //			WeChatShare.sendAppInfo(weChatShareApi, HomepageActivity.this.getResources(), HomepageActivity.this);
@@ -631,14 +643,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		 * 加载分享选择框动画
 		 */
 		private void startAnimShare(){
-			linearlayout_share = (LinearLayout)findViewById(R.id.homepage_linearlayout_share);//选择分享方式的linearlayout
+			relativeLayout_share = (RelativeLayout)findViewById(R.id.homepage_dialog_timeout);//选择分享方式的linearlayout
 			
 			//判断是否支持分享到朋友圈
 			if(!WeChatShare.checkIsShareToFriendsCircle(weChatShareApi)){
 				Button button_shareToFriendsCircle = (Button)findViewById(R.id.homepage_button_friendscircle);
 				button_shareToFriendsCircle.setVisibility(View.GONE);
 			}
-			int yOffset  = (int)(linearlayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);
+			int yOffset  = (int)(relativeLayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);
 
 			Animation animation = new TranslateAnimation(0F,0F, yOffset,0);
 			animation.setDuration(2000);               //设置动画持续时间              
@@ -647,7 +659,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 				@Override
 				public void onAnimationEnd(Animation arg0) {
-					linearlayout_share.setVisibility(View.VISIBLE);
+					relativeLayout_share.setVisibility(View.VISIBLE);
 				}
 
 				@Override
@@ -659,15 +671,16 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				}
 				
 			});
-			linearlayout_share.setVisibility(View.VISIBLE);
-			linearlayout_share.startAnimation(animation);
+			relativeLayout_share.setVisibility(View.VISIBLE);
+			relativeLayout_share.startAnimation(animation);
+			
 		}
 	
 	/**
 	 * 分享到朋友圈
 	 */
 	public void onShareToFriendsCircleButtonClick(View view){
-		linearlayout_share.setVisibility(View.GONE);
+		relativeLayout_share.setVisibility(View.GONE);
 		WeChatShare.sendMusicToFriendsCircle(weChatShareApi, 
 				HomepageActivity.this.getResources(), 
 				HomepageActivity.this, 
@@ -680,22 +693,22 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	 * 分享到微信好友
 	 */
 	public void onShareToFriendButtonClick(View view){
-		
+		relativeLayout_share.setVisibility(View.GONE);
 		WeChatShare.sendMusicToFriend(weChatShareApi, 
 				HomepageActivity.this.getResources(), 
 				HomepageActivity.this, 
 				""+(((Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_share)).getTag()),
 				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()));
-		linearlayout_share.setVisibility(View.GONE);
+		
 	}
 	
 	/**
 	 * 取消分享
 	 */
 	public void onShareToCancelButtonClick(View view){
-		linearlayout_share = (LinearLayout)findViewById(R.id.homepage_linearlayout_share);//选择分享方式的linearlayout
+		relativeLayout_share = (RelativeLayout)findViewById(R.id.homepage_dialog_timeout);//选择分享方式的linearlayout
 		
-		int yOffset  = (int)(linearlayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);//偏移
+		int yOffset  = (int)(relativeLayout_share.getHeight() * HomepageActivity.this.getResources().getDisplayMetrics().density);//偏移
 
 		Animation animation = new TranslateAnimation(0F,0F, 0,yOffset);
 		animation.setDuration(2000);               //设置动画持续时间              
@@ -704,7 +717,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 			@Override
 			public void onAnimationEnd(Animation arg0) {
-				linearlayout_share.setVisibility(View.GONE);
+				relativeLayout_share.setVisibility(View.GONE);
 			}
 
 			@Override
@@ -716,7 +729,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			}
 			
 		});
-		linearlayout_share.startAnimation(animation);
+		relativeLayout_share.startAnimation(animation);
 		
 	}
 	

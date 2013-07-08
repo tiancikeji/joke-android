@@ -57,6 +57,9 @@
         <activity 
             android:name="com.jokes.core.FeedbackActivity"
             android:screenOrientation="portrait"></activity>
+        <activity 
+            android:name="com.jokes.core.ContactusActivity"
+            android:screenOrientation="portrait"></activity>
         
         <meta-data android:value="51c02e5d56240b16520079c0" android:name="UMENG_APPKEY"></meta-data>
 		<meta-data android:value="100001" android:name="UMENG_CHANNEL"/>

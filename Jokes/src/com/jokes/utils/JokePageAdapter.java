@@ -109,12 +109,13 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		
 		if(!joke.getIsLike()){
 			likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
-//			likeButton.setOnClickListener(this);
 		}
 //		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setOnClickListener(this);
-		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getIsLike());
+//		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getIsLike());
 		((Button)view.findViewById(R.id.homepage_button_share)).setOnClickListener(this);
 		((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small)).setOnClickListener(this);
+		((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small)).setTag(joke.getIsLike());
+		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getId());
 		((Button)view.findViewById(R.id.homepage_button_share)).setTag(""+ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()));
 	}
 	
@@ -164,23 +165,17 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		case R.id.homepage_framelayout_play:
 			playJoke(view);
 		break;
-		case R.id.homepage_button_favorite_big:
-			//Button likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
-			//likeButton.setVisibility(View.GONE);
-			
-//			Joke joke = getJokeFromView(view);
-//			Log.d(DEBUG_TAG, "home button = " + joke.getCreatedAt());
-//			ApiRequests.likeJoke(responseHandler, joke.getId() , UID);
-		break;
-//		case R.id.homepage_button_favorite_small:
 		case R.id.homepage_linearlayout_favorite_small:
-			Button likeButton_small = (Button)view.findViewById(R.id.homepage_button_favorite_small);
-			Joke temp_joke = getJokeFromView(view);
-			boolean islike = (Boolean)(likeButton_small.getTag());
+//			Button likeButton_small = (Button)view.findViewById(R.id.homepage_button_favorite_small);
+			LinearLayout linearlayout_like_small = ((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small));
+			
+			linearlayout_like_small.setClickable(false);
+//			Joke temp_joke = getJokeFromView(view);
+			boolean islike = (Boolean)(linearlayout_like_small.getTag());
 			if(!islike){
-				ApiRequests.likeJoke(responseHandler, temp_joke.getId() , UID);
+				ApiRequests.likeJoke(responseHandler, Integer.parseInt(""+((Button)view.findViewById(R.id.homepage_button_favorite_small)).getTag()) , UID);
 			}else{
-				ApiRequests.unlikeJoke(responseHandler, temp_joke.getId(), temp_joke.getUserId());
+				ApiRequests.unlikeJoke(responseHandler, Integer.parseInt(""+((Button)view.findViewById(R.id.homepage_button_favorite_small)).getTag()), UID);
 			}
 			break;
 		case R.id.homepage_button_share:
@@ -198,6 +193,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	
 	
 	private void playJoke(View view){
+		AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
 		if(isPlaying && !isPaused){
 			pauseJoke();
 			animationDrawable = getAnimationDrawable(view);
@@ -214,6 +210,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					joke.setNumPlays(joke.getNumPlays() + 1);
 					playCountTextView.setVisibility(View.GONE);
 					((ImageView)view.findViewById(R.id.homepage_imageview_volume)).setVisibility(View.VISIBLE);
+					animationDrawable.start();
 					
 					isPlaying = true;
 					
@@ -227,7 +224,10 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 				}else if(isPaused){
 					mp.start();
 					isPaused = false;
+<<<<<<< HEAD
 					AnimationDrawable animationDrawable = getAnimationDrawable(view);
+=======
+>>>>>>> cf6481adc0ad043fa0e0c9c8f2c9cfb3b454b6d0
 					animationDrawable.start();
 				} else{
 				}
