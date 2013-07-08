@@ -173,6 +173,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				button_favorite_small.setTag(true);
 				TextView textview_numlikes = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_numlikes);
 				textview_numlikes.setText((Integer.parseInt(textview_numlikes.getText().toString())+1)+"");
+				
 				break;
 			case HandlerCodes.LIKE_FAILURE:
 				break;

@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import com.jokes.core.HomepageActivity;
 import com.jokes.core.R;
@@ -109,9 +110,10 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
 //			likeButton.setOnClickListener(this);
 		}
-		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setOnClickListener(this);
+//		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setOnClickListener(this);
 		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getIsLike());
 		((Button)view.findViewById(R.id.homepage_button_share)).setOnClickListener(this);
+		((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small)).setOnClickListener(this);
 		((Button)view.findViewById(R.id.homepage_button_share)).setTag(""+ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()));
 	}
 	
@@ -180,15 +182,14 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 //			Log.d(DEBUG_TAG, "home button = " + joke.getCreatedAt());
 //			ApiRequests.likeJoke(responseHandler, joke.getId() , UID);
 		break;
-		case R.id.homepage_button_favorite_small:
+//		case R.id.homepage_button_favorite_small:
+		case R.id.homepage_linearlayout_favorite_small:
 			Button likeButton_small = (Button)view.findViewById(R.id.homepage_button_favorite_small);
 			Joke temp_joke = getJokeFromView(view);
-			boolean islike = (Boolean)((Button)view.findViewById(R.id.homepage_button_favorite_small)).getTag();
+			boolean islike = (Boolean)(likeButton_small.getTag());
 			if(!islike){
-				Log.e("JokePageAdapter","false");
 				ApiRequests.likeJoke(responseHandler, temp_joke.getId() , UID);
 			}else{
-				Log.e("JokePageAdapter","true");
 				ApiRequests.unlikeJoke(responseHandler, temp_joke.getId(), temp_joke.getUserId());
 			}
 			break;
@@ -286,7 +287,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		isPaused = true;
 	}
 	
-	private Joke getJokeFromView(View view){
+	public Joke getJokeFromView(View view){
 		TextView indexTextView = (TextView)view.findViewById(R.id.jokeIndexHack);
 		if(null == indexTextView){
 			indexTextView = (TextView)view.getRootView().findViewById(R.id.jokeIndexHack);	
