@@ -116,6 +116,7 @@ public class ApiRequests {
 				HttpRequest response = HttpRequest.post(LIKE_URL, true, "myjoke_id",
 						jokeId, "uid", userId, "isLike", 1);
 				final String responseStr = response.body();
+				Log.e("ApiRequests", responseStr + "=" + jokeId + "=" + userId);
 				try {
 					JSONObject resp = new JSONObject(responseStr);
 					if(resp.getBoolean("success")){
@@ -127,13 +128,13 @@ public class ApiRequests {
 					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_FAILURE);
 					Log.e(DEBUG_TAG, "Like " + e1.toString());
 				}
-				try {
-					//like.setFromLike((Like)handler.parseResponse(responseStr));
-					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_SUCCESS);
-				} catch (HttpRequestException e) {
-					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_FAILURE);
-					Log.e(DEBUG_TAG, "Like " + e.toString());
-				}
+//				try {
+//					//like.setFromLike((Like)handler.parseResponse(responseStr));
+//					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_SUCCESS);
+//				} catch (HttpRequestException e) {
+//					responseHandler.sendEmptyMessage(HandlerCodes.LIKE_FAILURE);
+//					Log.e(DEBUG_TAG, "Like " + e.toString());
+//				}
 			}
 		}).start();
 		
@@ -148,12 +149,12 @@ public class ApiRequests {
 				final String responseString = response.body();
 				try {
 					GeneralResponse generalResponse = new GeneralResponse(new JSONObject(responseString));
-//					if(generalResponse.isSuccess()){
+					if(generalResponse.isSuccess()){
 						responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_SUCCESS);
-//					} else {
-//						Log.d(DEBUG_TAG, "Unlike "  + responseString);
-//						responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_FAILURE);
-//					}
+					} else {
+						Log.d(DEBUG_TAG, "Unlike "  + responseString);
+						responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_FAILURE);
+					}
 				} catch (HttpRequestException e) {
 					responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_FAILURE);
 					Log.e(DEBUG_TAG, "Unlike " + e.toString() + " " + responseString);

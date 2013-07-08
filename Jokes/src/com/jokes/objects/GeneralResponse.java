@@ -13,8 +13,10 @@ public class GeneralResponse {
 	
 	public GeneralResponse(JSONObject json){
 		try {
-			this.reason = json.getString("reason");
 			this.success = json.getBoolean("success");
+			if(!success)
+			this.reason = json.getString("reason");
+			
 		} catch (JSONException e) {
 			Log.e("JOKE", "Failure to parse Upload Response");
 		}

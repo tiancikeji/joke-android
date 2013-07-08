@@ -112,12 +112,12 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		
 		if(!joke.getIsLike()){
 			likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
-//			likeButton.setOnClickListener(this);
 		}
 //		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setOnClickListener(this);
-		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getIsLike());
+//		((Button)view.findViewById(R.id.homepage_button_favorite_small)).setTag(joke.getIsLike());
 		((Button)view.findViewById(R.id.homepage_button_share)).setOnClickListener(this);
 		((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small)).setOnClickListener(this);
+		((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small)).setTag(joke.getIsLike());
 		((Button)view.findViewById(R.id.homepage_button_share)).setTag(""+ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()));
 	}
 	
@@ -178,23 +178,17 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		case R.id.homepage_framelayout_play:
 			playJoke(view);
 		break;
-		case R.id.homepage_button_favorite_big:
-			//Button likeButton = (Button)view.findViewById(R.id.homepage_button_favorite_big);
-			//likeButton.setVisibility(View.GONE);
-			
-//			Joke joke = getJokeFromView(view);
-//			Log.d(DEBUG_TAG, "home button = " + joke.getCreatedAt());
-//			ApiRequests.likeJoke(responseHandler, joke.getId() , UID);
-		break;
-//		case R.id.homepage_button_favorite_small:
 		case R.id.homepage_linearlayout_favorite_small:
-			Button likeButton_small = (Button)view.findViewById(R.id.homepage_button_favorite_small);
+//			Button likeButton_small = (Button)view.findViewById(R.id.homepage_button_favorite_small);
+			LinearLayout linearlayout_like_small = ((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small));
+			
+			linearlayout_like_small.setClickable(false);
 			Joke temp_joke = getJokeFromView(view);
-			boolean islike = (Boolean)(likeButton_small.getTag());
+			boolean islike = (Boolean)(linearlayout_like_small.getTag());
 			if(!islike){
 				ApiRequests.likeJoke(responseHandler, temp_joke.getId() , UID);
 			}else{
-				ApiRequests.unlikeJoke(responseHandler, temp_joke.getId(), temp_joke.getUserId());
+				ApiRequests.unlikeJoke(responseHandler, temp_joke.getId(), UID);
 			}
 			break;
 		case R.id.homepage_button_share:
@@ -211,9 +205,10 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	}
 	
 	private void playJoke(View view){
+		AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
 		if(isPlaying && !isPaused){
 			pauseJoke();
-			AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
+			
 			animationDrawable.stop();
 		} else {
 			joke = getJokeFromView(view);
@@ -224,7 +219,6 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setBackgroundResource(R.drawable.btn);
 					((TextView)view.findViewById(R.id.homepage_textview_playcount)).setVisibility(View.GONE);
 					((ImageView)view.findViewById(R.id.homepage_imageview_volume)).setVisibility(View.VISIBLE);
-					AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
 					animationDrawable.start();
 					
 					isPlaying = true;
@@ -233,23 +227,9 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					mTimer = new Timer();
 					mTimerTask = getTimerTask();
 					mTimer.schedule(mTimerTask, 0, 1000);
-//					if(!joke.getIsLike()){					
-//						likeButton = (Button)currentView.findViewById(R.id.homepage_button_favorite_big);
-//						Log.d(DEBUG_TAG, "like button " + likeButton);
-//						likeButton.setVisibility(View.VISIBLE);
-//						AlphaAnimation fadeInAnimation = new AlphaAnimation(0.0f, 1.0f);
-//						fadeInAnimation.setAnimationListener(this);
-//						fadeInAnimation.setDuration(LIKE_BTN_ANI_LEN);
-//						likeButton.setAnimation(fadeInAnimation);
-//						likeButton.startAnimation(fadeInAnimation);
-//					}
-					//mTimer = new Timer();
-					//mTimerTask = getTimerTask();
-					//mTimer.schedule(mTimerTask, 0, 1000);
 				}else if(isPaused){
 					mp.start();
 					isPaused = false;
-					AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)view.findViewById(R.id.homepage_imageview_volume)).getDrawable();
 					animationDrawable.start();
 				} else{
 				}

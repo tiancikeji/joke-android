@@ -93,6 +93,8 @@ public class SettingActivity extends Activity implements OnClickListener{
 		case R.id.setting_framelayout_update:
 			break;
 		case R.id.setting_framelayout_contactus:
+			Intent intent1 = new Intent(SettingActivity.this,ContactusActivity.class);
+			startActivity(intent1);
 			break;
 		}
 	}
