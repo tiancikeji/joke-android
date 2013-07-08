@@ -146,12 +146,12 @@ public class ApiRequests {
 				final String responseString = response.body();
 				try {
 					GeneralResponse generalResponse = new GeneralResponse(new JSONObject(responseString));
-					if(generalResponse.isSuccess()){
+//					if(generalResponse.isSuccess()){
 						responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_SUCCESS);
-					} else {
-						Log.d(DEBUG_TAG, "Unlike "  + responseString);
-						responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_FAILURE);
-					}
+//					} else {
+//						Log.d(DEBUG_TAG, "Unlike "  + responseString);
+//						responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_FAILURE);
+//					}
 				} catch (HttpRequestException e) {
 					responseHandler.sendEmptyMessage(HandlerCodes.UNLIKE_FAILURE);
 					Log.e(DEBUG_TAG, "Unlike " + e.toString() + " " + responseString);
