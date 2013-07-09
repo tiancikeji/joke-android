@@ -224,10 +224,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 				}else if(isPaused){
 					mp.start();
 					isPaused = false;
-<<<<<<< HEAD
-					AnimationDrawable animationDrawable = getAnimationDrawable(view);
-=======
->>>>>>> cf6481adc0ad043fa0e0c9c8f2c9cfb3b454b6d0
+					animationDrawable = getAnimationDrawable(view);
 					animationDrawable.start();
 				} else{
 				}
