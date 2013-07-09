@@ -119,13 +119,11 @@
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="1dp"
-            android:visibility="gone"
             android:background="@drawable/line" />
 
         <FrameLayout
             android:id="@+id/setting_framelayout_update"
             android:layout_width="fill_parent"
-            android:visibility="gone"
             android:layout_height="66dp" >
 
             <TextView
@@ -144,7 +142,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|right"
                 android:layout_marginRight="10dp"
-                android:text="89%"
                 android:textColor="#fe0000"
                 android:textSize="15sp" />
         </FrameLayout>
