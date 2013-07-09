@@ -30,6 +30,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.jokes.mywidget.MyToast;
 import com.jokes.objects.Joke;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
@@ -81,6 +83,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 
 	boolean isPlay = false;//判断是否播放音频
 	
+	MyToast toast;
+	
 	Handler mainHandler = new Handler(){
 
 		@Override
@@ -93,7 +97,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				changePointView(count);
 				break;
 			case HandlerCodes.CREATE_JOKE_SUCCESS:
-				Toast.makeText(RecordActivity.this, "已经上传，请等待审核", Toast.LENGTH_LONG).show();
+				toast = new MyToast(RecordActivity.this,"已经上传，请等待审核");
+				toast.startMyToast();
 //				button_send.setEnabled(false);
 				button_send.setTag(false);
 				CountDownTimer timer = new CountDownTimer(3000, 3000) {
@@ -109,7 +114,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				timer.start();
 				break;
 			case HandlerCodes.CREATE_JOKE_FAILURE:
-				Toast.makeText(RecordActivity.this, "上传失败了", Toast.LENGTH_LONG).show();
+				toast = new MyToast(RecordActivity.this,"上传失败了");
+				toast.startMyToast();
 //				button_send.setEnabled(false);
 				button_send.setTag(false);
 				break;

@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import com.jokes.mywidget.MyToast;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
@@ -36,7 +37,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+//import android.widget.Toast;
 
 public class SettingActivity extends Activity implements OnClickListener{
 
@@ -53,6 +54,8 @@ public class SettingActivity extends Activity implements OnClickListener{
 
 	Context context;
 
+	MyToast toast;
+	
 	//下载apk的大小
 	private int downloadedSize = 0;  	//已经下载文件大小
 	private int fileSize = 0; 			//文件大小
@@ -91,12 +94,14 @@ public class SettingActivity extends Activity implements OnClickListener{
 					
 				}else{
 					isDownloadAPK = false;
-					Toast.makeText(SettingActivity.this, "当前版本为最新版本", Toast.LENGTH_SHORT).show();
+					toast = new MyToast(SettingActivity.this,"当前版本为最新版本");
+					toast.startMyToast();
 				}
 				
 				break;
 			case HandlerCodes.CHECK_UPDATE_FAILURE:
-				Toast.makeText(SettingActivity.this, "检查版本更新失败！", Toast.LENGTH_SHORT).show();
+				toast = new MyToast(SettingActivity.this,"检查版本更新失败！");
+				toast.startMyToast();
 				isDownloadAPK = false;
 				break;
 			case HandlerCodes.DOWNLOAD_APK:
@@ -112,7 +117,8 @@ public class SettingActivity extends Activity implements OnClickListener{
 				break;
 			case HandlerCodes.CONNECTION_FAILURE:
 				isDownloadAPK = false;
-				Toast.makeText(SettingActivity.this, "请检查网络连接！", Toast.LENGTH_SHORT).show();
+				toast = new MyToast(SettingActivity.this,"请检查网络连接！");
+				toast.startMyToast();
 				break;
 			}
 		}
@@ -195,8 +201,11 @@ public class SettingActivity extends Activity implements OnClickListener{
 			break;
 		case R.id.setting_framelayout_update:
 			if(isDownloadAPK){
-				Toast.makeText(SettingActivity.this, "正在下载", Toast.LENGTH_SHORT).show();
+				toast = new MyToast(SettingActivity.this,"正在下载");
+				toast.startMyToast();
 			}else{
+				toast = new MyToast(SettingActivity.this,"正在检测最新版本");
+				toast.startMyToast();
 				ApiRequests.checkAppUpdate(mainHandler);
 			}
 			
