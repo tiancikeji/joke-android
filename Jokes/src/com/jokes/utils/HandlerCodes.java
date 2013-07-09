@@ -27,10 +27,18 @@ public class HandlerCodes {
 	public static final int CREATE_FEEDBACK_SUCCESS = 14;
 	public static final int CREATE_FEEDBACK_FAILURE = 15;
 	
+
 	public static final int MESSAGE_SHARE = 16;//通知开启分享功能
 	
 	public static final int ADD_PLAY_SUCCESS = 17;
 	public static final int ADD_PLAY_FAILURE = 18;
+	
+	public static final int CHECK_UPDATE_SUCCESS = 19;//检查升级成功
+	public static final int CHECK_UPDATE_FAILURE = 20;//检查升级失败
+	
+	public static final int DOWNLOAD_APK = 21;//下载apk进度更新
+	
+	public static final int CONNECTION_FAILURE = 22;//联网失败
 	
 	public static final int CLOSE = 99;
 

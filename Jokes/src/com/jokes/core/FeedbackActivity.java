@@ -17,6 +17,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.jokes.mywidget.MyToast;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
 import com.jokes.utils.AudioUtils;
@@ -52,7 +53,8 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 			}
 			case HandlerCodes.CREATE_FEEDBACK_SUCCESS:
 			{
-				Toast.makeText(FeedbackActivity.this, "已经上传，谢谢反馈", Toast.LENGTH_LONG).show();
+				MyToast toast = new MyToast(FeedbackActivity.this,"已经上传，谢谢反馈");
+				toast.startMyToast();
 				button_send.setEnabled(false);
 				CountDownTimer timer = new CountDownTimer(3000, 3000) {
 					@Override

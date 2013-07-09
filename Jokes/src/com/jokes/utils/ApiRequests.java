@@ -6,7 +6,9 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.github.kevinsawicki.http.HttpRequest;
@@ -14,6 +16,7 @@ import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 import com.jokes.handlers.JokeHandler;
 import com.jokes.objects.GeneralResponse;
 import com.jokes.objects.Joke;
+import com.jokes.objects.Update;
 
 @SuppressWarnings("unchecked")
 public class ApiRequests {
@@ -27,7 +30,8 @@ public class ApiRequests {
 	private static final String PLAY_URL = BASE_URL + API_URL + "/myjokes/play";
 	//private static final String IMG_UPLOAD_URL 		= JOKE_URL + "/photo";
 	//private static final String AUDIO_UPLOAD_URL 	= JOKE_URL + "/audio";
-	
+	private static final String UPDATE_URL = BASE_URL+API_URL+"/version/checkVersion";
+	private static final String DOWNLOAD_APK_URL = BASE_URL + API_URL;
 	
 	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid, final int page, final boolean clearList){
 		new Thread(new Runnable() {	
@@ -216,6 +220,37 @@ public class ApiRequests {
 				}
 			}
 		}).start();
+	}
+	
+	public static void checkAppUpdate(final Handler responsehandler){
+		//"42.96.164.29:8888/api/version/checkVersion.json"
+		new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				HttpRequest response = HttpRequest.get(UPDATE_URL);
+				final String responseStr = response.body();
+				try {
+					Update update = new Update(new JSONObject(responseStr));
+					if(update.getCurrentVersion() != null){
+						Message msg = new Message();
+						Bundle bundle = new Bundle();
+						bundle.putString("current_version", update.getCurrentVersion());
+						bundle.putString("url", update.getUrl());
+						msg.setData(bundle);
+						msg.what = HandlerCodes.CHECK_UPDATE_SUCCESS;
+						responsehandler.sendMessage(msg);
+					}else{
+						responsehandler.sendEmptyMessage(HandlerCodes.CHECK_UPDATE_FAILURE);
+					}
+				} catch (JSONException e) {
+					responsehandler.sendEmptyMessage(HandlerCodes.CHECK_UPDATE_FAILURE);
+					Log.d(DEBUG_TAG, "check update error:" + e.toString() + " | " + response);
+				}
+			}
+			
+		}).start();
+
 	}
 	
 
