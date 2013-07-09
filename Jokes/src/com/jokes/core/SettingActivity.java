@@ -54,12 +54,13 @@ public class SettingActivity extends Activity implements OnClickListener{
 	Context context;
 
 	//下载apk的大小
-	private int downloadedSize = 0;  
-	private int fileSize = 0;
-	private String fileName;
-	private File fileAPK;
+	private int downloadedSize = 0;  	//已经下载文件大小
+	private int fileSize = 0; 			//文件大小
+	private String fileName;			//文件名称
+	private File fileAPK; 				//下载的文件
+	private String url ;				//下载地址
+	boolean isDownloadAPK = false;		//是否正在下载
 	
-	boolean isDownloadAPK = false;
 	Handler mainHandler = new Handler(){
 
 		@Override
@@ -68,14 +69,29 @@ public class SettingActivity extends Activity implements OnClickListener{
 			case HandlerCodes.CHECK_UPDATE_SUCCESS:
 				Bundle bundle = msg.getData();
 				String current_version = bundle.getString("current_version");
-				String url = bundle.getString("url");
+				url = bundle.getString("url");
 				if(isUpdate(current_version)){
-					textview_updatepercent.setVisibility(View.VISIBLE);
-					//启动线程下载apk
-					downloadAPK(ApiRequests.buildAbsoluteUrl(url));
+					//退出此页面提示是否退出，退出正在下载文件失败
+					new AlertDialog.Builder(SettingActivity.this).setTitle("一听到底有新版本可升级").setMessage("版本号为：v"+current_version)
+					.setPositiveButton("立即更新",new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog,int whichButton)
+						{
+							textview_updatepercent.setVisibility(View.VISIBLE);
+							//启动线程下载apk
+							downloadAPK(ApiRequests.buildAbsoluteUrl(url));
+						}
+					}).setNegativeButton("以后再说",new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog,int whichButton)
+						{
+							textview_updatepercent.setVisibility(View.GONE);
+						}
+					}).show();
+					
 				}else{
 					isDownloadAPK = false;
-					Toast.makeText(SettingActivity.this, "此版本为最新版本！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(SettingActivity.this, "当前版本为最新版本", Toast.LENGTH_SHORT).show();
 				}
 				
 				break;
