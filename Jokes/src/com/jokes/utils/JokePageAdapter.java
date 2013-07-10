@@ -88,6 +88,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			new ImageDownLoadTask(joke.getId(),
 					ApiRequests.buildAbsoluteUrl(joke.getFullPictureUrl()), context).execute(imageview_pic);
 			imageview_pic.setTag(joke.getId());
+			((ImageView) view.findViewById(R.id.homepage_imageview_pic)).setBackgroundColor(0);
 		}
 		
 		((TextView)view.findViewById(R.id.homepage_textview_duration)).setText(joke.getLength() + "\"");

@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 //import android.widget.Toast;
 
 public class SettingActivity extends Activity implements OnClickListener{
@@ -204,8 +205,9 @@ public class SettingActivity extends Activity implements OnClickListener{
 				toast = new MyToast(SettingActivity.this,"正在下载");
 				toast.startMyToast();
 			}else{
-				toast = new MyToast(SettingActivity.this,"正在检测最新版本");
-				toast.startMyToast();
+				Toast.makeText(SettingActivity.this, "正在检测最新版本", Toast.LENGTH_LONG).show();
+				//toast = new MyToast(SettingActivity.this,"正在检测最新版本");
+				//toast.startMyToast();
 				ApiRequests.checkAppUpdate(mainHandler);
 			}
 			
