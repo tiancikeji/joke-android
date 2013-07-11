@@ -53,8 +53,7 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 			}
 			case HandlerCodes.CREATE_FEEDBACK_SUCCESS:
 			{
-				MyToast toast = new MyToast(FeedbackActivity.this,"已经上传，谢谢反馈");
-				toast.startMyToast();
+				Toast.makeText(FeedbackActivity.this, "已经上传，谢谢反馈", Toast.LENGTH_LONG).show();
 				button_send.setEnabled(false);
 				CountDownTimer timer = new CountDownTimer(3000, 3000) {
 					@Override

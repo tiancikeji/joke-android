@@ -32,6 +32,9 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 	@Override
 	protected void onPostExecute(Object result) {
 		if (result != null && imageView != null) {
+//			if(item != null){
+//				item.bitmap = (Bitmap) result;
+//			}
 			this.imageView.setImageBitmap((Bitmap) result);
 			this.imageView = null;
 		}
@@ -81,7 +84,7 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 				conn = url.openConnection();
 				conn.connect();
 				ism = conn.getInputStream();
-				
+
 				bitmap = BitmapFactory.decodeStream(ism);
 
 				try {
