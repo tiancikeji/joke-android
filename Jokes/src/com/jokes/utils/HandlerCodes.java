@@ -40,6 +40,11 @@ public class HandlerCodes {
 	
 	public static final int CONNECTION_FAILURE = 22;//联网失败
 	
+	public static final int DOWNLOADIMAGE_SUCCESS = 23;//下载图片成功
+	public static final int DOWNLOAD_OFFLINE_PICTURE = 24;//下载离线数据进度更新
+	public static final int DOWNLOAD_OFFLINE_JOKE = 25;//下载离线数据进度更新
+	public static final int DOWNLOAD_OFFLINE_JOKE_FINISH = 26;//一条笑话下载完成
+	
 	public static final int CLOSE = 99;
 
 

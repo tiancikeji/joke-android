@@ -48,6 +48,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 //	private TextView textview_playcount;
 //	private TextView textview_numlikes;
 	private String UID;
+	private boolean isOnline;//判断是否处在离线状态，如果处在离线状态则播放本地音频
 	
 	private boolean isPlaying = false;
 	private boolean isPaused  = false;
@@ -61,7 +62,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private AnimationDrawable animationDrawable;
 	
 	public JokePageAdapter(android.support.v4.app.FragmentManager fm, Context context, List<Joke> jokes, MediaPlayer mp,
-			OnPreparedListener onPreparedListener, Handler responseHandler, String UID,IWXAPI weChatShareApi){
+			OnPreparedListener onPreparedListener, Handler responseHandler, String UID,IWXAPI weChatShareApi,boolean isOnline){
 		this.context = context;
 		this.jokes = jokes;
 		this.mp = mp;
@@ -69,6 +70,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		this.onPreparedListener = onPreparedListener;
 		this.responseHandler = responseHandler;
 		this.UID = UID;
+		this.isOnline = isOnline;
 	}
 
 	@Override
@@ -217,7 +219,18 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					
 					//FIXME this is not actually working
 					((ProgressBar)currentView.findViewById(R.id.bufferingAudioSpinner)).setVisibility(View.VISIBLE);
-					AudioUtils.prepareStreamAudio(mp, ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()), onPreparedListener);
+					
+					//如果是离线状态则播放本地 音频
+					if(isOnline){
+						AudioUtils.prepareStreamAudio(mp, ApiRequests.buildAbsoluteUrl(joke.getFullAudioUrl()), onPreparedListener);
+					}else{
+						//获取下载文件名
+						String[] array = joke.getFullAudioUrl().split("/");
+						String fileName = array[array.length-1];
+						
+						AudioUtils.startPlayOffline(mp, AudioUtils.getAudioFilePath(context, fileName));
+					}
+					
 					seekBar = (SeekBar)currentView.findViewById(R.id.homepage_seekbar_progress);
 					mTimer = new Timer();
 					mTimerTask = getTimerTask();

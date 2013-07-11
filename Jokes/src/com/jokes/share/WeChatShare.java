@@ -5,12 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
 
 import com.jokes.core.R;
@@ -24,8 +26,8 @@ import com.tencent.mm.sdk.platformtools.Util;
 
 public class WeChatShare {
 	
-	//private static final String APP_ID = "wxc15df4cc42ae252b";
-	private static final String APP_ID = "wxb3b0db608a4925ee";
+	private static final String APP_ID = "wxc15df4cc42ae252b";
+//	private static final String APP_ID = "wxb3b0db608a4925ee";
 	private static final String APP_KEY= "658010a294485a9e81df8788bd025b14";
 	private static final int TIMELINE_SUPPORTED_VERSION = 0x21020001;
 	
@@ -114,9 +116,9 @@ public class WeChatShare {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-		if(thumb == null){
+//		if(thumb == null){
 			thumb = BitmapFactory.decodeResource(res, R.drawable.btn_favorite_big);
-		}
+//		}
 		
 		if(ism != null){
 			try {
@@ -144,6 +146,7 @@ public class WeChatShare {
 	 * @param joke_id
 	 * @param share_type：1为分享到好友，2为分享到朋友圈
 	 */
+	@SuppressLint("NewApi")
 	public static void sendMusicToFriend(IWXAPI api, Resources res, Context context,String url, String joke_id){
 		WXMusicObject music = new WXMusicObject();
 		music.musicUrl = url;
@@ -163,9 +166,10 @@ public class WeChatShare {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-		if(thumb == null){
+//		if(thumb == null){
 			thumb = BitmapFactory.decodeResource(res, R.drawable.btn_favorite_big);
-		}
+//		}
+		
 		if(ism != null){
 			try {
 				ism.close();

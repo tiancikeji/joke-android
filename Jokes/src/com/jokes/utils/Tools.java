@@ -3,6 +3,10 @@ package com.jokes.utils;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 public class Tools {
 
 	/**
@@ -35,4 +39,49 @@ public class Tools {
 		return String.format("%1$04d%2$02d%3$02d", 
 				calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH));
 	}
+
+	/**
+	 * 判断wifi是否可用
+	 */
+	public static boolean isWiFiActive(Context _context){
+		Context temp_context = _context.getApplicationContext();
+		ConnectivityManager connectivity = (ConnectivityManager) temp_context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if(connectivity != null){
+			NetworkInfo[] info = connectivity.getAllNetworkInfo();
+			if(info != null){
+				for(int i=0; i < info.length; i++){
+					if(info[i].getTypeName().equals("WIFI") && info[i].isConnected()){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 判断网络是否可用
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static boolean isNetworkAvailable(Context context) {
+		ConnectivityManager connectivity = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (connectivity == null) {
+			return false;
+		} else {
+			NetworkInfo[] info = connectivity.getAllNetworkInfo();
+			if (info != null) {
+				for (int i = 0; i < info.length; i++) {
+					if (info[i].getState() == NetworkInfo.State.CONNECTED) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+
 }

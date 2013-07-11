@@ -1,8 +1,11 @@
 package com.jokes.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.util.Log;
@@ -16,6 +19,31 @@ public class AudioUtils {
 		mp.setDataSource(url);
 		mp.prepareAsync();
 //		mp.setOnPreparedListener(listener);
+	}
+	
+	/**
+	 * 开始播放本地音频
+	 */
+	public static void startPlayOffline(MediaPlayer mPlayer,String fileName){
+		try {
+			mPlayer.setDataSource((new FileInputStream(new File(fileName))).getFD());
+//			mPlayer.setDataSource(fileName);
+			mPlayer.prepare();
+			mPlayer.start();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 
@@ -89,7 +117,15 @@ public class AudioUtils {
 		return getAudioFileLength(audio, new MediaPlayer());
 	}
 	
-	
+	/**
+	 * 获取播放本地文件的路径
+	 */
+	public static String getAudioFilePath(Context context,String fileName){
+		File file = context.getFilesDir();
+		String path = file.getPath() +"/"+ fileName;
+		Log.d(DEBUG_TAG, path);
+		return path;
+	}
 
 
 }

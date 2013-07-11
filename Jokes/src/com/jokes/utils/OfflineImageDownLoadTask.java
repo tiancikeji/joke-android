@@ -6,59 +6,63 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.ImageView;
+import android.os.Handler;
 
-public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
-	private ImageView imageView;
+public class OfflineImageDownLoadTask extends AsyncTask<Object, Object, Object> {
+//	private ImageView imageView;
 	private String iconurl;
 	Bitmap bmp;
 	Context context;
-	int jokeId;
+	String fileName = "";
 	
-	public ImageDownLoadTask(int jokeId,String url, Context context) {
+	Handler settingActivitHandler;
+	
+	public OfflineImageDownLoadTask(String url, Context context,Handler handler) {
 		this.iconurl = url;
-//		this.iconurl = "http://image.baidu.com/i?ct=503316480&z=&tn=baiduimagedetail&ipn=d&word=%E9%87%91%E5%B8%8C%E6%BE%88&ie=utf-8&in=5261&cl=&lm=&st=&pn=31&rn=1&di=163468126150&ln=1998&fr=&&fmq=1372239520062_R&ic=&s=&se=&sme=0&tab=&width=&height=&face=&is=&istype=&ist=&jit=&objurl=http%3A%2F%2Fpic.baike.soso.com%2Fp%2F20120910%2F20120910130935-730414026.jpg#pn31&-1&di163468126150&objURLhttp%3A%2F%2Fpic.baike.soso.com%2Fp%2F20120910%2F20120910130935-730414026.jpg&fromURLippr_z2C%24qAzdH3FAzdH3Fkwthj_z%26e3Bf5f5_z%26e3Bv54AzdH3Filc0l9_z%26e3Bip4&W500&H379&T7712&S26&TPjpg";
 		this.context = context;
-		this.jokeId = jokeId;
+		this.settingActivitHandler = handler;
+		
+		//获取下载文件名
+		String[] array = url.split("/");
+		fileName = array[array.length-1];
 	}
 	
 	@Override
 	protected void onPostExecute(Object result) {
-		if (result != null && imageView != null) {
-			this.imageView.setImageBitmap((Bitmap) result);
-			this.imageView = null;
+//		if (result != null && imageView != null) {
+//			this.imageView.setImageBitmap((Bitmap) result);
+//			this.imageView = null;
+//		}
+		if(result != null && settingActivitHandler != null){
+			settingActivitHandler.sendEmptyMessage(HandlerCodes.DOWNLOADIMAGE_SUCCESS);
+			settingActivitHandler.sendEmptyMessage(HandlerCodes.DOWNLOAD_OFFLINE_PICTURE);
 		}
 	}
 
 	@Override
 	protected Object doInBackground(Object... views) {
 		bmp = downImage(iconurl,context);
-		this.imageView = (ImageView) views[0];
+//		this.imageView = (ImageView) views[0];
 		return bmp;
 	}
 	
 	public Bitmap downImage(String ImageUrl, Context context){
-		Log.d("JOKE", "图片地址: " + ImageUrl);
 		InputStream ism = null;
 		URLConnection conn = null;
 		FileOutputStream output = null;
 		Bitmap bitmap = null;
 		
 		//在本地读取文件，如果存在，则直接解析，否则从网络获取
-
-		//ism = context.openFileInput(imageFile);
 		String[] fileList = context.fileList();
 		for(int i = 0;i<fileList.length;i++){
-			if(fileList[i].equals(jokeId+"")){
+			if(fileList[i].equals(fileName)){
 				try {
-					ism = context.openFileInput(jokeId+"");
+					ism = context.openFileInput(fileName);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
@@ -94,9 +98,9 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 
 				//保存文件
 				if(bitmap != null){
-					output = context.openFileOutput(jokeId+"", Context.MODE_PRIVATE);
+
+					output = context.openFileOutput(fileName, Context.MODE_PRIVATE);
 					bitmap.compress(CompressFormat.JPEG, 50, output);
-					
 					output.flush();
 					output.close();
 				}

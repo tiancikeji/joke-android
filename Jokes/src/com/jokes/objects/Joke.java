@@ -24,6 +24,8 @@ public class Joke {
 	private int length;
 	private String fullAudioUrl;
 	private String fullPictureUrl;
+	private int picture_size_in_b;
+	private int audio_size_in_b;
 
 	public Joke(JSONObject json){
 		try{
@@ -42,10 +44,11 @@ public class Joke {
 			this.num_plays = json.getInt("num_plays");
 			this.num_likes = json.getInt("num_likes");
 			this.isLike = json.getInt("is_like");
+			this.picture_size_in_b = json.getInt("picture_size_in_b");
+			this.audio_size_in_b = json.getInt("audio_size_in_b");
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
 		}
-		
 	}
 	
 	public Joke() {
@@ -54,6 +57,22 @@ public class Joke {
 		this.length = 0;
 	}
 
+	public int getPictureSizeInB(){
+		return picture_size_in_b;
+	}
+	
+	public void setPictureSizeInB(int picture_size_in_b){
+		this.picture_size_in_b = picture_size_in_b;
+	}
+	
+	public int getAudioSizeInB(){
+		return audio_size_in_b;
+	}
+	
+	public void setAudioSizeInB(int audio_size_in_b){
+		this.audio_size_in_b = audio_size_in_b;
+	}
+	
 	public int getNumPlays(){
 		return num_plays;
 	}

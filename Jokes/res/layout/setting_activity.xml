@@ -60,7 +60,6 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
-        android:visibility="gone"
         android:background="@drawable/item2" >
 
         <TextView
@@ -79,7 +78,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|right"
             android:layout_marginRight="10dp"
-            android:text="90%"
             android:textColor="#fe0000"
             android:textSize="15sp" />
     </FrameLayout>

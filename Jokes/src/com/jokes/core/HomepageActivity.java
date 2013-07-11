@@ -1,5 +1,6 @@
 package com.jokes.core;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -10,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
@@ -43,6 +45,7 @@ import android.widget.Toast;
 import com.handmark.pulltorefresh.extras.viewpager.PullToRefreshViewPager;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.jokes.database.DataBase;
 import com.jokes.ext.VerticalViewPager;
 import com.jokes.ext.VerticalViewPager.OnPageChangeListener;
 import com.jokes.objects.Joke;
@@ -90,6 +93,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 //	LinearLayout linearlayout_share;//选择分享方式的linearlayout
 	RelativeLayout relativeLayout_share;
 	
+	private List<Joke> offlineJokeList;;//保存离线笑话列表
 	private List<Joke> jokeList;
 	private Like like;
 	private Joke jokeCurrent;//正在播放的音频 Play the audio
@@ -109,6 +113,9 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	long countDownTime = 0;//倒计时剩余时间
 
 	WakeLock wakelock = null;//保持程序部睡眠
+	
+	private boolean isOnline = false;//用来判断是否处在有网络状态,true为有网络，false为离线状态
+	
 	private static String UID; //TODO save this so it doesn't change 
 	
 	//For Paging through joke list
@@ -129,10 +136,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = " + jokeList.size());
 				mPullToRefreshViewPager.onRefreshComplete();
 				if(currentPagingJokePage <= 1){
+//					jokePageAdapter = new JokePageAdapter(
+//							HomepageActivity.this.getSupportFragmentManager(),
+//							HomepageActivity.this, jokeList, mediaPlayer,
+//							HomepageActivity.this, mainHandler, UID, weChatShareApi);
 					jokePageAdapter = new JokePageAdapter(
 							HomepageActivity.this.getSupportFragmentManager(),
 							HomepageActivity.this, jokeList, mediaPlayer,
-							HomepageActivity.this, mainHandler, UID, weChatShareApi);
+							HomepageActivity.this, mainHandler, UID, weChatShareApi,isOnline);
 					viewPager.setAdapter(jokePageAdapter);
 					if (jokeList.size() > 0) {
 						TextView dateTextView = (TextView) findViewById(R.id.homepage_textview_date);
@@ -272,7 +283,18 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		
 		
 		jokeList = new ArrayList<Joke>();
-		ApiRequests.getJokes(mainHandler, jokeList, UID , 0, true);
+		
+		//判断是否有网络
+		if(Tools.isNetworkAvailable(HomepageActivity.this)){
+			isOnline = true;
+			ApiRequests.getJokes(mainHandler, jokeList, UID , 0, true);
+		}else{
+			isOnline = false;
+			offlineJokeList = getOfflineJokesList();
+			setOfflineJokesToJokeList();
+			mainHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
+		}
+		
 	}
 
 	@Override
@@ -477,7 +499,11 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		arg0.start();
 		jokePageAdapter.startPlayAnimation();
 		Joke joke = jokePageAdapter.getCurrentJoke();
-		ApiRequests.addPlay(mainHandler, joke, Constant.uid);
+		//检查联网
+		if(Tools.isNetworkAvailable(HomepageActivity.this)){
+			ApiRequests.addPlay(mainHandler, joke, Constant.uid);
+		}
+		
 		//Fix the length of the joke if it is wrong, a temp fix for uploading using web version not having length
 		/*View view = jokePageAdapter.getCurrentView();
 		Joke joke = jokePageAdapter.getJokeFromView(view);
@@ -628,14 +654,35 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 		@Override
 		public void onRefresh(PullToRefreshBase<VerticalViewPager> refreshView) {
-			if(refreshView.getCurrentMode() == com.handmark.pulltorefresh.library.PullToRefreshBase.Mode.PULL_FROM_END){
-				currentPagingJokePage++;
-				ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, false);
-				
-			} else {
-				currentPagingJokePage = 1;
-				ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, true);
+			//如果有网络则正常浏览，如果无网络，处在离线状态则浏览利息那
+			if(Tools.isNetworkAvailable(HomepageActivity.this)){
+				if(offlineJokeList != null && offlineJokeList.size() != 0){
+					//用户下载了离线数据，应该先播放离线 的数据
+					setOfflineJokesToJokeList();
+					mainHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
+				}else{
+					//无离线数据，且有网络
+					if(refreshView.getCurrentMode() == com.handmark.pulltorefresh.library.PullToRefreshBase.Mode.PULL_FROM_END){
+						currentPagingJokePage++;
+						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, false);
+						
+					} else {
+						currentPagingJokePage = 1;
+						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, true);
+					}
+				}
+			}else{
+				if(offlineJokeList != null && offlineJokeList.size() != 0){
+					//用户下载了离线数据，应该先播放离线 的数据
+					setOfflineJokesToJokeList();
+					mainHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
+				}else{
+					//通知到底了
+					
+				}
 			}
+			
+			
 			
 		}
 		
@@ -699,7 +746,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				HomepageActivity.this, 
 				""+(((Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_share)).getTag()),
 				""+(((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_pic)).getTag()));
-		
 	}
 	
 	/**
@@ -733,8 +779,72 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		
 	}
 	
-	
+	/**
+	 * 从数据库读取离线笑话列表
+	 */
+	private List<Joke> getOfflineJokesList(){
+		List<Joke> list = new ArrayList<Joke>();
 		
+		DataBase db = new DataBase(HomepageActivity.this);
+		db.open();
+		db.beginTransaction();
+		Cursor cursor = db.getOffLineJokes();
+		if(cursor.getCount() > 0){
+			cursor.moveToFirst();
+			Joke tempJoke;
+			int index_joke_id = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_JOKE_ID);
+			int index_audio_size_in_b = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_AUDIO_SIZE_IN_B);
+			int index_fullaudio_url = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_FULLAUDIO_URL);
+			int index_fullpicture_url = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_FULLPICTURE_URL);
+			int index_length = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_LENGTH);
+			int index_num_likes = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_NUM_LIKES);
+			int index_num_plays = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_NUM_PLAYS);
+			int index_picture_size_in_b = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_PICTURE_SIZE_IN_B);
+			int index_joke_uid = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_UID);
+			int index_createat = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_CREATEAT);
+			do{
+				tempJoke = new Joke();
+				tempJoke.setId(Integer.parseInt(cursor.getString(index_joke_id)));
+				tempJoke.setAudioSizeInB(Integer.parseInt(cursor.getString(index_audio_size_in_b)));
+				tempJoke.setFullAudioUrl(cursor.getString(index_fullaudio_url));
+				tempJoke.setFullPictureUrl(cursor.getString(index_fullpicture_url));
+				tempJoke.setLength(Integer.parseInt(cursor.getString(index_length)));
+				tempJoke.setNumLikes(Integer.parseInt(cursor.getString(index_num_likes)));
+				tempJoke.setNumPlays(Integer.parseInt(cursor.getString(index_num_plays)));
+				tempJoke.setPictureSizeInB(Integer.parseInt(cursor.getString(index_picture_size_in_b)));
+				tempJoke.setUserId(cursor.getString(index_joke_uid));
+				tempJoke.setCreatedAt(cursor.getString(index_createat));
+				list.add(tempJoke);
+				
+				cursor.moveToNext();
+			}while(!cursor.isAfterLast());
+		}
+		cursor.close();
+		db.endTransaction();
+		db.close();
+		
+		return list;
+	}
+	
+	/*
+	 * 包离线笑话数据赋值给jokeList
+	*/
+	private void setOfflineJokesToJokeList(){
+		if(offlineJokeList.size() > 0){
+			int count = 0;
+			for(int i=0;i < 5;i++){
+				if(count < 5 && offlineJokeList.size() > 0){
+					jokeList.add(offlineJokeList.get(0));
+					offlineJokeList.remove(0);
+					count++;
+				}else{
+					break;
+				}
+			}
+		}
+
+		
+	}
 }
 
 
