@@ -23,16 +23,22 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.jokes.mywidget.MyToast;
 import com.jokes.objects.Joke;
+import com.jokes.share.WeChatShare;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
 import com.jokes.utils.AudioUtils;
@@ -62,6 +68,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	LinearLayout linearlayout_bar;
 	ImageView imageview_bar;//加载中动画
 
+	RelativeLayout relativeLayout_dialog;
+	
 	ImageView imageview_point_1;
 	ImageView imageview_point_2;
 	ImageView imageview_point_3;
@@ -160,7 +168,7 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	public void onClick(View v) {
 		switch(v.getId()){
 		case R.id.record_button_back:
-			finish();
+				startAnimShare();
 			break;
 		case R.id.record_button_send:
 			if((Boolean)button_send.getTag()){
@@ -316,6 +324,16 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		}
 	}
 
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+				startAnimShare();
+		}
+//		return super.onKeyDown(keyCode, event);
+		return false;
+	}
+	
 	private void init(){
 		button_back = (Button)findViewById(R.id.record_button_back);
 		button_send = (Button)findViewById(R.id.record_button_send);
@@ -333,6 +351,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		linearlayout_bar.setVisibility(View.GONE);
 		imageview_bar = (ImageView)findViewById(R.id.record_imageview_bar);
 
+		relativeLayout_dialog = (RelativeLayout)findViewById(R.id.record_relativelayout_dialog);
+		
 		imageview_point_1 = (ImageView)findViewById(R.id.record_imageview_point_1);
 		imageview_point_2 = (ImageView)findViewById(R.id.record_imageview_point_2);
 		imageview_point_3 = (ImageView)findViewById(R.id.record_imageview_point_3);
@@ -527,6 +547,84 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		}
 			break;
 		}
+	}
+	
+	/**
+	 * 加载选择框动画
+	 */
+	private void startAnimShare(){
+		int yOffset  = (int)(relativeLayout_dialog.getHeight() * RecordActivity.this.getResources().getDisplayMetrics().density);
+
+		Animation animation = new TranslateAnimation(0F,0F, yOffset,0);
+		animation.setDuration(2000);               //设置动画持续时间              
+		animation.setRepeatCount(0);    
+		animation.setAnimationListener(new AnimationListener(){
+
+			@Override
+			public void onAnimationEnd(Animation arg0) {
+				relativeLayout_dialog.setVisibility(View.VISIBLE);
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation arg0) {
+			}
+
+			@Override
+			public void onAnimationStart(Animation arg0) {
+			}
+			
+		});
+		relativeLayout_dialog.setVisibility(View.VISIBLE);
+		relativeLayout_dialog.startAnimation(animation);
+		
+	}
+	
+	public void onAgainRecordButtonClick(View view){
+//		relativeLayout_dialog.setVisibility(View.GONE);
+		onCloseDialogButtonClick(relativeLayout_dialog);
+		button_send.setTag(true);
+		button_send.setVisibility(View.GONE);
+		button_record.setTag(false);//设置录音状态
+		button_record.setBackgroundResource(R.drawable.btn_record_activity_record);
+		linearlayout_record.setVisibility(View.VISIBLE);
+		linearlayout_bar.setVisibility(View.GONE);
+		linearlayout_addpic.setVisibility(View.GONE);
+		bipmpTemp = null;
+		imageFile = null;
+		mp3RecordedFile = null;
+		
+	}
+	
+	public void onCancelSendButtonClick(View view){
+		finish();
+	}
+	
+	/**
+	 * 取消
+	 */
+	public void onCloseDialogButtonClick(View view){
+		int yOffset  = (int)(relativeLayout_dialog.getHeight() * RecordActivity.this.getResources().getDisplayMetrics().density);//偏移
+
+		Animation animation = new TranslateAnimation(0F,0F, 0,yOffset);
+		animation.setDuration(2000);               //设置动画持续时间              
+		animation.setRepeatCount(0);    
+		animation.setAnimationListener(new AnimationListener(){
+
+			@Override
+			public void onAnimationEnd(Animation arg0) {
+				relativeLayout_dialog.setVisibility(View.GONE);
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation arg0) {
+			}
+
+			@Override
+			public void onAnimationStart(Animation arg0) {
+			}
+			
+		});
+		relativeLayout_dialog.startAnimation(animation);
 	}
 
 }

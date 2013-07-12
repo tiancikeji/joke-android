@@ -1,187 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg"
     android:orientation="vertical" >
 
-    <FrameLayout
-        android:layout_width="fill_parent"
-        android:layout_height="60dp"
-        android:background="@drawable/record_activity_title_bg"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/record_button_back"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_gravity="center_vertical|left"
-            android:layout_marginLeft="20dp"
-            android:background="@drawable/btn_back" >
-        </Button>
-
-        <Button
-            android:id="@+id/record_button_send"
-            android:layout_width="70dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical|right"
-            android:layout_marginRight="20dp"
-            android:background="@drawable/btn_current_1"
-            android:gravity="center"
-            android:text="发布"
-            android:textColor="#ffffff"
-            android:textSize="15sp" >
-        </Button>
-    </FrameLayout>
-
     <LinearLayout
-        android:id="@+id/record_linearlayout_record"
-        android:layout_width="fill_parent"
-        android:layout_height="0px"
-        android:layout_weight="7"
-        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical" >
 
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/record_activity_title_bg"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/record_button_back"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center_vertical|left"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/btn_back" >
+            </Button>
+
+            <Button
+                android:id="@+id/record_button_send"
+                android:layout_width="70dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical|right"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/btn_current_1"
+                android:gravity="center"
+                android:text="发布"
+                android:textColor="#ffffff"
+                android:textSize="15sp" >
+            </Button>
+        </FrameLayout>
+
         <LinearLayout
-            android:id="@+id/record_linearlayout_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
+            android:id="@+id/record_linearlayout_record"
+            android:layout_width="fill_parent"
+            android:layout_height="0px"
+            android:layout_weight="7"
+            android:gravity="center"
             android:orientation="vertical" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="正在接收"
-                android:textColor="#666666"
-                android:textSize="18dp" >
-            </TextView>
-
             <LinearLayout
-                android:id="@+id/record_linearlayout_point"
+                android:id="@+id/record_linearlayout_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="10dp"
-                android:background="#00000000" >
+                android:layout_gravity="center_horizontal|bottom"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="正在接收"
+                    android:textColor="#666666"
+                    android:textSize="18dp" >
+                </TextView>
+
+                <LinearLayout
+                    android:id="@+id/record_linearlayout_point"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="10dp"
+                    android:background="#00000000" >
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_1"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/point2" />
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_2"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/point2" />
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_3"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/point2" />
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_4"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/point2" />
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_5"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/point2" />
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_6"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/point2" />
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_7"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/point2" />
+
+                    <ImageView
+                        android:id="@+id/record_imageview_point_8"
+                        android:layout_width="3dp"
+                        android:layout_height="3dp"
+                        android:background="@drawable/point2" />
+                </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/record_imageview_point_1"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@drawable/point2" />
-
-                <ImageView
-                    android:id="@+id/record_imageview_point_2"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@drawable/point2" />
-
-                <ImageView
-                    android:id="@+id/record_imageview_point_3"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@drawable/point2" />
-
-                <ImageView
-                    android:id="@+id/record_imageview_point_4"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@drawable/point2" />
-
-                <ImageView
-                    android:id="@+id/record_imageview_point_5"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@drawable/point2" />
-
-                <ImageView
-                    android:id="@+id/record_imageview_point_6"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@drawable/point2" />
-
-                <ImageView
-                    android:id="@+id/record_imageview_point_7"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@drawable/point2" />
-
-                <ImageView
-                    android:id="@+id/record_imageview_point_8"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:background="@drawable/point2" />
+                    android:id="@+id/record_imageview_bar"
+                    android:layout_width="40dp"
+                    android:layout_height="4dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/animation1"
+                    android:visibility="gone" />
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/record_imageview_bar"
-                android:layout_width="40dp"
-                android:layout_height="4dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/animation1"
-                android:visibility="gone" />
+            <Button
+                android:id="@+id/record_button_record"
+                android:layout_width="213dp"
+                android:layout_height="213dp"
+                android:layout_marginBottom="50dp"
+                android:background="@drawable/btn_record_record" >
+            </Button>
         </LinearLayout>
-
-        <Button
-            android:id="@+id/record_button_record"
-            android:layout_width="213dp"
-            android:layout_height="213dp"
-            android:layout_marginBottom="50dp"
-            android:background="@drawable/btn_record_record" >
-        </Button>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/record_linearlayout_addpic"
-        android:layout_width="fill_parent"
-        android:layout_height="0px"
-        android:layout_margin="10dp"
-        android:layout_weight="7"
-        android:background="@drawable/homepage_activity_centerbg"
-        android:orientation="vertical"
-        android:visibility="gone" >
 
         <LinearLayout
             android:id="@+id/record_linearlayout_addpic"
             android:layout_width="fill_parent"
             android:layout_height="0px"
-            android:layout_weight="4"
-            android:orientation="vertical" >
+            android:layout_margin="10dp"
+            android:layout_weight="7"
+            android:background="@drawable/homepage_activity_centerbg"
+            android:orientation="vertical"
+            android:visibility="gone" >
 
-            <ImageView
-                android:id="@+id/record_imageview_pic"
+            <LinearLayout
+                android:id="@+id/record_linearlayout_addpic"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/btn_record_addpic"
-                android:clickable="true" />
-        </LinearLayout>
+                android:layout_height="0px"
+                android:layout_weight="4"
+                android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/record_button_play"
-            android:layout_width="280dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="17dp"
-            android:layout_marginTop="17dp"
-            android:background="@drawable/record_activity_play"
-            android:gravity="left|center_vertical"
-            android:paddingLeft="20dp"
-            android:textColor="#333333"
-            android:textSize="18sp" />
+                <ImageView
+                    android:id="@+id/record_imageview_pic"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/btn_record_addpic"
+                    android:clickable="true" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/record_button_play"
+                android:layout_width="280dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="17dp"
+                android:layout_marginTop="17dp"
+                android:background="@drawable/record_activity_play"
+                android:gravity="left|center_vertical"
+                android:paddingLeft="20dp"
+                android:textColor="#333333"
+                android:textSize="18sp" />
+        </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+    <RelativeLayout
+        android:id="@+id/record_relativelayout_dialog"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" 
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/dialog_background"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/record_button_again"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/dialog_btn_b"
+                android:gravity="center"
+                android:onClick="onAgainRecordButtonClick"
+                android:text="重新录制"
+                android:textColor="#FFFFFF" />
+            
+            <Button
+                android:id="@+id/record_button_cancel_send"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/dialog_btn_r"
+                android:gravity="center"
+                android:onClick="onCancelSendButtonClick"
+                android:text="取消发布"
+                android:textColor="#FFFFFF" />
+            
+            <Button
+                android:id="@+id/record_button_cancel"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/dialog_btn_r"
+                android:gravity="center"
+                android:onClick="onCloseDialogButtonClick"
+                android:text="取消"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>
