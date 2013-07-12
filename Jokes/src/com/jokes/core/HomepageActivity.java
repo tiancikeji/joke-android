@@ -147,7 +147,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 					viewPager.setAdapter(jokePageAdapter);
 					if (jokeList.size() > 0) {
 						TextView dateTextView = (TextView) findViewById(R.id.homepage_textview_date);
-						dateTextView.setText(jokeList.get(0).getCreatedAt()
+						dateTextView.setText(jokeList.get(0).getUpdatedAt()
 								.substring(0, DATE_STR_LEN_MINUS_TIME));
 					}
 				} else {
@@ -631,7 +631,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		public void onPageSelected(int position) {
 			TextView dateTextView = (TextView)findViewById(R.id.homepage_textview_date);
 			Joke joke = jokePageAdapter.getCurrentJoke();
-			dateTextView.setText(joke.getCreatedAt().substring(0, 11));
+			dateTextView.setText(joke.getUpdatedAt().substring(0, DATE_STR_LEN_MINUS_TIME));
 			//TextView playCountTextView = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_playcount);
 			//playCountTextView.setText(String.valueOf(joke.getNumPlays()));
 		}

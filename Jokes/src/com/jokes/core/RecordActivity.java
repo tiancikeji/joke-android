@@ -97,8 +97,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				changePointView(count);
 				break;
 			case HandlerCodes.CREATE_JOKE_SUCCESS:
-				toast = new MyToast(RecordActivity.this,"已经上传，请等待审核");
-				toast.startMyToast();
+				Toast.makeText(RecordActivity.this, "已经上传，请等待审核", Toast.LENGTH_LONG).show();
+
 //				button_send.setEnabled(false);
 				button_send.setTag(false);
 				CountDownTimer timer = new CountDownTimer(3000, 3000) {
