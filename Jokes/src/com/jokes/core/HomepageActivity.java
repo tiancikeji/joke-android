@@ -101,7 +101,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 	//分享
 	private IWXAPI weChatShareApi;
-	private int page = 2;//当前页为page-1
+//	private int page = 2;//当前页为page-1
 
 	boolean isGetJokeSuccesss = true;//记录第一次获取笑话列表失败
 	Animation myAnimation_Alpha;
@@ -157,13 +157,10 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				break;
 			}
 			case HandlerCodes.GET_JOKES_FAILURE:
-//				linearlayout_progressdialog.setVisibility(View.GONE);
-				if(page == 0){
-					Toast.makeText(HomepageActivity.this,"获取笑话列表失败",Toast.LENGTH_SHORT).show();
-				}else{
-					Toast.makeText(HomepageActivity.this,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
-				}
-
+				Toast.makeText(HomepageActivity.this,"获取笑话列表失败",Toast.LENGTH_SHORT).show();
+				break;
+			case HandlerCodes.GET_JOKES_NULL:
+				Toast.makeText(HomepageActivity.this,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Button button_favorite_big = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_big);
@@ -378,8 +375,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			startActivity(intent1);
 			break;
 		case R.id.homepage_button_refresh:
-			page = 2;
-			ApiRequests.getJokes(mainHandler, jokeList, UID, page, true);
+//			page = 2;
+//			ApiRequests.getJokes(mainHandler, jokeList, UID, page, true);
 			break;
 		case R.id.homepage_button_record:
 			Intent intent2 = new Intent(HomepageActivity.this,RecordActivity.class);
@@ -528,6 +525,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).setVisibility(View.GONE);
 		framelayout_play = (FrameLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_framelayout_play);
 		framelayout_play.setBackgroundResource(R.drawable.playback_play);
+		
+		//音频播放完成，播放次数+1,并且显示播放次数
+		TextView textview_numplays = ((TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_playcount));
+		textview_numplays.setVisibility(View.VISIBLE);
+		textview_numplays.setText((Integer.parseInt(textview_numplays.getText().toString())+1)+"");
+		//重新给音频长度控件赋值
+		textview_duration = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_duration);
+		textview_duration.setText(jokePageAdapter.getCurrentJoke().getLength()+"");
 	}
 	/**
 	 * 给程序加锁，保持CPU 运转，屏幕和键盘灯有可能是关闭的
@@ -674,6 +679,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			}else{
 				if(offlineJokeList != null && offlineJokeList.size() != 0){
 					//用户下载了离线数据，应该先播放离线 的数据
+					currentPagingJokePage++;
 					setOfflineJokesToJokeList();
 					mainHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
 				}else{

@@ -54,13 +54,104 @@
         android:layout_height="0px"
         android:layout_weight="7"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
+        <LinearLayout
+            android:id="@+id/feedback_linearlayout_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="正在接收"
+                android:textColor="#666666"
+                android:textSize="18dp" >
+            </TextView>
+
+            <LinearLayout
+                android:id="@+id/feedback_linearlayout_point"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"
+                android:background="#00000000" >
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_1"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_2"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_3"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_4"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_5"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_6"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_7"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginRight="2dp"
+                    android:background="@drawable/point2" />
+
+                <ImageView
+                    android:id="@+id/feedback_imageview_point_8"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:background="@drawable/point2" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/feedback_imageview_bar"
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/animation1"
+                android:visibility="gone" />
+        </LinearLayout>
+        
         <Button
             android:id="@+id/feedback_button_record"
             android:layout_width="213dp"
             android:layout_height="213dp"
-            android:background="@drawable/btn_record_record" >
+            android:background="@drawable/btn_record_record"
+            android:layout_marginBottom="50dp" >
         </Button>
     </LinearLayout>
 

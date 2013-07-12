@@ -45,6 +45,8 @@ public class HandlerCodes {
 	public static final int DOWNLOAD_OFFLINE_JOKE = 25;//下载离线数据进度更新
 	public static final int DOWNLOAD_OFFLINE_JOKE_FINISH = 26;//一条笑话下载完成
 	
+	public static final int GET_JOKES_NULL = 27;//获取笑话列表为空，用户以获取所有笑话。
+	
 	public static final int CLOSE = 99;
 
 

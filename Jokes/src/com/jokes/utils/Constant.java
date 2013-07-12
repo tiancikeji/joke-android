@@ -6,5 +6,5 @@ public class Constant {
 	
 	public static final String PREFERENCES_NAME = "jokes";
 	public static final String PREFERENCES_UID_KEY = "com.jokes.UID_KEY";
-	public static final String VERSION = "2.0";
+	public static final String VERSION = "0.0";
 }

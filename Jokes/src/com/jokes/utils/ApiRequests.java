@@ -40,14 +40,19 @@ public class ApiRequests {
 				HttpRequest response = HttpRequest.get(JOKE_URL, true, "page", page, "uid", uid);
 //				HttpRequest response = HttpRequest.get(JOKE_URL, true, "date", date,"uid", uid);
 				JokeHandler handler = new JokeHandler();
+				
 				String responseStr = "";
 				try {
 					responseStr = response.body();
 					if(clearList){
 						jokes.clear();
 					}
-					jokes.addAll((List<Joke>)handler.parseResponse(responseStr));
+					List<Joke> tempJokes = (List<Joke>)handler.parseResponse(responseStr);
+					jokes.addAll(tempJokes);
 					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
+					if(tempJokes.size() <= 0){
+						responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_NULL);
+					}
 				} catch (HttpRequestException e) {
 					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_FAILURE);
 					Log.e(DEBUG_TAG, "GetJokes " + e.toString() + " " + responseStr);

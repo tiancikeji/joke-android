@@ -26,8 +26,8 @@ import com.tencent.mm.sdk.platformtools.Util;
 
 public class WeChatShare {
 	
-//	private static final String APP_ID = "wxc15df4cc42ae252b";
-	private static final String APP_ID = "wxb3b0db608a4925ee";
+	private static final String APP_ID = "wxc15df4cc42ae252b";
+//	private static final String APP_ID = "wxb3b0db608a4925ee";
 	private static final String APP_KEY= "658010a294485a9e81df8788bd025b14";
 	private static final int TIMELINE_SUPPORTED_VERSION = 0x21020001;
 	
@@ -116,9 +116,9 @@ public class WeChatShare {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-//		if(thumb == null){
+		if(thumb == null){
 			thumb = BitmapFactory.decodeResource(res, R.drawable.btn_favorite_big);
-//		}
+		}
 		
 		if(ism != null){
 			try {
@@ -166,10 +166,10 @@ public class WeChatShare {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-//		if(thumb == null){
+		if(thumb == null){
 			thumb = BitmapFactory.decodeResource(res, R.drawable.btn_favorite_big);
-//		}
-		
+		}
+	
 		if(ism != null){
 			try {
 				ism.close();
@@ -210,7 +210,7 @@ public class WeChatShare {
 	 * @return
 	 */
 	private static byte[] getBitmapBytes(Bitmap bitmap, boolean paramBoolean) {
-        Bitmap localBitmap = Bitmap.createBitmap(150, 150, Bitmap.Config.RGB_565);
+        Bitmap localBitmap = Bitmap.createBitmap(80, 80, Bitmap.Config.RGB_565);
         Canvas localCanvas = new Canvas(localBitmap);
         int i;
         int j;
@@ -223,7 +223,7 @@ public class WeChatShare {
         }
         while (true) {
             localCanvas.drawBitmap(bitmap, new Rect(0, 0, i, j), new Rect(0, 0,
-                    150, 150), null);
+                    80, 80), null);
             if (paramBoolean)
                 bitmap.recycle();
             ByteArrayOutputStream localByteArrayOutputStream = new ByteArrayOutputStream();

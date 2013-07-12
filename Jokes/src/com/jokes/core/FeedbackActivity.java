@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.jokes.mywidget.MyToast;
@@ -27,11 +29,24 @@ import com.jokes.utils.UmengAnaly;
 import com.umeng.analytics.MobclickAgent;
 
 public class FeedbackActivity extends Activity implements OnClickListener, OnCompletionListener{
-
+	private static final int CHANGEVOLUME = 100001;
 	Button button_back;
 	Button button_send;
+	LinearLayout linearlayout_record;
 	Button button_record;
 	Button button_play;
+	
+	LinearLayout linearlayout_bar;
+	ImageView imageview_bar;//加载中动画
+
+	ImageView imageview_point_1;
+	ImageView imageview_point_2;
+	ImageView imageview_point_3;
+	ImageView imageview_point_4;
+	ImageView imageview_point_5;
+	ImageView imageview_point_6;
+	ImageView imageview_point_7;
+	ImageView imageview_point_8;
 	
 	//private boolean isPlaying = false;
 	private AudioRecorder audioRecorder;
@@ -40,7 +55,10 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 	private boolean isPlaying = false;
 	private boolean isPaused = false;
 	
-	
+	//用来控制录音动画效果
+	int count = 0;
+	boolean isStartAnim = false;
+		
 	Handler mainHandler = new Handler(){
 
 		@Override
@@ -70,6 +88,9 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 			}
 			case HandlerCodes.CREATE_FEEDBACK_FAILURE:
 				Log.e("JOKE", "feedback failed to send");
+				break;
+			case CHANGEVOLUME:
+				changePointView(count);
 				break;
 			}
 		
@@ -120,7 +141,9 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		case R.id.feedback_button_record:
 			//点击开始录音，再次点击停止了录音
 			if((Boolean)button_record.getTag()){
+				isStartAnim = false;
 				button_record.setTag(false);
+				linearlayout_record.setVisibility(View.GONE);
 				button_record.setBackgroundResource(R.drawable.btn_record_activity_record);
 				button_send.setVisibility(View.VISIBLE);
 				button_play.setVisibility(View.VISIBLE);
@@ -129,6 +152,9 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 				//友盟统计：录制音频
 				UmengAnaly.AnalyOnClickFeedbaceRocord(this);
 			}else{
+				isStartAnim = true;
+				linearlayout_bar.setVisibility(View.VISIBLE);
+				startPlayAnim();
 				audioRecorder = new AudioRecorder();
 				audioRecorder.startRecordingAudio(this);
 				button_record.setTag(true);
@@ -161,9 +187,24 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		button_back = (Button)findViewById(R.id.feedback_button_back);
 		button_send = (Button)findViewById(R.id.feedback_button_send);
 		button_send.setVisibility(View.GONE);
+		linearlayout_record = (LinearLayout)findViewById(R.id.feedback_linearlayout_record);
 		button_record = (Button)findViewById(R.id.feedback_button_record);
 		button_record.setTag(false);//设置按钮是否在录音状态
 		button_play = (Button)findViewById(R.id.feedback_button_play);
+		
+		linearlayout_bar = (LinearLayout)findViewById(R.id.feedback_linearlayout_bar);
+		linearlayout_bar.setVisibility(View.GONE);
+		imageview_bar = (ImageView)findViewById(R.id.record_imageview_bar);
+
+		imageview_point_1 = (ImageView)findViewById(R.id.feedback_imageview_point_1);
+		imageview_point_2 = (ImageView)findViewById(R.id.feedback_imageview_point_2);
+		imageview_point_3 = (ImageView)findViewById(R.id.feedback_imageview_point_3);
+		imageview_point_4 = (ImageView)findViewById(R.id.feedback_imageview_point_4);
+		imageview_point_5 = (ImageView)findViewById(R.id.feedback_imageview_point_5);
+		imageview_point_6 = (ImageView)findViewById(R.id.feedback_imageview_point_6);
+		imageview_point_7 = (ImageView)findViewById(R.id.feedback_imageview_point_7);
+		imageview_point_8 = (ImageView)findViewById(R.id.feedback_imageview_point_8);
+		
 		button_back.setOnClickListener(this);
 		button_send.setOnClickListener(this);
 		button_record.setOnClickListener(this);
@@ -180,6 +221,142 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		mediaPlayer = null;
 		isPaused = false;
 		isPlaying = false;
+	}
+	
+	/**
+	 * 录音动画效果
+	 */
+	private void startPlayAnim(){
+
+		new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				while(isStartAnim){
+					mainHandler.sendEmptyMessage(CHANGEVOLUME);
+					if(count == 8){
+						count = 0;
+					}else{
+						count++;
+					}
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+
+		}).start();
+	}
+	
+	/**
+	 * 根据count改变point状态
+	 * @param count
+	 */
+	private void changePointView(int count){
+		switch(count){
+		case 0:{
+			imageview_point_1.setBackgroundResource(R.drawable.point1);
+			imageview_point_2.setBackgroundResource(R.drawable.point1);
+			imageview_point_3.setBackgroundResource(R.drawable.point1);
+			imageview_point_4.setBackgroundResource(R.drawable.point1);
+			imageview_point_5.setBackgroundResource(R.drawable.point1);
+			imageview_point_6.setBackgroundResource(R.drawable.point1);
+			imageview_point_7.setBackgroundResource(R.drawable.point1);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 1:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point1);
+			imageview_point_3.setBackgroundResource(R.drawable.point1);
+			imageview_point_4.setBackgroundResource(R.drawable.point1);
+			imageview_point_5.setBackgroundResource(R.drawable.point1);
+			imageview_point_6.setBackgroundResource(R.drawable.point1);
+			imageview_point_7.setBackgroundResource(R.drawable.point1);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 2:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point2);
+			imageview_point_3.setBackgroundResource(R.drawable.point1);
+			imageview_point_4.setBackgroundResource(R.drawable.point1);
+			imageview_point_5.setBackgroundResource(R.drawable.point1);
+			imageview_point_6.setBackgroundResource(R.drawable.point1);
+			imageview_point_7.setBackgroundResource(R.drawable.point1);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 3:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point2);
+			imageview_point_3.setBackgroundResource(R.drawable.point2);
+			imageview_point_4.setBackgroundResource(R.drawable.point1);
+			imageview_point_5.setBackgroundResource(R.drawable.point1);
+			imageview_point_6.setBackgroundResource(R.drawable.point1);
+			imageview_point_7.setBackgroundResource(R.drawable.point1);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 4:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point2);
+			imageview_point_3.setBackgroundResource(R.drawable.point2);
+			imageview_point_4.setBackgroundResource(R.drawable.point2);
+			imageview_point_5.setBackgroundResource(R.drawable.point1);
+			imageview_point_6.setBackgroundResource(R.drawable.point1);
+			imageview_point_7.setBackgroundResource(R.drawable.point1);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 5:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point2);
+			imageview_point_3.setBackgroundResource(R.drawable.point2);
+			imageview_point_4.setBackgroundResource(R.drawable.point2);
+			imageview_point_5.setBackgroundResource(R.drawable.point2);
+			imageview_point_6.setBackgroundResource(R.drawable.point1);
+			imageview_point_7.setBackgroundResource(R.drawable.point1);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 6:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point2);
+			imageview_point_3.setBackgroundResource(R.drawable.point2);
+			imageview_point_4.setBackgroundResource(R.drawable.point2);
+			imageview_point_5.setBackgroundResource(R.drawable.point2);
+			imageview_point_6.setBackgroundResource(R.drawable.point2);
+			imageview_point_7.setBackgroundResource(R.drawable.point1);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 7:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point2);
+			imageview_point_3.setBackgroundResource(R.drawable.point2);
+			imageview_point_4.setBackgroundResource(R.drawable.point2);
+			imageview_point_5.setBackgroundResource(R.drawable.point2);
+			imageview_point_6.setBackgroundResource(R.drawable.point2);
+			imageview_point_7.setBackgroundResource(R.drawable.point2);
+			imageview_point_8.setBackgroundResource(R.drawable.point1);
+		}
+			break;
+		case 8:{
+			imageview_point_1.setBackgroundResource(R.drawable.point2);
+			imageview_point_2.setBackgroundResource(R.drawable.point2);
+			imageview_point_3.setBackgroundResource(R.drawable.point2);
+			imageview_point_4.setBackgroundResource(R.drawable.point2);
+			imageview_point_5.setBackgroundResource(R.drawable.point2);
+			imageview_point_6.setBackgroundResource(R.drawable.point2);
+			imageview_point_7.setBackgroundResource(R.drawable.point2);
+			imageview_point_8.setBackgroundResource(R.drawable.point2);
+		}
+			break;
+		}
 	}
 
 }

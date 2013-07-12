@@ -186,8 +186,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				linearlayout_record.setVisibility(View.GONE);
 				linearlayout_addpic.setVisibility(View.VISIBLE);
 				button_send.setVisibility(View.VISIBLE);
-				AnimationDrawable animationDrawable = (AnimationDrawable) imageview_bar.getDrawable();
-				animationDrawable.stop();
+//				AnimationDrawable animationDrawable = (AnimationDrawable) imageview_bar.getDrawable();
+//				animationDrawable.stop();
 				
 				mp3RecordedFile = audioRecorder.stopRecordingAudio(this);
 				displayLengthOfAudioFile();

@@ -47,6 +47,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 //	private ImageView imageview_volume;
 //	private TextView textview_playcount;
 //	private TextView textview_numlikes;
+	private TextView textview_duration;
 	private String UID;
 	private boolean isOnline;//判断是否处在离线状态，如果处在离线状态则播放本地音频
 	
@@ -331,7 +332,13 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 
 			if (duration > 0) {  
 				long pos = seekBar.getMax() * position / duration;  
-				seekBar.setProgress((int) pos);  
+				seekBar.setProgress((int) pos); 
+				//动态修改播放剩余时长,判断播放进度和剩余时长是否大于0
+				textview_duration = (TextView)currentView.findViewById(R.id.homepage_textview_duration);
+				if(pos > 0 && Integer.parseInt(textview_duration.getText().toString().split("\"")[0]) != 0){
+					
+					textview_duration.setText((Integer.parseInt(textview_duration.getText().toString().split("\"")[0])-1)+"");
+				}
 			}  
 		};  
 	};
