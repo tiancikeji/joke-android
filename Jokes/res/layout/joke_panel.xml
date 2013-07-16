@@ -138,8 +138,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="20dp"
-                    android:textColor="#333333"
-                    android:textSize="15sp"
+                    android:textColor="#666666"
+                    android:textSize="7sp"
                     android:visibility="visible" />
 
                 <TextView

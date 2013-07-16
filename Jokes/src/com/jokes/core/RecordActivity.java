@@ -35,8 +35,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
-import com.jokes.mywidget.MyToast;
 import com.jokes.objects.Joke;
 import com.jokes.share.WeChatShare;
 import com.jokes.utils.ApiRequests;
@@ -90,9 +88,6 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	boolean isStartAnim = false;
 
 	boolean isPlay = false;//判断是否播放音频
-	
-	MyToast toast;
-	
 	Handler mainHandler = new Handler(){
 
 		@Override
@@ -122,8 +117,6 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 				timer.start();
 				break;
 			case HandlerCodes.CREATE_JOKE_FAILURE:
-				toast = new MyToast(RecordActivity.this,"上传失败了");
-				toast.startMyToast();
 //				button_send.setEnabled(false);
 				button_send.setTag(false);
 				break;

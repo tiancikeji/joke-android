@@ -72,7 +72,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 	private int downloadJokesSize = 0;
 	private int imagedownloadcount = 0;//用来记录下载图片个数
 	private int jokedownloadcount = 0;
-	
+
 	Handler mainHandler = new Handler(){
 
 		@Override
@@ -82,36 +82,36 @@ public class SettingActivity extends Activity implements OnClickListener{
 				Bundle bundle = msg.getData();
 				String current_version = bundle.getString("current_version");
 				apkUrl = bundle.getString("url");
-				if(isUpdate(current_version)){
-					//退出此页面提示是否退出，退出正在下载文件失败
-					new AlertDialog.Builder(SettingActivity.this).setTitle("一听到底有新版本可升级").setMessage("版本号为：v"+current_version)
-					.setPositiveButton("立即更新",new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog,int whichButton)
+				if(current_version != null && !current_version.equals("")){
+					if(isUpdate(current_version)){
+						//退出此页面提示是否退出，退出正在下载文件失败
+						new AlertDialog.Builder(SettingActivity.this).setTitle("一听到底有新版本可升级").setMessage("版本号为：v"+current_version)
+						.setPositiveButton("立即更新",new DialogInterface.OnClickListener()
 						{
-							textview_updatepercent.setVisibility(View.VISIBLE);
-							//启动线程下载apk
-							downloadAPK(ApiRequests.buildAbsoluteUrl(apkUrl));
-						}
-					}).setNegativeButton("以后再说",new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog,int whichButton)
+							public void onClick(DialogInterface dialog,int whichButton)
+							{
+								textview_updatepercent.setVisibility(View.VISIBLE);
+								//启动线程下载apk
+								downloadAPK(ApiRequests.buildAbsoluteUrl(apkUrl));
+							}
+						}).setNegativeButton("以后再说",new DialogInterface.OnClickListener()
 						{
-							textview_updatepercent.setVisibility(View.GONE);
-						}
-					}).show();
+							public void onClick(DialogInterface dialog,int whichButton)
+							{
+								textview_updatepercent.setVisibility(View.GONE);
+							}
+						}).show();
 
+					}else{
+						isDownloadAPK = false;
+						Toast.makeText(SettingActivity.this,"当前版本为最新版本",Toast.LENGTH_SHORT).show();
+					}
 				}else{
-					isDownloadAPK = false;
-//					toast = new MyToast(SettingActivity.this,"当前版本为最新版本");
-//					toast.startMyToast();
 					Toast.makeText(SettingActivity.this,"当前版本为最新版本",Toast.LENGTH_SHORT).show();
 				}
 
 				break;
 			case HandlerCodes.CHECK_UPDATE_FAILURE:
-//				toast = new MyToast(SettingActivity.this,"检查版本更新失败！");
-//				toast.startMyToast();
 				Toast.makeText(SettingActivity.this,"检查版本更新失败！",Toast.LENGTH_SHORT).show();
 				isDownloadAPK = false;
 				break;
@@ -128,8 +128,6 @@ public class SettingActivity extends Activity implements OnClickListener{
 				break;
 			case HandlerCodes.CONNECTION_FAILURE:
 				isDownloadAPK = false;
-//				toast = new MyToast(SettingActivity.this,"请检查网络连接！");
-//				toast.startMyToast();
 				Toast.makeText(SettingActivity.this,"请检查网络连接！",Toast.LENGTH_SHORT).show();
 				break;
 			case HandlerCodes.GET_JOKES_SUCCESS:
@@ -166,13 +164,11 @@ public class SettingActivity extends Activity implements OnClickListener{
 				}
 				break;
 			case HandlerCodes.DOWNLOAD_OFFLINE_JOKE:
-				
+
 				Bundle temp_bundle = msg.getData();
 				int temp_download = temp_bundle.getInt("downloadsize");
 				downloadJokesSize = downloadJokesSize + temp_download;
-				
-//				Log.e("DOWNLOAD_OFFLINE_JOKE",jokesSize+"="+downloadJokesSize);
-				
+
 				int temp_progress_1 = (Double.valueOf((downloadJokesSize * 1.0 / jokesSize * 100))).intValue();  
 				if (temp_progress_1 == 100) {  
 					textview_downloadpercent.setText("下载完成");
@@ -197,7 +193,6 @@ public class SettingActivity extends Activity implements OnClickListener{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.setting_activity);
-
 		context = getApplicationContext();
 		init();
 		setView();
@@ -271,7 +266,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 								//获取离线笑话列表
 								jokesList = new ArrayList<Joke>();
 								ApiRequests.getJokes(mainHandler, jokesList, Constant.uid, 1, true);
-								
+
 								//友盟统计：下载离线
 								UmengAnaly.AnalyOffLineDownload(SettingActivity.this);
 							}
@@ -286,7 +281,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 						//获取离线笑话列表
 						jokesList = new ArrayList<Joke>();
 						ApiRequests.getJokes(mainHandler, jokesList, Constant.uid, 1, true);
-						
+
 						//友盟统计：下载离线
 						UmengAnaly.AnalyOffLineDownload(SettingActivity.this);
 					}
@@ -294,7 +289,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 					Toast.makeText(SettingActivity.this, "请检查网络", Toast.LENGTH_SHORT).show();
 				}
 			}
-				
+
 			break;
 		case R.id.setting_framelayout_feedback:
 			Intent intent = new Intent(SettingActivity.this,FeedbackActivity.class);
@@ -465,7 +460,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 								fos.write(buf, 0, count); 
 								mainHandler.sendEmptyMessage(HandlerCodes.DOWNLOAD_APK);
 							}
-							
+
 							conn.disconnect();
 							fos.close();  
 							is.close();
@@ -491,7 +486,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 						}else{
 							isDownloadAPK = true;
 							FileOutputStream fos = context.openFileOutput(apkFileName, Context.MODE_PRIVATE);
-							
+
 							byte[] buf = new byte[1024];
 							int count = 0;  
 
@@ -520,7 +515,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 					e.printStackTrace(); 
 				} 
 			}
-			 
+
 		}
 
 

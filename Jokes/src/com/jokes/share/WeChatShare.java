@@ -26,8 +26,8 @@ import com.tencent.mm.sdk.platformtools.Util;
 
 public class WeChatShare {
 	
-//	private static final String APP_ID = "wxc15df4cc42ae252b";
-	private static final String APP_ID = "wxb3b0db608a4925ee";
+	private static final String APP_ID = "wxc15df4cc42ae252b";
+//	private static final String APP_ID = "wxb3b0db608a4925ee";
 	private static final String APP_KEY= "658010a294485a9e81df8788bd025b14";
 	private static final int TIMELINE_SUPPORTED_VERSION = 0x21020001;
 	
