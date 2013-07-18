@@ -33,12 +33,20 @@ public class ApiRequests {
 	private static final String UPDATE_URL = BASE_URL+API_URL+"/version/checkVersion";
 	private static final String DOWNLOAD_APK_URL = BASE_URL + API_URL;
 	
-	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, final String uid, final int page, final boolean clearList){
+	/**
+	 * 通过page获取最新10条笑话
+	 * @param responseHandler
+	 * @param jokes
+	 * @param uid
+	 * @param page
+	 * @param clearList
+	 */
+	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, 
+			final String uid, final int page, final boolean clearList){
 		new Thread(new Runnable() {	
 			@Override
 			public void run() {
 				HttpRequest response = HttpRequest.get(JOKE_URL, true, "page", page, "uid", uid);
-//				HttpRequest response = HttpRequest.get(JOKE_URL, true, "date", date,"uid", uid);
 				JokeHandler handler = new JokeHandler();
 				
 				String responseStr = "";
@@ -49,6 +57,64 @@ public class ApiRequests {
 					}
 					List<Joke> tempJokes = (List<Joke>)handler.parseResponse(responseStr);
 					jokes.addAll(tempJokes);
+					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
+					if(tempJokes.size() <= 0){
+						responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_NULL);
+					}
+				} catch (HttpRequestException e) {
+					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_FAILURE);
+					Log.e(DEBUG_TAG, "GetJokes " + e.toString() + " " + responseStr);
+				} catch (JSONException e) {
+					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_FAILURE);
+					Log.e(DEBUG_TAG, "GetJokes " + e.toString() + " " + responseStr);
+				}
+			}
+		}).start();
+	}
+	
+	/**
+	 * 获取更多时，通过date来获取，direction：0向前  1向后
+	 * @param responseHandler
+	 * @param jokes
+	 * @param uid
+	 * @param date
+	 * @param direction
+	 * @param clearList
+	 */
+	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, 
+			final String uid, final String date,final int direction, final boolean clearList){
+		new Thread(new Runnable() {	
+			@Override
+			public void run() {
+				HttpRequest response = HttpRequest.get(JOKE_URL, true, "date", date, "dir", direction, "uid", uid);
+				JokeHandler handler = new JokeHandler();
+				
+				String responseStr = "";
+				try {
+					responseStr = response.body();
+					if(clearList){
+						jokes.clear();
+					}
+					List<Joke> tempJokes = (List<Joke>)handler.parseResponse(responseStr);
+					//检查数据是否已经存在 ，如果存在则不保存
+					if(jokes.size() != 0){
+						boolean isequals = true;
+						for(int i = 0; i < tempJokes.size(); i++){
+							
+							for(int j = 0  ; j < jokes.size() ; j++){
+								if(date.equals(Tools.getDateFormat_(tempJokes.get(i).getUpdatedAt()))){
+									isequals = false;
+									break;
+								}
+							}
+							if(isequals){
+								jokes.add(tempJokes.get(i));
+								isequals = true;
+							}
+						}
+					}else{
+						jokes.addAll(tempJokes);
+					}
 					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
 					if(tempJokes.size() <= 0){
 						responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_NULL);

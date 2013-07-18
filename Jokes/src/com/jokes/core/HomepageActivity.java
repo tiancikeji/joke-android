@@ -70,7 +70,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	OnRefreshListener<VerticalViewPager>{
 	
 	private static final String DEBUG_TAG = "JOKE";
-	private static final int CHANGEVOLUME = 100002;
 	private static final int DATE_STR_LEN_MINUS_TIME = 11;
 
 	Button button_setting;//设置按钮
@@ -185,7 +184,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 					temp_textview.setText((Integer.parseInt(temp_textview.getText().toString())-1)+"");
 				}
 				
-				
 				break;
 			case HandlerCodes.UNLIKE_FAILURE:
 				linearlayout_like_small = ((LinearLayout)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_linearlayout_favorite_small));
@@ -195,9 +193,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 				break;
 			case HandlerCodes.GET_LIKEJOKES_FAILURE:
-				break;
-			case CHANGEVOLUME:
-				//changeView(count);
 				break;
 			case HandlerCodes.CREATE_JOKE_SUCCESS:
 				Log.d(DEBUG_TAG, "Create joke success");
@@ -252,14 +247,16 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		//判断是否有网络
 		if(Tools.isNetworkAvailable(HomepageActivity.this)){
 			isOnline = true;
-			ApiRequests.getJokes(mainHandler, jokeList, UID , 0, true);
+//			ApiRequests.getJokes(mainHandler, jokeList, UID , 0, true);
+			ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getTodayFormat_(), 0, true);
+			Log.e("请求日期", Tools.getTodayFormat_()+"【"+0+"】");
 		}else{
 			isOnline = false;
 			offlineJokeList = getOfflineJokesList();
 			setOfflineJokesToJokeList();
 			mainHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
 		}
-		
+//		acquireWakeLock();
 	}
 
 	@Override
@@ -289,6 +286,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			mTimer.cancel();
 			mTimer = null;
 		}
+		
+//		releaseWakeLock();
 	}
 	
 	@Override
@@ -568,14 +567,18 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 					setOfflineJokesToJokeList();
 					mainHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
 				}else{
-					//无离线数据，且有网络
+					//无离线数据，且有网络时：上拉
 					if(refreshView.getCurrentMode() == com.handmark.pulltorefresh.library.PullToRefreshBase.Mode.PULL_FROM_END){
 						currentPagingJokePage++;
-						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, false);
-						
+//						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, false);
+						ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getUpdatedAt()), 1, false);
+						Log.e("请求日期", Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getUpdatedAt())+"【"+1+"】");
 					} else {
 						currentPagingJokePage = 1;
-						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, true);
+//						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, true);
+						ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getTodayFormat_(), 0, true);
+						Log.e("请求日期", Tools.getTodayFormat_()+"【"+0+"】");
+						
 					}
 				}
 			}else{

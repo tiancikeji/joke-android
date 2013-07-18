@@ -46,6 +46,7 @@ public class Joke {
 			this.isLike = json.getInt("is_like");
 			this.picture_size_in_b = json.getInt("picture_size_in_b");
 			this.audio_size_in_b = json.getInt("audio_size_in_b");
+			Log.e("笑话更新时间", updatedAt);
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
 		}
