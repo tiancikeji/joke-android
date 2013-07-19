@@ -566,7 +566,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 			values.put(DataBase.OFFLINE_NUM_PLAYS, ""+list.get(i).getNumPlays());
 			values.put(DataBase.OFFLINE_PICTURE_SIZE_IN_B, ""+list.get(i).getPictureSizeInB());
 			values.put(DataBase.OFFLINE_UID, ""+list.get(i).getUserId());
-			values.put(DataBase.OFFLINE_CREATEAT, ""+list.get(i).getCreatedAt());
+			values.put(DataBase.OFFLINE_APPROVAL_TIME, ""+list.get(i).getApprovalTime());
 			db.saveOffLineJokes(values);
 		}
 		db.endTransaction();

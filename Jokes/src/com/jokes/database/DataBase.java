@@ -23,7 +23,8 @@ public class DataBase {
 	public static final String OFFLINE_FULLPICTURE_URL = "offline_fullpicture_url";
 	public static final String OFFLINE_PICTURE_SIZE_IN_B = "offline_picture_size_in_b";
 	public static final String OFFLINE_AUDIO_SIZE_IN_B = "offline_audio_size_in_b";
-	public static final String OFFLINE_CREATEAT = "createdAt";
+//	public static final String OFFLINE_CREATEAT = "createdAt";
+	public static final String OFFLINE_APPROVAL_TIME = "offline_approval_time";
 	
 	private Context context;
 	private SQLiteDatabase sqliteDatabase;
@@ -107,7 +108,7 @@ public class DataBase {
 					+OFFLINE_FULLAUDIO_URL   +" text,"
 					+OFFLINE_FULLPICTURE_URL  +" text,"
 					+OFFLINE_PICTURE_SIZE_IN_B  +" text,"
-					+OFFLINE_CREATEAT +" text,"
+					+OFFLINE_APPROVAL_TIME +" text,"
 					+OFFLINE_AUDIO_SIZE_IN_B + " text )"
 			);
 		}

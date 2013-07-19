@@ -43,7 +43,7 @@ public class ApiRequests {
 	 */
 	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, 
 			final String uid, final int page, final boolean clearList){
-		new Thread(new Runnable() {	
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				HttpRequest response = HttpRequest.get(JOKE_URL, true, "page", page, "uid", uid);
@@ -74,12 +74,13 @@ public class ApiRequests {
 	
 	/**
 	 * 获取更多时，通过date来获取，direction：0向前  1向后
+	 * 此方法逻辑判断有些复杂，还没有想到好的解决方法，待优化
 	 * @param responseHandler
 	 * @param jokes
 	 * @param uid
 	 * @param date
 	 * @param direction
-	 * @param clearList
+	 * @param clearList，（只有在刷新是要求清除记录，在加载更多时不会清除列表）
 	 */
 	public static void getJokes(final Handler responseHandler, final List<Joke> jokes, 
 			final String uid, final String date,final int direction, final boolean clearList){
@@ -92,17 +93,19 @@ public class ApiRequests {
 				String responseStr = "";
 				try {
 					responseStr = response.body();
-					if(clearList){
-						jokes.clear();
-					}
 					List<Joke> tempJokes = (List<Joke>)handler.parseResponse(responseStr);
+					
 					//检查数据是否已经存在 ，如果存在则不保存
-					if(jokes.size() != 0){
+//					if(jokes.size() != 0){
+					if(!clearList){
+						if(clearList){
+							jokes.clear();
+						}
 						boolean isequals = true;
 						for(int i = 0; i < tempJokes.size(); i++){
 							
 							for(int j = 0  ; j < jokes.size() ; j++){
-								if(date.equals(Tools.getDateFormat_(tempJokes.get(i).getUpdatedAt()))){
+								if(date.equals(Tools.getDateFormat_(tempJokes.get(i).getApprovalTime()))){
 									isequals = false;
 									break;
 								}
@@ -112,10 +115,34 @@ public class ApiRequests {
 								isequals = true;
 							}
 						}
+						//用户下载更多成功
+						responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
 					}else{
+						int count = 0;//记录获取的笑话中有多少是新笑话
+						for(int i=0; i<tempJokes.size(); i++){
+							//循环10次，是因为每天更新的笑话个数为10，jokes中前十条就是进入程序是获取最新10条笑话。这是规则。
+							for(int j = 0  ; j < (jokes.size()>=10?10:jokes.size()); j++){
+								if(date.equals(Tools.getDateFormat_(tempJokes.get(i).getApprovalTime()))){
+									count++;
+								}
+							}
+						}
+						//如果需要清除记录，那就说明是刷新笑话列表。此事如果count大于0说明有新笑话则删除记录重新加载
+						jokes.clear();
 						jokes.addAll(tempJokes);
+						if(count > 0){
+							Message msg = new Message();
+							msg.what = HandlerCodes.GET_JOKES_REFRESH_SUCCESS;
+							Bundle bundle = new Bundle();
+							bundle.putInt("update_count", count);
+							responseHandler.sendMessage(msg);
+						}else{
+							responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
+						}
+						
+						
 					}
-					responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_SUCCESS);
+					
 					if(tempJokes.size() <= 0){
 						responseHandler.sendEmptyMessage(HandlerCodes.GET_JOKES_NULL);
 					}

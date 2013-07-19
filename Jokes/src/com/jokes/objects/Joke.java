@@ -26,14 +26,15 @@ public class Joke {
 	private String fullPictureUrl;
 	private int picture_size_in_b;
 	private int audio_size_in_b;
+	private String approval_time;
 
 	public Joke(JSONObject json){
 		try{
 			//this.pictureUrl = json.getString("picture_url");
 			this.approved 	= json.getInt("approved") == APPROVED;
 			//this.audioUrl 	= json.getString("audio_url");
-			this.createdAt 	= json.getString("created_at");
-			this.updatedAt 	= json.getString("updated_at");
+//			this.createdAt 	= json.getString("created_at");
+//			this.updatedAt 	= json.getString("updated_at");
 			this.uid 		= json.getString("uid");
 			this.id			= json.getInt("id");
 			this.name		= json.getString("name");
@@ -46,7 +47,8 @@ public class Joke {
 			this.isLike = json.getInt("is_like");
 			this.picture_size_in_b = json.getInt("picture_size_in_b");
 			this.audio_size_in_b = json.getInt("audio_size_in_b");
-			Log.e("笑话更新时间", updatedAt);
+			this.approval_time = json.getString("approval_time");
+			Log.e("笑话更新时间", approval_time);
 		} catch(JSONException e){
 			Log.e("JOKE", "JSON parsing exception in Joke Constructor " + e);
 		}
@@ -58,6 +60,14 @@ public class Joke {
 		this.length = 0;
 	}
 
+	public String getApprovalTime(){
+		return approval_time;
+	}
+	
+	public void setApprovalTime(String approval_time){
+		this.approval_time = approval_time;
+	}
+	
 	public int getPictureSizeInB(){
 		return picture_size_in_b;
 	}
@@ -124,18 +134,18 @@ public class Joke {
 	public void setApproved(boolean approved) {
 		this.approved = approved;
 	}
-	public String getCreatedAt() {
-		return createdAt;
-	}
-	public void setCreatedAt(String createdAt) {
-		this.createdAt = createdAt;
-	}
-	public String getUpdatedAt() {
-		return updatedAt;
-	}
-	public void setUpdatedAt(String updatedAt) {
-		this.updatedAt = updatedAt;
-	}
+//	public String getCreatedAt() {
+//		return createdAt;
+//	}
+//	public void setCreatedAt(String createdAt) {
+//		this.createdAt = createdAt;
+//	}
+//	public String getUpdatedAt() {
+//		return updatedAt;
+//	}
+//	public void setUpdatedAt(String updatedAt) {
+//		this.updatedAt = updatedAt;
+//	}
 	public String getUserId() {
 		return uid;
 	}

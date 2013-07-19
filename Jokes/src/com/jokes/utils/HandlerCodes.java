@@ -5,6 +5,7 @@ public class HandlerCodes {
 	
 	public static final int GET_JOKES_SUCCESS = 0;
 	public static final int GET_JOKES_FAILURE = 1;
+	public static final int GET_JOKES_REFRESH_SUCCESS = 28;//更新笑话成功，笑话有更新的情况下使用
 	
 	public static final int LIKE_SUCCESS = 2;
 	public static final int LIKE_FAILURE = 3;

@@ -136,7 +136,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 					viewPager.setAdapter(jokePageAdapter);
 					if (jokeList.size() > 0) {
 						TextView dateTextView = (TextView) findViewById(R.id.homepage_textview_date);
-						dateTextView.setText(jokeList.get(0).getUpdatedAt()
+						dateTextView.setText(jokeList.get(0).getApprovalTime()
 								.substring(0, DATE_STR_LEN_MINUS_TIME));
 					}
 				} else {
@@ -150,6 +150,23 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				break;
 			case HandlerCodes.GET_JOKES_NULL:
 				Toast.makeText(HomepageActivity.this,"你已经听到底了，明天再来听吧",Toast.LENGTH_SHORT).show();
+				break;
+			case HandlerCodes.GET_JOKES_REFRESH_SUCCESS:
+				mPullToRefreshViewPager.onRefreshComplete();
+				jokePageAdapter = new JokePageAdapter(
+						HomepageActivity.this.getSupportFragmentManager(),
+						HomepageActivity.this, jokeList, mediaPlayer,
+						HomepageActivity.this, mainHandler, UID, weChatShareApi,isOnline);
+				viewPager.setAdapter(jokePageAdapter);
+				if (jokeList.size() > 0) {
+					TextView dateTextView = (TextView) findViewById(R.id.homepage_textview_date);
+					dateTextView.setText(jokeList.get(0).getApprovalTime()
+							.substring(0, DATE_STR_LEN_MINUS_TIME));
+				}
+				Bundle bundle = new Bundle();
+				int temp_count = bundle.getInt("update_count");
+				if(temp_count>0)
+				Toast.makeText(HomepageActivity.this, "更新了"+temp_count+"条笑话", Toast.LENGTH_SHORT).show();
 				break;
 			case HandlerCodes.LIKE_SUCCESS:
 				Button button_favorite_big = (Button)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_button_favorite_big);
@@ -537,7 +554,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		public void onPageSelected(int position) {
 			TextView dateTextView = (TextView)findViewById(R.id.homepage_textview_date);
 			Joke joke = jokePageAdapter.getCurrentJoke();
-			dateTextView.setText(joke.getUpdatedAt().substring(0, DATE_STR_LEN_MINUS_TIME));
+			dateTextView.setText(joke.getApprovalTime().substring(0, DATE_STR_LEN_MINUS_TIME));
 			//TextView playCountTextView = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_playcount);
 			//playCountTextView.setText(String.valueOf(joke.getNumPlays()));
 		}
@@ -571,8 +588,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 					if(refreshView.getCurrentMode() == com.handmark.pulltorefresh.library.PullToRefreshBase.Mode.PULL_FROM_END){
 						currentPagingJokePage++;
 //						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, false);
-						ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getUpdatedAt()), 1, false);
-						Log.e("请求日期", Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getUpdatedAt())+"【"+1+"】");
+						ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getApprovalTime()), 1, false);
+						Log.e("请求日期", Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getApprovalTime())+"【"+1+"】");
 					} else {
 						currentPagingJokePage = 1;
 //						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, true);
@@ -718,7 +735,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			int index_num_plays = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_NUM_PLAYS);
 			int index_picture_size_in_b = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_PICTURE_SIZE_IN_B);
 			int index_joke_uid = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_UID);
-			int index_createat = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_CREATEAT);
+			int index_createat = cursor.getColumnIndexOrThrow(DataBase.OFFLINE_APPROVAL_TIME);
 			do{
 				tempJoke = new Joke();
 				tempJoke.setId(Integer.parseInt(cursor.getString(index_joke_id)));
@@ -730,7 +747,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				tempJoke.setNumPlays(Integer.parseInt(cursor.getString(index_num_plays)));
 				tempJoke.setPictureSizeInB(Integer.parseInt(cursor.getString(index_picture_size_in_b)));
 				tempJoke.setUserId(cursor.getString(index_joke_uid));
-				tempJoke.setCreatedAt(cursor.getString(index_createat));
+				tempJoke.setApprovalTime(cursor.getString(index_createat));
 				list.add(tempJoke);
 				
 				cursor.moveToNext();
