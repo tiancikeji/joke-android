@@ -18,6 +18,7 @@ public class ContactusActivity extends Activity{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.contactus_activity);
+		
 		initView();
 	}
 	

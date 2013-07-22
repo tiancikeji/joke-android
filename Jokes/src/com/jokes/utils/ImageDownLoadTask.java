@@ -37,6 +37,7 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 //				item.bitmap = (Bitmap) result;
 //			}
 			this.imageView.setImageBitmap((Bitmap) result);
+			this.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			this.imageView = null;
 		}
 	}

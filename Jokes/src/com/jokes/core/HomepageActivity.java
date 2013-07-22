@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -35,7 +33,6 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -53,7 +50,6 @@ import com.jokes.ext.VerticalViewPager.OnPageChangeListener;
 import com.jokes.objects.Joke;
 import com.jokes.share.WeChatShare;
 import com.jokes.utils.ApiRequests;
-import com.jokes.utils.AudioUtils;
 import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.Installation;
@@ -437,7 +433,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	}
 
 	/**
->>>>>>> working on wakelock, not yet finished
 	 * 保存是否是第一次进入程序
 	 */
 	public void saveSettingTime(String isFrist){
@@ -480,8 +475,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		wakeLock.acquire();
 		arg0.start();
 		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
-		    AudioManager.AUDIOFOCUS_GAIN);
+//		int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
+//		    AudioManager.AUDIOFOCUS_GAIN);
 		
 		jokePageAdapter.startPlayAnimation();
 		Joke joke = jokePageAdapter.getCurrentJoke();

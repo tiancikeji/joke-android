@@ -69,6 +69,8 @@
             android:id="@+id/homepage_textview_date"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="3dp"
             android:gravity="center"
             android:textColor="#999999"
             android:textSize="12sp" />
@@ -84,8 +86,8 @@
         android:layout_alignParentBottom="true"
         android:layout_below="@+id/homepage_framelayout_date"
         ptr:ptrAnimationStyle="flip"
-        ptr:ptrHeaderBackground="@android:color/darker_gray"
-        ptr:ptrMode="both" />
+        ptr:ptrHeaderBackground="#e6e6e6"
+        ptr:ptrMode="both" /><!-- ptr:ptrHeaderBackground="@android:color/darker_gray" -->
 
     <LinearLayout
         android:layout_width="fill_parent"
