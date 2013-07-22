@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 package com.jokes.utils;
 
 import java.io.IOException;
@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager.WakeLock;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -56,9 +57,11 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private TimerTask mTimerTask;
 	private Joke joke;
 	private AnimationDrawable animationDrawable;
+	private WakeLock wakeLock;
 	
 	public JokePageAdapter(android.support.v4.app.FragmentManager fm, Context context, List<Joke> jokes, MediaPlayer mp,
-			OnPreparedListener onPreparedListener, Handler responseHandler, String UID,IWXAPI weChatShareApi,boolean isOnline){
+			OnPreparedListener onPreparedListener, Handler responseHandler, String UID,IWXAPI weChatShareApi,
+			boolean isOnline, WakeLock wakeLock){
 		this.context = context;
 		this.jokes = jokes;
 		this.mp = mp;
@@ -67,6 +70,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		this.responseHandler = responseHandler;
 		this.UID = UID;
 		this.isOnline = isOnline;
+		this.wakeLock = wakeLock;
 	}
 
 	@Override
@@ -119,6 +123,9 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	}
 	
 	public void resetPlayer(){
+		if(wakeLock.isHeld()){
+			wakeLock.release();
+		}
 		isPlaying = false;
 		isPaused = false;
 		if(null != mTimer){
@@ -232,8 +239,10 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					mTimer = new Timer();
 					mTimerTask = getTimerTask();
 					mTimer.schedule(mTimerTask, 0, 1000);
+					wakeLock.acquire();
 				}else if(isPaused){
 					mp.start();
+					wakeLock.acquire();
 					isPaused = false;
 					animationDrawable = getAnimationDrawable(view);
 					animationDrawable.start();
@@ -270,6 +279,9 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		//releaseWakeLock();
 		//暂停笑话
 		AudioUtils.pausePlaying(mp);
+		if(wakeLock.isHeld()){
+			wakeLock.release();
+		}
 		isPaused = true;
 	}
 	

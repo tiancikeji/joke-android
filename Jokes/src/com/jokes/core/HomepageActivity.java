@@ -130,10 +130,11 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				Log.d(DEBUG_TAG, "Jokes success message received, printing... size = " + jokeList.size());
 				mPullToRefreshViewPager.onRefreshComplete();
 				if(currentPagingJokePage <= 1){
+					refreshWakeLock();
 					jokePageAdapter = new JokePageAdapter(
 							HomepageActivity.this.getSupportFragmentManager(),
 							HomepageActivity.this, jokeList, mediaPlayer,
-							HomepageActivity.this, mainHandler, UID, weChatShareApi,isOnline);
+							HomepageActivity.this, mainHandler, UID, weChatShareApi,isOnline, wakeLock);
 					viewPager.setAdapter(jokePageAdapter);
 					if (jokeList.size() > 0) {
 						TextView dateTextView = (TextView) findViewById(R.id.homepage_textview_date);
@@ -154,10 +155,12 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 				break;
 			case HandlerCodes.GET_JOKES_REFRESH_SUCCESS:
 				mPullToRefreshViewPager.onRefreshComplete();
+				refreshWakeLock();
 				jokePageAdapter = new JokePageAdapter(
 						HomepageActivity.this.getSupportFragmentManager(),
 						HomepageActivity.this, jokeList, mediaPlayer,
-						HomepageActivity.this, mainHandler, UID, weChatShareApi,isOnline);
+						HomepageActivity.this, mainHandler, UID, weChatShareApi,
+						isOnline, wakeLock);
 				viewPager.setAdapter(jokePageAdapter);
 				if (jokeList.size() > 0) {
 					TextView dateTextView = (TextView) findViewById(R.id.homepage_textview_date);
@@ -380,10 +383,10 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	}
 
 	/**
-<<<<<<< HEAD
-=======
+
 	 * 未开始
 	 */
+	/*
 	private void currentJoke(){
 		linearlayout_volume.setVisibility(View.GONE);
 		framelayout_play.setBackgroundResource(R.drawable.playback_play);
@@ -391,7 +394,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		textview_playCount.setVisibility(View.VISIBLE);
 		textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
 	}
-
+*/
 	/**
 	 * 播放中动画效果
 	 */
@@ -460,12 +463,20 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		editor.remove("ISFRIST");
 		editor.commit();
 	}
+	
+	private void refreshWakeLock(){
+		if(null != wakeLock && wakeLock.isHeld()){
+			wakeLock.release();
+		} else {
+			PowerManager mgr = (PowerManager)getSystemService(Context.POWER_SERVICE);
+			wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
+		}
+	}
 
 
 	@Override
 	public void onPrepared(MediaPlayer arg0) {
-		PowerManager mgr = (PowerManager)getSystemService(Context.POWER_SERVICE);
-	    wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
+		refreshWakeLock();
 		wakeLock.acquire();
 		arg0.start();
 		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -498,7 +509,9 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	public void onCompletion(MediaPlayer mp) {
 		mp.reset();
 		jokePageAdapter.resetPlayer();
-		releaseWakeLock();
+		if(wakeLock.isHeld()){
+			wakeLock.release();
+		}
 		AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).getDrawable();
 		animationDrawable.stop();
 		((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).setVisibility(View.GONE);
@@ -514,15 +527,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		textview_duration.setText(jokePageAdapter.getCurrentJoke().getLength()+"\"");
 	}
 
-	/**
-	 * 释放倒计时锁
-	 */
-	private void releaseWakeLock(){
-		if(null != wakeLock){
-			wakeLock.release();
-			wakeLock = null;
-		}
-	}
 	
 //	/**
 //	 * 给程序加锁，保持CPU 运转，屏幕和键盘灯有可能是关闭的
@@ -856,7 +860,9 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	public void onAudioFocusChange(int focusChange) {
 		if(focusChange == AudioManager.AUDIOFOCUS_LOSS){
 			mediaPlayer.pause();
-			releaseWakeLock();
+			if(wakeLock.isHeld()){
+				wakeLock.release();
+			}
 		}
 	}
 }
