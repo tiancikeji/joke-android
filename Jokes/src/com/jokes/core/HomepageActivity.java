@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -35,7 +33,6 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -53,7 +50,6 @@ import com.jokes.ext.VerticalViewPager.OnPageChangeListener;
 import com.jokes.objects.Joke;
 import com.jokes.share.WeChatShare;
 import com.jokes.utils.ApiRequests;
-import com.jokes.utils.AudioUtils;
 import com.jokes.utils.Constant;
 import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.Installation;
@@ -380,61 +376,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	}
 
 	/**
-<<<<<<< HEAD
-=======
-	 * 未开始
-	 */
-	private void currentJoke(){
-		linearlayout_volume.setVisibility(View.GONE);
-		framelayout_play.setBackgroundResource(R.drawable.playback_play);
-		textview_duration.setText(jokeList.get(jokeIndex).getLength()+"\"");
-		textview_playCount.setVisibility(View.VISIBLE);
-		textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
-	}
-
-	/**
-	 * 播放中动画效果
-	 */
-	private void startPlayCounttimer(int time){
-		if(null != countDownTimer){
-			countDownTimer.cancel();
-		}
-
-		/*
-		countDownTimer = new CountDownTimer((time+1) * 1000, 1000) {
-			public void onTick(long millisUntilFinished) {
-				countDownTime = millisUntilFinished;
-				//通知改变动画
-				if(add){
-					if(count > 7){
-						add = false;
-						count--;
-					}else{
-						mainHandler.sendEmptyMessage(CHANGEVOLUME);
-						count++;
-					}
-
-				}else if(!add){
-					if(count < 0){
-						add = true;
-						count++;
-					}else{
-						mainHandler.sendEmptyMessage(CHANGEVOLUME);
-						count--;
-					}
-				}
-
-			public void onFinish() {
-				countDownTime = 0;
-				//倒计时结束，释放锁
-				releaseWakeLock();
-			}
-		}.start();
-			}*/
-	}
-
-	/**
->>>>>>> working on wakelock, not yet finished
+	 * working on wakelock, not yet finished
 	 * 保存是否是第一次进入程序
 	 */
 	public void saveSettingTime(String isFrist){
@@ -469,8 +411,8 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		wakeLock.acquire();
 		arg0.start();
 		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
-		    AudioManager.AUDIOFOCUS_GAIN);
+//		int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
+//		    AudioManager.AUDIOFOCUS_GAIN);
 		
 		jokePageAdapter.startPlayAnimation();
 		Joke joke = jokePageAdapter.getCurrentJoke();
