@@ -4,12 +4,12 @@
     android:layout_height="fill_parent"
     android:background="@drawable/bg"
     android:orientation="vertical" >
-    
-    <ProgressBar 
-	    android:id="@+id/homepage_progressbar"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_centerInParent="true"/>
+
+    <ProgressBar
+        android:id="@+id/homepage_progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
 
     <LinearLayout
         android:id="@+id/titleBarLayout"
@@ -23,8 +23,8 @@
             android:layout_width="50dp"
             android:layout_height="fill_parent"
             android:layout_gravity="left"
-            android:onClick="onSettingsButtonClick"
-            android:background="@drawable/btn_homepage_setting" />
+            android:background="@drawable/btn_homepage_setting"
+            android:onClick="onSettingsButtonClick" />
 
         <LinearLayout
             android:layout_width="0px"
@@ -38,32 +38,31 @@
             android:layout_height="fill_parent"
             android:layout_gravity="right"
             android:text="刷新"
-            android:visibility="gone"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/homepage_button_record"
             android:layout_width="50dp"
             android:layout_height="fill_parent"
             android:layout_gravity="right"
-            android:onClick="onRecordButtonClick"
-            android:background="@drawable/btn_homepage_record" />
+            android:background="@drawable/btn_homepage_record"
+            android:onClick="onRecordButtonClick" />
     </LinearLayout>
-    
-            <FrameLayout
+
+    <FrameLayout
         android:id="@+id/homepage_framelayout_date"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/titleBarLayout"
         android:layout_centerHorizontal="true"
-         android:layout_below="@+id/titleBarLayout"
         android:orientation="horizontal" >
-        
 
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/hello_world"
             android:layout_gravity="center"
+            android:contentDescription="@string/hello_world"
             android:src="@drawable/homepage_activity_date_line" />
 
         <TextView
@@ -74,18 +73,19 @@
             android:textColor="#999999"
             android:textSize="12sp" />
     </FrameLayout>
-        
 
-      <com.handmark.pulltorefresh.extras.viewpager.PullToRefreshViewPager
+    <com.handmark.pulltorefresh.extras.viewpager.PullToRefreshViewPager
         xmlns:ptr="http://schemas.android.com/apk/res-auto"
         android:id="@+id/mainJokeListPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/homepage_framelayout_date"
         ptr:ptrAnimationStyle="flip"
         ptr:ptrHeaderBackground="@android:color/darker_gray"
-        ptr:ptrMode="both" 
-        android:layout_alignParentBottom="true"
-        android:layout_below="@+id/homepage_framelayout_date" />
+        ptr:ptrMode="both" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -94,7 +94,8 @@
         android:orientation="horizontal" >
     </LinearLayout>
 
-   <!-- <LinearLayout
+    <!--
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:gravity="center_horizontal|bottom"
@@ -140,13 +141,15 @@
                 android:text="取消"
                 android:textSize="10sp" />
         </LinearLayout>
-    </LinearLayout> --> 
+    </LinearLayout>
+    -->
 
     <RelativeLayout
         android:id="@+id/homepage_dialog_timeout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone"><!-- android:background="#66000000" -->
+        android:visibility="gone" >
+ <!-- android:background="#66000000" -->
 
         <LinearLayout
             android:layout_width="fill_parent"

@@ -9,5 +9,4 @@
     <string name="errcode_deny">微信分享失败</string>
     <string name="errcode_unknown">微信分享失败</string>
     <string name="title_activity_loading">LoadingActivity</string>
-
 </resources>

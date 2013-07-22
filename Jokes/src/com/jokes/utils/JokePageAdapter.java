@@ -1,15 +1,14 @@
+<<<<<<< HEAD
 package com.jokes.utils;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
@@ -26,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
 import com.jokes.core.R;
 import com.jokes.ext.PagerAdapter;
 import com.jokes.ext.VerticalViewPager;
@@ -44,9 +42,6 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 	private OnPreparedListener onPreparedListener;
 	private Handler responseHandler;
 	private Button likeButton;
-//	private ImageView imageview_volume;
-//	private TextView textview_playcount;
-//	private TextView textview_numlikes;
 	private TextView textview_duration;
 	private String UID;
 	private boolean isOnline;//判断是否处在离线状态，如果处在离线状态则播放本地音频
@@ -103,7 +98,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 		else{
 			button_favorite_small.setBackgroundResource(R.drawable.btn_favorite_2);
 		}
-		((TextView)view.findViewById(R.id.homepage_textview_playcount)).setText(joke.getNumPlays()+"");
+		((TextView)view.findViewById(R.id.homepage_textview_playcount)).setText(joke.getNumPlays()+"播放");
 		((TextView)view.findViewById(R.id.homepage_textview_numlikes)).setText(joke.getNumLikes()+"");	
 		
 		TextView jokeIndexView = (TextView)view.findViewById(R.id.jokeIndexHack); //).setText(position);
@@ -170,11 +165,9 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			playJoke(view);
 		break;
 		case R.id.homepage_linearlayout_favorite_small:
-//			Button likeButton_small = (Button)view.findViewById(R.id.homepage_button_favorite_small);
 			LinearLayout linearlayout_like_small = ((LinearLayout)view.findViewById(R.id.homepage_linearlayout_favorite_small));
 			
 			linearlayout_like_small.setClickable(false);
-//			Joke temp_joke = getJokeFromView(view);
 			boolean islike = (Boolean)(linearlayout_like_small.getTag());
 			if(!islike){
 				ApiRequests.likeJoke(responseHandler, Integer.parseInt(""+((Button)view.findViewById(R.id.homepage_button_favorite_small)).getTag()) , UID);
@@ -184,12 +177,15 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 			break;
 		case R.id.homepage_button_share:
 //			WeChatShare.sendAppInfo(weChatShareApi, context.getResources(), context);
-			Message msg = new Message();
-			msg.what = HandlerCodes.MESSAGE_SHARE;
-			Bundle bundle = new Bundle();
+			
+//			Message msg = new Message();
+//			msg.what = HandlerCodes.MESSAGE_SHARE;
+//			Bundle bundle = new Bundle();
 //			bundle.putString("joke_id", ""+((Button)view.findViewById(R.id.homepage_button_share)).getTag());
-			msg.setData(bundle);
-			responseHandler.sendMessage(msg);
+//			msg.setData(bundle);
+//			responseHandler.sendMessage(msg);
+			
+			responseHandler.sendEmptyMessage(HandlerCodes.MESSAGE_SHARE);
 			break;
 		}
 		
@@ -210,7 +206,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 					//播放音频，去掉播放按钮的三角图片，替换为空白；隐藏播放次数；显示动画图片，开启动画；
 					((FrameLayout)view.findViewById(R.id.homepage_framelayout_play)).setBackgroundResource(R.drawable.btn);
 					TextView playCountTextView = (TextView)view.findViewById(R.id.homepage_textview_playcount);
-					playCountTextView.setText(String.valueOf(joke.getNumPlays()));
+					playCountTextView.setText(joke.getNumPlays()+"播放");
 					joke.setNumPlays(joke.getNumPlays() + 1);
 					playCountTextView.setVisibility(View.GONE);
 					((ImageView)view.findViewById(R.id.homepage_imageview_volume)).setVisibility(View.VISIBLE);
@@ -337,7 +333,7 @@ public class JokePageAdapter extends PagerAdapter implements OnClickListener, An
 				textview_duration = (TextView)currentView.findViewById(R.id.homepage_textview_duration);
 				if(pos > 0 && Integer.parseInt(textview_duration.getText().toString().split("\"")[0]) != 0){
 					
-					textview_duration.setText((Integer.parseInt(textview_duration.getText().toString().split("\"")[0])-1)+"");
+					textview_duration.setText((Integer.parseInt(textview_duration.getText().toString().split("\"")[0])-1)+"\"");
 				}
 			}  
 		};  

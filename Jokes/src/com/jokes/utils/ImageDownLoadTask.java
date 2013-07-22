@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -47,8 +48,8 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 		return bmp;
 	}
 	
+	@SuppressLint("NewApi")
 	public Bitmap downImage(String ImageUrl, Context context){
-		Log.d("JOKE", "图片地址: " + ImageUrl);
 		InputStream ism = null;
 		URLConnection conn = null;
 		FileOutputStream output = null;
@@ -86,7 +87,6 @@ public class ImageDownLoadTask extends AsyncTask<Object, Object, Object> {
 				ism = conn.getInputStream();
 
 				bitmap = BitmapFactory.decodeStream(ism);
-
 				try {
 					if(ism != null){
 						ism.close();
