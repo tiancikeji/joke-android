@@ -1,9 +1,12 @@
 package com.jokes.core;
 
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
@@ -11,12 +14,14 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.jokes.utils.ApiRequests;
 import com.jokes.utils.AudioRecorder;
@@ -37,6 +42,8 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 	LinearLayout linearlayout_bar;
 	ImageView imageview_bar;//加载中动画
 
+	ImageView imageview_volume;
+	
 	ImageView imageview_point_1;
 	ImageView imageview_point_2;
 	ImageView imageview_point_3;
@@ -45,6 +52,7 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 	ImageView imageview_point_6;
 	ImageView imageview_point_7;
 	ImageView imageview_point_8;
+	RelativeLayout relativeLayout_dialog;
 	
 	//private boolean isPlaying = false;
 	private AudioRecorder audioRecorder;
@@ -57,6 +65,10 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 	int count = 0;
 	boolean isStartAnim = false;
 		
+	private AnimationDrawable animationDrawable;
+	private Timer mTimer;
+	private TimerTask mTimerTask;
+	
 	Handler mainHandler = new Handler(){
 
 		@Override
@@ -103,6 +115,8 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.feedback_activity);
 		init();
+		animationDrawable = (AnimationDrawable) ((ImageView)findViewById(R.id.feedback_imageview_volume)).getDrawable();
+		
 		//友盟统计：进入意见反馈
 		UmengAnaly.AnalyOnClickFeedback(this);
 	}
@@ -119,6 +133,14 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		// TODO Auto-generated method stub
 		super.onResume();
 		MobclickAgent.onResume(this);
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			relativeLayout_dialog.setVisibility(View.VISIBLE);
+		}
+		return false;
 	}
 
 	@Override
@@ -160,22 +182,34 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 			}
 			break;
 		case R.id.feedback_button_play:
-			if(mediaPlayer == null){
-				mediaPlayer = new MediaPlayer();
-				mediaPlayer.setOnCompletionListener(this);
-			}
-			if(isPaused){
-				mediaPlayer.start();
-				isPaused = false;
-			}
-			else if(!isPlaying && mp3RecordedFile != null){
-				isPlaying = true;
-				AudioUtils.startPlaying(mediaPlayer, mp3RecordedFile.getAbsolutePath());
-			}else{
+			if(isPlaying && !isPaused){
 				isPlaying = false;
 				isPaused = true;
 				AudioUtils.pausePlaying(mediaPlayer);
+				animationDrawable.stop();
+			}else{
+				if(mediaPlayer == null){
+					mediaPlayer = new MediaPlayer();
+					mediaPlayer.setOnCompletionListener(this);
+				}
+				if(!isPlaying && mp3RecordedFile != null && !isPaused){
+					isPlaying = true;
+					AudioUtils.startPlaying(mediaPlayer, mp3RecordedFile.getAbsolutePath());
+					
+					button_play.setBackgroundResource(R.drawable.btn);
+					imageview_volume.setVisibility(View.VISIBLE);
+					animationDrawable.start();
+					mTimer = new Timer();
+					mTimerTask = getTimerTask();
+					mTimer.schedule(mTimerTask, 0, 1000);
+				}else if(isPaused){
+					isPlaying = true;
+					mediaPlayer.start();
+					isPaused = false;
+					animationDrawable.start();
+				}
 			}
+			
 			break;
 		}
 		
@@ -194,6 +228,8 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		linearlayout_bar.setVisibility(View.GONE);
 		imageview_bar = (ImageView)findViewById(R.id.record_imageview_bar);
 
+		imageview_volume = (ImageView)findViewById(R.id.feedback_imageview_volume);
+		
 		imageview_point_1 = (ImageView)findViewById(R.id.feedback_imageview_point_1);
 		imageview_point_2 = (ImageView)findViewById(R.id.feedback_imageview_point_2);
 		imageview_point_3 = (ImageView)findViewById(R.id.feedback_imageview_point_3);
@@ -202,6 +238,8 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		imageview_point_6 = (ImageView)findViewById(R.id.feedback_imageview_point_6);
 		imageview_point_7 = (ImageView)findViewById(R.id.feedback_imageview_point_7);
 		imageview_point_8 = (ImageView)findViewById(R.id.feedback_imageview_point_8);
+		
+		relativeLayout_dialog = (RelativeLayout)findViewById(R.id.feedback_relativelayout_dialog);
 		
 		button_back.setOnClickListener(this);
 		button_send.setOnClickListener(this);
@@ -219,6 +257,15 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		mediaPlayer = null;
 		isPaused = false;
 		isPlaying = false;
+		
+		animationDrawable.stop();
+		imageview_volume.setVisibility(View.GONE);
+		button_play.setBackgroundResource(R.drawable.playback_play);
+		button_play.setText(AudioUtils.getAudioFileLength(mp3RecordedFile) + "\"");
+		
+		if(null != mTimer){
+			mTimer.cancel();
+		}
 	}
 	
 	/**
@@ -355,6 +402,64 @@ public class FeedbackActivity extends Activity implements OnClickListener, OnCom
 		}
 			break;
 		}
+	}
+	
+	/**
+	 * 重新录制 
+	 * @param view
+	 */
+	public void onAgainRecordButtonClick(View view){
+		onCloseDialogButtonClick(relativeLayout_dialog);
+		button_send.setTag(true);
+		button_send.setVisibility(View.GONE);
+		button_record.setTag(false);//设置录音状态
+		button_record.setBackgroundResource(R.drawable.btn_record_activity_record);
+		linearlayout_record.setVisibility(View.VISIBLE);
+		linearlayout_bar.setVisibility(View.GONE);
+		mp3RecordedFile = null;
+		
+	}
+	
+	/**
+	 * 取消录音
+	 * @param view
+	 */
+	public void onCancelSendButtonClick(View view){
+		finish();
+	}
+	
+	/**
+	 * 取消
+	 */
+	public void onCloseDialogButtonClick(View view){
+		relativeLayout_dialog.setVisibility(View.GONE);
+	}
+	private TimerTask getTimerTask(){
+		return new TimerTask() {  
+			@Override  
+			public void run() {  
+				if(mediaPlayer==null)  
+					return;  
+				if (mediaPlayer.isPlaying() && !isPaused) {  
+					handleProgress.sendEmptyMessage(0);  
+				}  
+			}  
+			
+			Handler handleProgress = new Handler() {  
+				public void handleMessage(Message msg) {  
+
+					int duration = mediaPlayer.getDuration();  
+
+					if (duration > 0) {  
+						//动态修改播放剩余时长,判断播放进度和剩余时长是否大于0
+						if(mediaPlayer.isPlaying() && Integer.parseInt(button_play.getText().toString().split("\"")[0]) != 0){
+							
+							button_play.setText((Integer.parseInt(button_play.getText().toString().split("\"")[0])-1)+"\"");
+						}
+					}  
+				};  
+			};
+		};  
 	}
 
 }

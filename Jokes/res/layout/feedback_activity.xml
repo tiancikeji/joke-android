@@ -38,8 +38,8 @@
             android:gravity="center"
             android:text="提交"
             android:textColor="#ffffff"
-            android:textSize="15sp" 
-            android:visibility="gone">
+            android:textSize="15sp"
+            android:visibility="gone" >
         </Button>
     </FrameLayout>
 
@@ -54,7 +54,7 @@
         android:layout_height="0px"
         android:layout_weight="7"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical" >
 
         <LinearLayout
             android:id="@+id/feedback_linearlayout_bar"
@@ -145,29 +145,97 @@
                 android:src="@drawable/animation1"
                 android:visibility="gone" />
         </LinearLayout>
-        
+
         <Button
             android:id="@+id/feedback_button_record"
             android:layout_width="213dp"
             android:layout_height="213dp"
-            android:background="@drawable/btn_record_record"
-            android:layout_marginBottom="50dp" >
+            android:layout_marginBottom="50dp"
+            android:background="@drawable/btn_record_record" >
         </Button>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/feedback_button_play"
-        android:layout_width="280dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="17dp"
-        android:layout_marginTop="17dp"
-        android:background="@drawable/record_activity_play"
-        android:gravity="left|center_vertical"
-        android:paddingLeft="20dp"
-        android:text="1234"
-        android:textColor="#333333"
-        android:textSize="18sp" 
-        android:visibility="gone"/>
+    <FrameLayout
+        android:id="@+id/bottomPanel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
 
+        <Button
+            android:id="@+id/feedback_button_play"
+            android:layout_width="280dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="17dp"
+            android:layout_marginTop="17dp"
+            android:background="@drawable/record_activity_play"
+            android:gravity="left|center_vertical"
+            android:paddingLeft="20dp"
+            android:text="1234"
+            android:textColor="#333333"
+            android:textSize="18sp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/feedback_imageview_volume"
+            android:layout_width="37dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical|right"
+            android:layout_marginRight="60dp"
+            android:src="@drawable/animation_play"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/feedback_relativelayout_dialog"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" 
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/dialog_background"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/feedback_button_again"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/dialog_btn_b"
+                android:gravity="center"
+                android:onClick="onAgainRecordButtonClick"
+                android:text="重新录制"
+                android:textColor="#FFFFFF" />
+            
+            <Button
+                android:id="@+id/feedback_button_cancel_send"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/dialog_btn_b"
+                android:gravity="center"
+                android:onClick="onCancelSendButtonClick"
+                android:text="取消发布"
+                android:textColor="#FFFFFF" />
+            
+            <Button
+                android:id="@+id/feedback_button_cancel"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/dialog_btn_r"
+                android:gravity="center"
+                android:onClick="onCloseDialogButtonClick"
+                android:text="取消"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

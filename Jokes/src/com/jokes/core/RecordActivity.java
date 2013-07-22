@@ -4,6 +4,9 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -13,6 +16,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
@@ -31,9 +35,12 @@ import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.jokes.objects.Joke;
 import com.jokes.share.WeChatShare;
@@ -45,7 +52,7 @@ import com.jokes.utils.HandlerCodes;
 import com.jokes.utils.UmengAnaly;
 import com.umeng.analytics.MobclickAgent;
 
-public class RecordActivity extends Activity implements OnClickListener, OnInfoListener{
+public class RecordActivity extends Activity implements OnClickListener, OnInfoListener,OnCompletionListener{
 	private final static String DEBUG_TAG = "RecordActivity";
 	private static final int CHANGEVOLUME = 100001;
 
@@ -65,7 +72,7 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	Button button_play;//播放按钮
 	LinearLayout linearlayout_bar;
 	ImageView imageview_bar;//加载中动画
-
+	ImageView imageview_volume;
 	RelativeLayout relativeLayout_dialog;
 	
 	ImageView imageview_point_1;
@@ -88,6 +95,12 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	boolean isStartAnim = false;
 
 	boolean isPlay = false;//判断是否播放音频
+	boolean isPaused = false;//是否暂停音频
+	
+	private AnimationDrawable animationDrawable;
+	private Timer mTimer;
+	private TimerTask mTimerTask;
+	
 	Handler mainHandler = new Handler(){
 
 		@Override
@@ -131,8 +144,12 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		setContentView(R.layout.record_activity);
 		init();
+		
+		animationDrawable = (AnimationDrawable) ((ImageView)findViewById(R.id.record_imageview_volume)).getDrawable();
+		
 		//友盟统计：记录进入录音页面
 		UmengAnaly.AnalyOnClickRecord(this);
+		
 	}
 
 	@Override
@@ -227,18 +244,39 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 			}).create().show();
 			break;
 		case R.id.record_button_play:
-			if(mediaPlayer == null){
-				mediaPlayer = new MediaPlayer();
-			}
-			if(!isPlay && mp3RecordedFile != null){
-				isPlay = true;
-				AudioUtils.startPlaying(mediaPlayer, mp3RecordedFile.getAbsolutePath());
-			}else{
+			if(isPlay && !isPaused){
 				isPlay = false;
-				AudioUtils.stopPlaying(mediaPlayer);
-				mediaPlayer.release();
-				mediaPlayer = null;
+				isPaused = true;
+				AudioUtils.pausePlaying(mediaPlayer);
+				animationDrawable.stop();
+			}else{
+				if(mediaPlayer == null){
+					mediaPlayer = new MediaPlayer();
+					mediaPlayer.setOnCompletionListener(this);
+				}
+				if(!isPlay && mp3RecordedFile != null && !isPaused){
+					isPlay = true;
+					AudioUtils.startPlaying(mediaPlayer, mp3RecordedFile.getAbsolutePath());
+					button_play.setBackgroundResource(R.drawable.btn);
+					imageview_volume.setVisibility(View.VISIBLE);
+					animationDrawable.start();
+					mTimer = new Timer();
+					mTimerTask = getTimerTask();
+					mTimer.schedule(mTimerTask, 0, 1000);
+				}else if(isPaused){
+					isPlay = true;
+					mediaPlayer.start();
+					isPaused = false;
+					animationDrawable.start();
+				}else{
+//					isPlay = false;
+//					AudioUtils.stopPlaying(mediaPlayer);
+//					mediaPlayer.release();
+//					mediaPlayer = null;
+//					animationDrawable.stop();
+				}
 			}
+			
 			break;
 		}
 		
@@ -344,6 +382,8 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 		linearlayout_bar.setVisibility(View.GONE);
 		imageview_bar = (ImageView)findViewById(R.id.record_imageview_bar);
 
+		imageview_volume = (ImageView)findViewById(R.id.record_imageview_volume);
+		
 		relativeLayout_dialog = (RelativeLayout)findViewById(R.id.record_relativelayout_dialog);
 		
 		imageview_point_1 = (ImageView)findViewById(R.id.record_imageview_point_1);
@@ -546,29 +586,29 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	 * 加载选择框动画
 	 */
 	private void startAnimShare(){
-		int yOffset  = (int)(relativeLayout_dialog.getHeight() * RecordActivity.this.getResources().getDisplayMetrics().density);
-
-		Animation animation = new TranslateAnimation(0F,0F, yOffset,0);
-		animation.setDuration(2000);               //设置动画持续时间              
-		animation.setRepeatCount(0);    
-		animation.setAnimationListener(new AnimationListener(){
-
-			@Override
-			public void onAnimationEnd(Animation arg0) {
-				relativeLayout_dialog.setVisibility(View.VISIBLE);
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation arg0) {
-			}
-
-			@Override
-			public void onAnimationStart(Animation arg0) {
-			}
-			
-		});
+//		int yOffset  = (int)(relativeLayout_dialog.getHeight() * RecordActivity.this.getResources().getDisplayMetrics().density);
+//
+//		Animation animation = new TranslateAnimation(0F,0F, yOffset,0);
+//		animation.setDuration(2000);               //设置动画持续时间              
+//		animation.setRepeatCount(0);    
+//		animation.setAnimationListener(new AnimationListener(){
+//
+//			@Override
+//			public void onAnimationEnd(Animation arg0) {
+//				relativeLayout_dialog.setVisibility(View.VISIBLE);
+//			}
+//
+//			@Override
+//			public void onAnimationRepeat(Animation arg0) {
+//			}
+//
+//			@Override
+//			public void onAnimationStart(Animation arg0) {
+//			}
+//			
+//		});
 		relativeLayout_dialog.setVisibility(View.VISIBLE);
-		relativeLayout_dialog.startAnimation(animation);
+//		relativeLayout_dialog.startAnimation(animation);
 		
 	}
 	
@@ -596,28 +636,74 @@ public class RecordActivity extends Activity implements OnClickListener, OnInfoL
 	 * 取消
 	 */
 	public void onCloseDialogButtonClick(View view){
-		int yOffset  = (int)(relativeLayout_dialog.getHeight() * RecordActivity.this.getResources().getDisplayMetrics().density);//偏移
-
-		Animation animation = new TranslateAnimation(0F,0F, 0,yOffset);
-		animation.setDuration(2000);               //设置动画持续时间              
-		animation.setRepeatCount(0);    
-		animation.setAnimationListener(new AnimationListener(){
-
-			@Override
-			public void onAnimationEnd(Animation arg0) {
-				relativeLayout_dialog.setVisibility(View.GONE);
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation arg0) {
-			}
-
-			@Override
-			public void onAnimationStart(Animation arg0) {
-			}
+//		int yOffset  = (int)(relativeLayout_dialog.getHeight() * RecordActivity.this.getResources().getDisplayMetrics().density);//偏移
+//
+//		Animation animation = new TranslateAnimation(0F,0F, 0,yOffset);
+//		animation.setDuration(2000);               //设置动画持续时间              
+//		animation.setRepeatCount(0);    
+//		animation.setAnimationListener(new AnimationListener(){
+//
+//			@Override
+//			public void onAnimationEnd(Animation arg0) {
+//				relativeLayout_dialog.setVisibility(View.GONE);
+//			}
+//
+//			@Override
+//			public void onAnimationRepeat(Animation arg0) {
+//			}
+//
+//			@Override
+//			public void onAnimationStart(Animation arg0) {
+//			}
+//			
+//		});
+//		relativeLayout_dialog.startAnimation(animation);
+		relativeLayout_dialog.setVisibility(View.GONE);
+	}
+	
+	private TimerTask getTimerTask(){
+		return new TimerTask() {  
+			@Override  
+			public void run() {  
+				if(mediaPlayer==null)  
+					return;  
+				if (mediaPlayer.isPlaying() && !isPaused) {  
+					handleProgress.sendEmptyMessage(0);  
+				}  
+			}  
 			
-		});
-		relativeLayout_dialog.startAnimation(animation);
+			Handler handleProgress = new Handler() {  
+				public void handleMessage(Message msg) {  
+
+					int duration = mediaPlayer.getDuration();  
+
+					if (duration > 0) {  
+						//动态修改播放剩余时长,判断播放进度和剩余时长是否大于0
+						if(mediaPlayer.isPlaying() && Integer.parseInt(button_play.getText().toString().split("\"")[0]) != 0){
+							
+							button_play.setText((Integer.parseInt(button_play.getText().toString().split("\"")[0])-1)+"\"");
+						}
+					}  
+				};  
+			};
+		};  
 	}
 
+	@Override
+	public void onCompletion(MediaPlayer mp) {
+		mediaPlayer.reset();
+		mediaPlayer = null;
+		isPaused = false;
+		isPlay = false;
+		animationDrawable.stop();
+		imageview_volume.setVisibility(View.GONE);
+		button_play.setBackgroundResource(R.drawable.playback_play);
+		button_play.setText(AudioUtils.getAudioFileLength(mp3RecordedFile) + "\"");
+		if(null != mTimer){
+			mTimer.cancel();
+		}
+	}
+
+	
+	
 }

@@ -45,7 +45,8 @@
             android:layout_height="0px"
             android:layout_weight="7"
             android:gravity="center"
-            android:orientation="vertical" >
+            android:orientation="vertical" 
+            >
 
             <LinearLayout
                 android:id="@+id/record_linearlayout_bar"
@@ -175,18 +176,34 @@
                     android:clickable="true" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/record_button_play"
-                android:layout_width="280dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="17dp"
-                android:layout_marginTop="17dp"
-                android:background="@drawable/record_activity_play"
-                android:gravity="left|center_vertical"
-                android:paddingLeft="20dp"
-                android:textColor="#333333"
-                android:textSize="18sp" />
+            <FrameLayout
+            	android:id="@+id/bottomPanel"
+            	android:layout_width="fill_parent"
+            	android:layout_height="wrap_content">
+                
+                <Button
+	                android:id="@+id/record_button_play"
+	                android:layout_width="280dp"
+	                android:layout_height="50dp"
+	                android:layout_gravity="center"
+	                android:layout_marginBottom="17dp"
+	                android:layout_marginTop="17dp"
+	                android:background="@drawable/record_activity_play"
+	                android:gravity="left|center_vertical"
+	                android:paddingLeft="20dp"
+	                android:textColor="#333333"
+	                android:textSize="18sp" />
+                
+                <ImageView
+                    android:id="@+id/record_imageview_volume"
+                    android:layout_width="37dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_marginRight="60dp"
+                    android:src="@drawable/animation_play"
+                    android:visibility="gone"/>
+                
+            </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 
@@ -223,7 +240,7 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="20dp"
-                android:background="@drawable/dialog_btn_r"
+                android:background="@drawable/dialog_btn_b"
                 android:gravity="center"
                 android:onClick="onCancelSendButtonClick"
                 android:text="取消发布"

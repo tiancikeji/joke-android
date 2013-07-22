@@ -266,7 +266,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 			isOnline = true;
 //			ApiRequests.getJokes(mainHandler, jokeList, UID , 0, true);
 			ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getTodayFormat_(), 0, true);
-			Log.e("请求日期", Tools.getTodayFormat_()+"【"+0+"】");
 		}else{
 			isOnline = false;
 			offlineJokeList = getOfflineJokesList();
@@ -659,13 +658,11 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 					if(refreshView.getCurrentMode() == com.handmark.pulltorefresh.library.PullToRefreshBase.Mode.PULL_FROM_END){
 						currentPagingJokePage++;
 //						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, false);
-						ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getApprovalTime()), 1, false);
-						Log.e("请求日期", Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getApprovalTime())+"【"+1+"】");
+						ApiRequests.getJokes(mainHandler, jokeList, UID, (Integer.parseInt(Tools.getDateFormat_(jokeList.get(jokeList.size()-1).getApprovalTime()))-1)+"", 1, false);
 					} else {
 						currentPagingJokePage = 1;
 //						ApiRequests.getJokes(mainHandler, jokeList, UID, currentPagingJokePage, true);
 						ApiRequests.getJokes(mainHandler, jokeList, UID, Tools.getTodayFormat_(), 0, true);
-						Log.e("请求日期", Tools.getTodayFormat_()+"【"+0+"】");
 						
 					}
 				}
