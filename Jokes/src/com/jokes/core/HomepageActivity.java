@@ -1,4 +1,4 @@
-package com.jokes.core;
+﻿package com.jokes.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,8 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.AudioManager;
+import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -67,7 +69,7 @@ import com.umeng.analytics.MobclickAgent;
 
 public class HomepageActivity extends FragmentActivity implements OnClickListener,AnimationListener,
 	OnPreparedListener, OnCompletionListener , IWXAPIEventHandler, OnBufferingUpdateListener, OnPageChangeListener, 
-	OnRefreshListener<VerticalViewPager>{
+	OnRefreshListener<VerticalViewPager>, OnAudioFocusChangeListener{
 	
 	private static final String DEBUG_TAG = "JOKE";
 	private static final int DATE_STR_LEN_MINUS_TIME = 11;
@@ -105,8 +107,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	CountDownTimer countDownTimer;//播放动画效果的倒计时
 	long countDownTime = 0;//倒计时剩余时间
 
-	WakeLock wakelock = null;//保持程序部睡眠
-	
 	private boolean isOnline = false;//用来判断是否处在有网络状态,true为有网络，false为离线状态
 	
 	private static String UID; //TODO save this so it doesn't change 
@@ -116,6 +116,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
     private com.jokes.ext.VerticalViewPager viewPager;
 	private PullToRefreshViewPager mPullToRefreshViewPager;
 	private int currentPagingJokePage = 1;
+	private WakeLock wakeLock;
 	
 	private Handler mainHandler = new Handler(){
 		Button button_favorite_small;
@@ -296,9 +297,6 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if(mediaPlayer.isPlaying()){
-			AudioUtils.stopPlaying(mediaPlayer);
-		}
 		if(null != mTimer){
 			mTimer.cancel();
 			mTimer = null;
@@ -362,6 +360,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		mediaPlayer.setOnCompletionListener(this);
 		mediaPlayer.setOnBufferingUpdateListener(this);  
 		mediaPlayer.setOnPreparedListener(this);
+		mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
 	}
 
 
@@ -381,6 +380,61 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	}
 
 	/**
+<<<<<<< HEAD
+=======
+	 * 未开始
+	 */
+	private void currentJoke(){
+		linearlayout_volume.setVisibility(View.GONE);
+		framelayout_play.setBackgroundResource(R.drawable.playback_play);
+		textview_duration.setText(jokeList.get(jokeIndex).getLength()+"\"");
+		textview_playCount.setVisibility(View.VISIBLE);
+		textview_playCount.setText(jokeList.get(jokeIndex).getNumPlays()+"");
+	}
+
+	/**
+	 * 播放中动画效果
+	 */
+	private void startPlayCounttimer(int time){
+		if(null != countDownTimer){
+			countDownTimer.cancel();
+		}
+
+		/*
+		countDownTimer = new CountDownTimer((time+1) * 1000, 1000) {
+			public void onTick(long millisUntilFinished) {
+				countDownTime = millisUntilFinished;
+				//通知改变动画
+				if(add){
+					if(count > 7){
+						add = false;
+						count--;
+					}else{
+						mainHandler.sendEmptyMessage(CHANGEVOLUME);
+						count++;
+					}
+
+				}else if(!add){
+					if(count < 0){
+						add = true;
+						count++;
+					}else{
+						mainHandler.sendEmptyMessage(CHANGEVOLUME);
+						count--;
+					}
+				}
+
+			public void onFinish() {
+				countDownTime = 0;
+				//倒计时结束，释放锁
+				releaseWakeLock();
+			}
+		}.start();
+			}*/
+	}
+
+	/**
+>>>>>>> working on wakelock, not yet finished
 	 * 保存是否是第一次进入程序
 	 */
 	public void saveSettingTime(String isFrist){
@@ -410,7 +464,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 
 	@Override
 	public void onPrepared(MediaPlayer arg0) {
+		PowerManager mgr = (PowerManager)getSystemService(Context.POWER_SERVICE);
+	    wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
+		wakeLock.acquire();
 		arg0.start();
+		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
+		    AudioManager.AUDIOFOCUS_GAIN);
+		
 		jokePageAdapter.startPlayAnimation();
 		Joke joke = jokePageAdapter.getCurrentJoke();
 		//检查联网
@@ -437,6 +498,7 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 	public void onCompletion(MediaPlayer mp) {
 		mp.reset();
 		jokePageAdapter.resetPlayer();
+		releaseWakeLock();
 		AnimationDrawable animationDrawable = (AnimationDrawable) ((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).getDrawable();
 		animationDrawable.stop();
 		((ImageView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_imageview_volume)).setVisibility(View.GONE);
@@ -450,6 +512,16 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		//重新给音频长度控件赋值
 		textview_duration = (TextView)jokePageAdapter.getCurrentView().findViewById(R.id.homepage_textview_duration);
 		textview_duration.setText(jokePageAdapter.getCurrentJoke().getLength()+"\"");
+	}
+
+	/**
+	 * 释放倒计时锁
+	 */
+	private void releaseWakeLock(){
+		if(null != wakeLock){
+			wakeLock.release();
+			wakeLock = null;
+		}
 	}
 	
 //	/**
@@ -778,6 +850,14 @@ public class HomepageActivity extends FragmentActivity implements OnClickListene
 		}
 
 		
+	}
+
+	@Override
+	public void onAudioFocusChange(int focusChange) {
+		if(focusChange == AudioManager.AUDIOFOCUS_LOSS){
+			mediaPlayer.pause();
+			releaseWakeLock();
+		}
 	}
 }
 
